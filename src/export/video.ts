@@ -12,7 +12,7 @@ import { needsResample, planOutput, readPlanned, type OutputPlan } from './outpu
 import { PaddedFrame, type Rgba } from './pixels';
 import { FrameProgress, type ProgressCallback } from './progress';
 import { RasterWorker } from './raster-worker';
-import { delay, playbackFrames, realtimeRecorderMime, recordCanvas } from './realtime';
+import { delay, onlyRecords, playbackFrames, realtimeRecorderMime, recordCanvas } from './realtime';
 import type { TimeRange } from './timing';
 import type { ExportOptions, ExportResult } from './types';
 import { chooseVideoTarget, loadMediabunny, outputFormat, type Mediabunny, type VideoContainer, type VideoTarget } from './video-codecs';
@@ -127,10 +127,10 @@ function audioWarning(discarded: DiscardedTrack[]): string | null {
   if (!audio) return null;
   const why =
     audio.reason === 'undecodable_source_codec' || audio.reason === 'unknown_source_codec'
-      ? 'its codec can’t be decoded in this browser'
+      ? 'its codec can’t be read in this browser'
       : audio.reason === 'no_encodable_target_codec'
         ? 'this browser can’t encode audio for this format'
-        : 'the output format can’t hold it';
+        : 'the format can’t hold it';
   return `Audio not included: ${why}.`;
 }
 
@@ -188,7 +188,8 @@ async function convertVideo(job: EncodeJob, video: LoadedVideo, target: VideoTar
     });
     if (!conversion.isValid) {
       const reason = conversion.discardedTracks.find((d) => d.track.isVideoTrack())?.reason ?? 'unknown';
-      throw new ExportError('unsupported', `This video can’t be converted in this browser (${reason.replace(/_/g, ' ')}).`);
+      console.warn(`Video conversion is not possible here: ${reason}`);
+      throw new ExportError('unsupported', 'This browser can’t export this video. Try another browser.');
     }
     const audio = audioWarning(conversion.discardedTracks);
     if (audio && opts.includeAudio) job.warnings.push(audio);
@@ -198,7 +199,7 @@ async function convertVideo(job: EncodeJob, video: LoadedVideo, target: VideoTar
     throwIfAborted(signal);
     await conversion.execute();
     progress.finishing();
-    if (!bufferTarget.buffer) throw new ExportError('encode-failed', 'The video encoder produced no data.');
+    if (!bufferTarget.buffer) throw new ExportError('encode-failed', 'Encoding produced no video. Try again.');
     return bufferTarget.buffer;
   } catch (error) {
     if (error instanceof mb.ConversionCanceledError || signal?.aborted) throw abortError();
@@ -244,7 +245,7 @@ async function encodeFrames(job: EncodeJob, { iterator, first }: StartedSequence
     }
     progress.finishing();
     await withAbort(output.finalize(), signal);
-    if (!bufferTarget.buffer) throw new ExportError('encode-failed', 'The video encoder produced no data.');
+    if (!bufferTarget.buffer) throw new ExportError('encode-failed', 'Encoding produced no video. Try again.');
     return bufferTarget.buffer;
   } catch (error) {
     if (output.state !== 'finalized') await output.cancel().catch(() => undefined);
@@ -313,7 +314,7 @@ export async function exportVideo(
     throw new ExportError('unsupported', `exportVideo cannot write ${format}`);
   }
   if (input.kind === 'video' && input.live) {
-    throw new ExportError('unsupported', 'A live camera has no frames to convert; record it instead.');
+    throw new ExportError('unsupported', 'A camera can’t be exported this way. Record it instead.');
   }
   const release = input.kind === 'video' ? input.retain() : null;
   // The grid (and so the export size) follows the source's size, so the engine gets the source first.
@@ -324,7 +325,7 @@ export async function exportVideo(
     } else {
       const iterator = input.frames[Symbol.asyncIterator]();
       sequence = { iterator, first: await withAbort(iterator.next(), signal) };
-      if (sequence.first.done) throw new ExportError('empty', 'There are no frames to export.');
+      if (sequence.first.done) throw new ExportError('empty', 'No frames to export.');
       engine.setSource(sequence.first.value.source, sequence.first.value.info);
     }
     return await encodeVideo(engine, input.kind === 'video' ? input : sequence!, input, { ...opts, format }, onProgress, signal);
@@ -348,7 +349,7 @@ async function encodeVideo(
   const warnings: string[] = [];
   let alpha = opts.transparentBackground && format === 'webm';
   if (opts.transparentBackground && format === 'mp4') {
-    warnings.push('MP4 can’t store transparency; the paper colour fills the background.');
+    warnings.push('MP4 can’t be transparent. The paper color fills the background.');
   }
   const planned = planOutput(engine, { ...opts, transparentBackground: false });
   const expected = evenSize(planned.size);
@@ -359,7 +360,7 @@ async function encodeVideo(
   if (!choice && alpha) {
     if (decodable) {
       choice = await chooseVideoTarget(format, expected.width, expected.height, false);
-      if (choice) warnings.push('This browser can’t encode transparent video; the paper colour fills the background.');
+      if (choice) warnings.push('This browser can’t export transparent video. The paper color fills the background.');
     }
     alpha = false;
   }
@@ -385,12 +386,11 @@ async function encodeVideo(
     } else {
       const mime = realtimeRecorderMime(format);
       if (!mime) {
-        throw new ExportError('unsupported', 'This browser can’t encode video. Try a recent Chrome, Edge or Safari, or export a GIF.');
+        throw new ExportError('unsupported', 'This browser can’t export video. Try a recent Chrome, Edge or Safari, or export a GIF.');
       }
       container = mime.startsWith('video/mp4') ? 'mp4' : 'webm';
-      const why = decodable ? 'this browser has no WebCodecs' : 'this browser can’t decode this video frame by frame';
-      warnings.push(`Recorded in real time (${why}), so frame timing may be uneven and audio is not included.`);
-      if (container !== format) warnings.push(`This browser can only record ${container.toUpperCase()}; saved as .${container}.`);
+      warnings.push('Recorded in real time. Frame timing may be uneven, and there is no audio.');
+      if (container !== format) warnings.push(onlyRecords(container));
       const fps = 'kind' in source ? source.fps : (opts.fps ?? 30);
       data = await recordInRealtime({ renderer, progress, signal, warnings }, source, opts, mime, fps);
     }

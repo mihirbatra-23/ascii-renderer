@@ -194,7 +194,6 @@ export async function estimateExport(
     case 'html':
     case 'svg': {
       const size = gridPixelSize(grid, geometry, margin);
-      if (opts.format === 'svg' && opts.svgText === 'text') notes.push('Live text needs the embedded font; use outlines for Figma.');
       return { width: size.width, height: size.height, notes, supported: true };
     }
     default:
@@ -227,12 +226,11 @@ export async function estimateExport(
   const decodable = media.kind !== 'video' || (!live && media.canDecodeFrames !== false);
   if (opts.format === 'gif') {
     if (live) {
-      notes.push('A camera can’t be saved as a GIF; record MP4 or WebM instead.');
+      notes.push('GIF isn’t available for a camera. Choose MP4 or WebM.');
       return { ...size, notes, supported: false };
     }
-    if (opts.transparentBackground) notes.push('GIFs are exported on the paper colour (no transparency).');
     if (!decodable) {
-      notes.push('This browser can’t decode this video frame by frame; export MP4 or WebM instead.');
+      notes.push('This browser can’t read this video frame by frame. Export MP4 or WebM instead.');
       return { ...size, frames, notes, supported: false };
     }
     let bytes: number | undefined;
@@ -264,14 +262,13 @@ export async function estimateExport(
   // mp4 / webm
   const even = evenSize(size);
   if (even.width !== size.width || even.height !== size.height) {
-    notes.push(`Padded to ${even.width} × ${even.height} px with the paper colour (video needs even dimensions).`);
+    notes.push(`Padded to ${even.width} × ${even.height} px with the paper color (video needs even dimensions).`);
     size = even;
   }
-  if (opts.transparentBackground && opts.format === 'mp4') notes.push('MP4 can’t be transparent; use WebM.');
   let supported = true;
   if (live) {
     if (!realtimeRecorderMime(opts.format)) {
-      notes.push('This browser can’t record video.');
+      notes.push('This browser can’t record video. Try a recent Chrome, Edge, Firefox or Safari.');
       supported = false;
     } else {
       notes.push('Recorded in real time until you stop it.');
@@ -283,10 +280,9 @@ export async function estimateExport(
   if (choice?.warning) notes.push(choice.warning);
   if (!choice) {
     if (realtimeRecorderMime(opts.format)) {
-      const why = decodable ? 'This browser has no WebCodecs' : 'This browser can’t decode this video frame by frame';
-      notes.push(`${why}: the video will be recorded in real time, without audio.`);
+      notes.push('This browser will record the video in real time, without audio.');
     } else {
-      notes.push('This browser can’t encode video; export a GIF instead.');
+      notes.push('This browser can’t export video. Export a GIF instead.');
       supported = false;
     }
   }

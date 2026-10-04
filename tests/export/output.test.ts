@@ -42,7 +42,7 @@ describe('planOutput', () => {
     expect(() => planOutput(engine({ cols: 400, rows: 225 }, GEOMETRY, 8192), { scale: 3 })).toThrow(/Use 2× or lower/);
     const wide = () => planOutput(engine({ cols: 400, rows: 225 }, GEOMETRY, 8192), { scale: 1, targetWidth: 9000 });
     expect(wide).toThrow(ExportError);
-    expect(wide).toThrow(/widest this device can export is 6400 px/);
+    expect(wide).toThrow(/widest export here is 6400 px/);
   });
 });
 

@@ -204,9 +204,9 @@ test.describe('integration: animation and video', () => {
       }),
     );
     expect(r.estimates.webm.supported).toBe(true);
-    expect(r.estimates.webm.notes.join(' ')).toMatch(/can’t decode this video frame by frame: the video will be recorded in real time/);
+    expect(r.estimates.webm.notes.join(' ')).toMatch(/This browser will record the video in real time, without audio/);
     expect(r.estimates.gif.supported).toBe(false);
-    expect(r.result.warnings.join(' ')).toMatch(/real time \(this browser can’t decode this video frame by frame\)/);
+    expect(r.result.warnings.join(' ')).toMatch(/Recorded in real time\. Frame timing may be uneven/);
     expect(r.result.type).toMatch(/^video\/webm/);
     expect({ width: r.probe.width, height: r.probe.height }).toEqual(r.expected);
     // Real-time capture of 1 s of playback: frame timing follows the wall clock.

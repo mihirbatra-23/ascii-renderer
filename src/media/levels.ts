@@ -61,7 +61,7 @@ function nextEvent(video: HTMLVideoElement, type: 'loadeddata' | 'seeked'): Prom
     const settle = (event: Event) => {
       video.removeEventListener(type, settle);
       video.removeEventListener('error', settle);
-      if (event.type === 'error') reject(new MediaError('decode-failed', 'Could not read frames from this video.'));
+      if (event.type === 'error') reject(new MediaError('decode-failed', 'Frames couldn’t be read from this video.'));
       else resolve();
     };
     video.addEventListener(type, settle);

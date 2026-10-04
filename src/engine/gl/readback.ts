@@ -87,13 +87,13 @@ export class PackBuffers {
 
 export async function fenceAndWait(gl: GL): Promise<void> {
   const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
-  if (!sync) throw new Error('The WebGL context was lost during a readback.');
+  if (!sync) throw new Error('The GPU was reset during the export. Try again.');
   gl.flush();
   try {
     for (;;) {
       const status = gl.clientWaitSync(sync, 0, 0);
       if (status === gl.ALREADY_SIGNALED || status === gl.CONDITION_SATISFIED) return;
-      if (status === gl.WAIT_FAILED || gl.isContextLost()) throw new Error('The WebGL context was lost during a readback.');
+      if (status === gl.WAIT_FAILED || gl.isContextLost()) throw new Error('The GPU was reset during the export. Try again.');
       await new Promise((resolve) => setTimeout(resolve, POLL_MS));
     }
   } finally {

@@ -40,8 +40,7 @@ export function imageMimeType(format: string): string {
   return MIME_TYPES[format] ?? 'application/octet-stream';
 }
 
-const HEIC_MESSAGE =
-  "This browser can't open HEIC photos. In Photos, export it as JPEG or PNG (File › Export) and drop that file here instead.";
+const HEIC_MESSAGE = 'Convert it to JPEG or PNG, then open that file.';
 
 /**
  * @param head  The first bytes of the file (for the header size / alpha checks).
@@ -140,10 +139,7 @@ async function decodeBitmap(blob: Blob, format: string): Promise<ImageBitmap> {
         throw new MediaError('heic-unsupported', HEIC_MESSAGE);
       }
     }
-    throw new MediaError(
-      'decode-failed',
-      `This ${format} file could not be decoded. It may be damaged, or use a variant this browser can't read.`,
-    );
+    throw new MediaError('decode-failed', `The file may be damaged, or use a ${format} variant this browser can’t read.`);
   }
 }
 
@@ -154,7 +150,7 @@ async function rasterizeSvg(blob: Blob): Promise<ImageBitmap> {
   try {
     return await drawImageElement(blob, size);
   } catch {
-    throw new MediaError('decode-failed', 'This SVG could not be drawn. It may be malformed.');
+    throw new MediaError('decode-failed', 'The SVG may be malformed.');
   }
 }
 

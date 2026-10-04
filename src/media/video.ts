@@ -140,13 +140,13 @@ function waitForFirstFrame(video: HTMLVideoElement, container: string, codecLabe
       reject(
         code === MEDIA_ERR_SRC_NOT_SUPPORTED || code === MEDIA_ERR_DECODE
           ? codecUnsupported(container, codecLabel)
-          : new MediaError('decode-failed', 'This video could not be read. It may be damaged.'),
+          : new MediaError('decode-failed', 'The video may be damaged.'),
       );
     };
     const timer = setTimeout(() => {
       cleanup();
       reject(
-        new MediaError('decode-failed', 'This video took too long to load. It may be damaged or unsupported.', {
+        new MediaError('decode-failed', 'Loading took too long. The file may be damaged or unsupported.', {
           transient: true,
         }),
       );
@@ -161,7 +161,7 @@ function codecUnsupported(container: string, codecLabel: string): MediaError {
     ? 'Open it in Safari, or convert it to H.264 MP4 and try again.'
     : 'Convert it to H.264 MP4 and try again.';
   const what = codecLabel === UNKNOWN_CODEC ? 'this' : codecLabel;
-  return new MediaError('codec-unsupported', `This browser can't play ${what} video (${container}). ${hint}`);
+  return new MediaError('codec-unsupported', `This browser can’t play ${what} video (${container}). ${hint}`);
 }
 
 function releaseElement(video: HTMLVideoElement, url: string): void {

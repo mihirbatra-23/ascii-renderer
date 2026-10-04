@@ -833,7 +833,7 @@ export class GlEngine extends EngineBase {
     const frozen = this.freezeLayer(gpu);
     try {
       for (let y0 = 0; y0 < height; y0 += bandRows) {
-        if (this.gpu !== gpu) throw new Error('The WebGL context was lost during the export.');
+        if (this.gpu !== gpu) throw new Error('The GPU was reset during the export. Try again.');
         // New glyphs replace the atlases a frozen layer's glyph indices refer to.
         if (this.glyphs !== frozen.glyphs) throw new Error('The font, characters or line height changed while the picture was being exported; export it again.');
         const rows = Math.min(bandRows, height - y0);
@@ -850,7 +850,7 @@ export class GlEngine extends EngineBase {
         }
         try {
           await fenceAndWait(gl);
-          if (this.gpu !== gpu) throw new Error('The WebGL context was lost during the export.');
+          if (this.gpu !== gpu) throw new Error('The GPU was reset during the export. Try again.');
           gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buffer);
           gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, data, y0 * rowBytes, rows * rowBytes);
           gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);

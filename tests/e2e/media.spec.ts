@@ -390,7 +390,7 @@ test.describe('video', () => {
   test('a video codec the browser cannot play fails cleanly with codec-unsupported', async ({ page }) => {
     expect(await loadError(page, '/__generated__/unplayable.mp4')).toEqual({
       code: 'codec-unsupported',
-      message: "This browser can't play this video (MP4). Convert it to H.264 MP4 and try again.",
+      message: "This browser can’t play this video (MP4). Convert it to H.264 MP4 and try again.",
     });
   });
 

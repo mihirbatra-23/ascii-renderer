@@ -6,6 +6,9 @@ import type { RasterReply, RasterRequest } from './raster-protocol';
 import type { Palette } from './gif-palette';
 import type { OwnedPixels } from './resample';
 
+/** The user-facing failure; the worker's own message goes to the console. */
+const PROCESS_FAILED = 'The image couldn’t be processed. Try again.';
+
 type Settle = { resolve: (reply: RasterReply) => void; reject: (error: Error) => void };
 
 /** Distributes Omit over the request union so each op keeps its own fields. */
@@ -26,10 +29,15 @@ export class RasterWorker {
       const settle = this.pending.get(reply.id);
       if (!settle) return;
       this.pending.delete(reply.id);
-      if (reply.op === 'error') settle.reject(new ExportError('encode-failed', `Image processing failed: ${reply.message}`));
-      else settle.resolve(reply);
+      if (reply.op === 'error') {
+        console.error(`Image processing failed: ${reply.message}`);
+        settle.reject(new ExportError('encode-failed', PROCESS_FAILED));
+      } else settle.resolve(reply);
     };
-    this.worker.onerror = (event) => this.failAll(new ExportError('encode-failed', `Image worker crashed: ${event.message}`));
+    this.worker.onerror = (event) => {
+      console.error(`Image worker crashed: ${event.message}`);
+      this.failAll(new ExportError('encode-failed', PROCESS_FAILED));
+    };
   }
 
   /** PNG of `pixels`, shrunk to `target` first when it differs from the raster. */
@@ -73,7 +81,7 @@ export class RasterWorker {
 
   terminate(): void {
     this.worker.terminate();
-    this.failAll(new ExportError('encode-failed', 'The image worker was stopped.'));
+    this.failAll(new ExportError('encode-failed', PROCESS_FAILED));
   }
 
   private request(pixels: RasterPixels, body: RequestBody, signal: AbortSignal | undefined, transfer: Transferable[] = []): Promise<RasterReply> {

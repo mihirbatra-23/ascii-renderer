@@ -36,9 +36,6 @@ export async function loadMedia(file: Blob, name = file instanceof File ? file.n
     case 'image':
       return loadImage(file, name, format, head);
     case 'unknown':
-      throw new MediaError(
-        'unsupported-format',
-        "This file type isn't supported. Try an image (JPEG, PNG, WebP, AVIF, GIF, SVG) or a video (MP4, MOV, WebM).",
-      );
+      throw new MediaError('unsupported-format', 'Use PNG, JPG, WEBP, AVIF, GIF, SVG, MP4, WEBM or MOV.');
   }
 }

@@ -63,21 +63,17 @@ export function planOutput(engine: AsciiEngine, request: OutputRequest): OutputP
 }
 
 function tooLargeMessage(size: PixelSize, scale: number, best: number, base: PixelSize, maxEdge: number, exactWidth: boolean): string {
-  const what = exactWidth ? `That width is rendered at ${scale}× (${size.width} × ${size.height} px)` : `At ${scale}× the image would be ${size.width} × ${size.height} px`;
+  const what = exactWidth ? `That width needs ${scale}× (${size.width} × ${size.height} px)` : `At ${scale}× the image would be ${size.width} × ${size.height} px`;
   const advice =
-    best < 1
-      ? 'Even 1× is too large here; reduce the columns or the margin.'
-      : exactWidth
-        ? `The widest this device can export is ${base.width * best} px.`
-        : `Use ${best}× or lower.`;
-  return `${what}, larger than this device can draw (${maxEdge} px per side). ${advice}`;
+    best < 1 ? 'Even 1× is too large. Use fewer columns.' : exactWidth ? `The widest export here is ${base.width * best} px.` : `Use ${best}× or lower.`;
+  return `${what}. This device can draw up to ${maxEdge} px per side. ${advice}`;
 }
 
 /** Warning text when the engine returned a raster that differs from the geometry formula. */
 export function sizeMismatch(expected: PixelSize, actual: PixelSize): string | null {
   return expected.width === actual.width && expected.height === actual.height
     ? null
-    : `Rendered ${actual.width} × ${actual.height} px instead of the expected ${expected.width} × ${expected.height} px.`;
+    : `The export came out at ${actual.width} × ${actual.height} px instead of ${expected.width} × ${expected.height} px. Try again.`;
 }
 
 /**

@@ -141,8 +141,8 @@ export function checkRaster(
   }
   if (size.width > maxEdge || size.height > maxEdge) {
     throw new Error(
-      `The export would be ${size.width} × ${size.height} px, larger than this device can render ` +
-        `(${maxEdge} px per side). Lower the scale or the number of columns.`,
+      `The export would be ${size.width} × ${size.height} px. This device can draw up to ${maxEdge} px per side. ` +
+        'Lower the scale or columns.',
     );
   }
   return { scale: options.scale, margin };

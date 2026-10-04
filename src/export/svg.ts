@@ -112,7 +112,7 @@ function outlinePaths(
     for (const [color, texts] of fallback) out += `<g fill="${toHex(color)}">${texts.join('')}</g>`;
     out += '</g>';
     const list = [...missing].map((ch) => `“${ch}”`).join(' ');
-    warnings.push(`${list} ${missing.size === 1 ? 'isn’t' : 'aren’t'} in ${name}, so ${missing.size === 1 ? 'it is' : 'they are'} kept as text drawn by the viewer’s fonts.`);
+    warnings.push(`${list} ${missing.size === 1 ? 'isn’t' : 'aren’t'} in ${name}. ${missing.size === 1 ? 'It stays' : 'They stay'} as text in the viewer’s font.`);
   }
   return out;
 }

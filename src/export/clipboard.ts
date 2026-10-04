@@ -15,7 +15,7 @@ export async function copyText(text: string): Promise<void> {
   area.select();
   const ok = document.execCommand('copy');
   area.remove();
-  if (!ok) throw new Error('Copy is not available in this browser');
+  if (!ok) throw new Error('This browser can’t copy to the clipboard. Use Download instead.');
 }
 
 /**
@@ -24,7 +24,7 @@ export async function copyText(text: string): Promise<void> {
  */
 export async function copyPng(png: Blob | Promise<Blob>): Promise<void> {
   if (typeof ClipboardItem === 'undefined' || !navigator.clipboard?.write) {
-    throw new Error('Copying images is not supported in this browser; use Download instead');
+    throw new Error('This browser can’t copy images. Use Download instead.');
   }
   await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
 }

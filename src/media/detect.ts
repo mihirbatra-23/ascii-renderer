@@ -128,7 +128,7 @@ function looksLikeSvg(b: Uint8Array): boolean {
 }
 
 /** Shown for a GIF whose blocks hold no image (a damaged or cut-off file). */
-export const GIF_NO_FRAMES = 'This GIF has no readable frames. It may be damaged or incomplete.';
+export const GIF_NO_FRAMES = 'The GIF has no readable frames. It may be damaged or incomplete.';
 
 /**
  * Counts image descriptors by walking GIF blocks (no LZW decoding). Stops early at `stopAt`.

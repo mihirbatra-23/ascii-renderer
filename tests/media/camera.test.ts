@@ -36,9 +36,9 @@ describe('openCamera errors are MediaErrors written for people', () => {
   it.each([
     ['NotAllowedError', 'camera-blocked', /Allow the camera for this site/],
     ['SecurityError', 'camera-blocked', /Allow the camera/],
-    ['NotFoundError', 'camera-unavailable', /No camera was found/],
+    ['NotFoundError', 'camera-unavailable', /No camera found/],
     ['OverconstrainedError', 'camera-unavailable', /requested settings/],
-    ['NotReadableError', 'camera-unavailable', /Another app may be using it/],
+    ['NotReadableError', 'camera-unavailable', /Close any other app using it/],
     ['AbortError', 'camera-unavailable', /couldn’t start/],
   ])('%s → %s', async (name, code, message) => {
     deviceThatThrows(name);

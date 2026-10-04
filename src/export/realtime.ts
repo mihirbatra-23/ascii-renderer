@@ -22,6 +22,11 @@ export function realtimeRecorderMime(format: VideoContainer): string | null {
   return MIME_PREFERENCE[format].find((m) => MediaRecorder.isTypeSupported(m)) ?? null;
 }
 
+/** Saved-toast warning when the recorder can only write the other container. */
+export function onlyRecords(container: VideoContainer): string {
+  return `This browser can only record ${container === 'webm' ? 'WebM' : 'MP4'}. Saved as .${container}.`;
+}
+
 export function delay(ms: number, signal: AbortSignal | undefined): Promise<void> {
   return new Promise((resolve, reject) => {
     if (signal?.aborted) return reject(abortError());
@@ -102,7 +107,7 @@ function mediaEvent(el: HTMLVideoElement, type: 'loadeddata' | 'seeked'): Promis
     const settle = (event: Event) => {
       el.removeEventListener(type, settle);
       el.removeEventListener('error', settle);
-      if (event.type === 'error') reject(new Error('The video could not be played for recording.'));
+      if (event.type === 'error') reject(new Error('The video couldn’t be played for recording. Try again.'));
       else resolve();
     };
     el.addEventListener(type, settle);

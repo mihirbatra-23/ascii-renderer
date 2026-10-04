@@ -57,7 +57,7 @@ export async function exportHtml(snapshot: GridSnapshot, opts: HtmlExportFileOpt
     fileName: exportFileName(opts.sourceName ?? 'image', snapshot, 'html'),
     width: size.width,
     height: size.height,
-    warnings: glyphs && !font ? ['The font is not embedded; the page uses the viewer’s monospace font.'] : [],
+    warnings: glyphs && !font ? ['The font isn’t embedded. The page uses the viewer’s monospace font.'] : [],
   };
 }
 

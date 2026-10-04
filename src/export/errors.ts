@@ -12,7 +12,7 @@ export class ExportError extends Error {
 
 /** Cancellation surfaces as the platform's AbortError so callers can treat every exporter alike. */
 export function abortError(): DOMException {
-  return new DOMException('Export cancelled', 'AbortError');
+  return new DOMException('Export canceled', 'AbortError');
 }
 
 export function throwIfAborted(signal: AbortSignal | undefined): void {

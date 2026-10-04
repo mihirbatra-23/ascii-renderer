@@ -238,7 +238,7 @@ test('exact raster sizes, oversize error, preview = export', async ({ page }) =>
   expect(portrait.rows).toBeGreaterThan(portrait.cols / 2);
 
   const oversize = await page.evaluate(() => window.engineHarness.oversizedRasterError());
-  expect(oversize).toMatch(/larger than this device can render/);
+  expect(oversize).toMatch(/This device can draw up to \d+ px per side/);
 
   await page.evaluate(() => window.engineHarness.loadFixture('torus_450.png'));
   for (const mode of ['shape', 'braille', 'blocks', 'halftone'] as const) {

@@ -31,7 +31,7 @@ describe('loadMedia', () => {
   it('rejects files that are not media, by content rather than name or type', async () => {
     const error = await errorOf(new File(['not really a png'], 'photo.png', { type: 'image/png' }));
     expect(error.code).toBe('unsupported-format');
-    expect(error.message).toMatch(/isn't supported/);
+    expect(error.message).toMatch(/Use PNG, JPG/);
   });
 
   it('rejects oversized images from the header, before decoding', async () => {

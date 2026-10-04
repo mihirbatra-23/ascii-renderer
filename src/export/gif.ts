@@ -60,9 +60,15 @@ class GifWorkerClient {
           this.wake();
         } else if (msg.type === 'encoded') onEncoded(msg.frames);
         else if (msg.type === 'done') resolve(msg.bytes);
-        else fail(new ExportError('encode-failed', `GIF encoding failed: ${msg.message}`));
+        else {
+          console.error(`GIF encoding failed: ${msg.message}`);
+          fail(new ExportError('encode-failed', 'GIF encoding failed. Try again.'));
+        }
       };
-      this.worker.onerror = (event) => fail(new ExportError('encode-failed', `GIF encoder crashed: ${event.message}`));
+      this.worker.onerror = (event) => {
+        console.error(`GIF encoder crashed: ${event.message}`);
+        fail(new ExportError('encode-failed', 'GIF encoding failed. Try again.'));
+      };
     });
     // Failures are re-thrown from send()/done; this only silences the unhandled-rejection report.
     this.done.catch(() => undefined);
@@ -122,7 +128,7 @@ export async function exportGif(
   engine.resetHistory();
   try {
     let next = await withAbort(iterator.next(), signal);
-    if (next.done) throw new ExportError('empty', 'There are no frames to export.');
+    if (next.done) throw new ExportError('empty', 'No frames to export.');
     engine.setSource(next.value.source, next.value.info);
     // Planned once the engine has a frame of the clip: the grid follows the source's size.
     const plan = planOutput(engine, { ...opts, transparentBackground: false });
@@ -158,7 +164,7 @@ export async function exportGif(
     }
     finished = true;
     if (opts.frameCount !== undefined && count < opts.frameCount) {
-      warnings.push(`Only ${count} of ${opts.frameCount} frames could be read from the source, so the GIF is shorter.`);
+      warnings.push(`Only ${count} of ${opts.frameCount} frames could be read. The GIF is shorter.`);
     }
 
     await client.send({ type: 'finish' }, signal);

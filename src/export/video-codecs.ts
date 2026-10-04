@@ -68,7 +68,7 @@ export async function chooseVideoTarget(
     if (target === candidates[0]) return { target };
     return {
       target,
-      warning: `${targetLabel(candidates[0])} isn’t available in this browser at ${width} × ${height}; saved as ${targetLabel(target)} instead.`,
+      warning: `This browser can’t encode ${targetLabel(candidates[0])} at ${width} × ${height}. ${targetLabel(target)} is used instead.`,
     };
   }
   return null;

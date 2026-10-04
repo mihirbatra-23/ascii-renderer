@@ -103,7 +103,7 @@ export async function* videoFrames(video: LoadedVideo, opts: TimeRange & { fps: 
       shown = true;
       yield { source: frame.canvas, info, durationMs: Math.min(1 / opts.fps, end - t) * 1000 };
     }
-    if (!shown) throw new ExportError('empty', 'No frames could be decoded from this video.');
+    if (!shown) throw new ExportError('empty', 'No frames could be read from this video.');
   } finally {
     input.dispose();
     release();

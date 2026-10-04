@@ -12,7 +12,7 @@ import { exportFileName } from './filename';
 import { evenSize } from './geometry';
 import { planOutput, readPlanned, type OutputRequest } from './output';
 import { transferableBytes } from './pixels';
-import { CanvasRecorder, realtimeRecorderMime } from './realtime';
+import { CanvasRecorder, onlyRecords, realtimeRecorderMime } from './realtime';
 import type { ExportOptions, ExportResult } from './types';
 import type { VideoContainer } from './video-codecs';
 
@@ -60,8 +60,8 @@ export function startRecording(engine: AsciiEngine, media: LoadedVideo, opts: Re
   engine.setSource(media.element, info);
   const plan = planOutput(engine, request);
   const warnings: string[] = [];
-  if (opts.transparentBackground) warnings.push('Recordings keep the paper colour (no transparency).');
-  if (container !== opts.format) warnings.push(`This browser can only record ${container.toUpperCase()}; saved as .${container}.`);
+  if (opts.transparentBackground) warnings.push('Recordings can’t be transparent. The paper color is kept.');
+  if (container !== opts.format) warnings.push(onlyRecords(container));
 
   // captureStream() exists only on DOM canvases.
   const canvas = Object.assign(document.createElement('canvas'), evenSize(plan.size));
@@ -157,7 +157,7 @@ export function startRecording(engine: AsciiEngine, media: LoadedVideo, opts: Re
     async stop() {
       const blob = await (ending ??= finish());
       if (failure) throw failure instanceof Error ? failure : new ExportError('encode-failed', String(failure));
-      if (frames === 0) throw new ExportError('empty', 'Nothing was recorded: the camera delivered no frames.');
+      if (frames === 0) throw new ExportError('empty', 'Nothing was recorded. The camera sent no frames.');
       return {
         blob,
         fileName: exportFileName(opts.sourceName ?? media.name, plan.grid, container),

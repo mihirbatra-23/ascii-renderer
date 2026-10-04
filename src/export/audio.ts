@@ -44,14 +44,14 @@ export async function planAudio(
   if (container === 'mp4') {
     if (codec && MP4_SAFE.has(codec)) return copy();
     if (await canEncode('aac', format)) {
-      const note = `Audio converted from ${from} to AAC so the MP4 plays everywhere.`;
+      const note = `Audio converted from ${from} to AAC.`;
       return { plan: { action: 'transcode', from, to: 'AAC', note }, options: { codec: 'aac', forceTranscode: true } };
     }
-    return copy(`Audio kept as ${from}: some players and editors can’t play it in an MP4. Export WebM if that matters.`);
+    return copy(`Audio kept as ${from}. Some players can’t play it in MP4. Use WebM to avoid this.`);
   }
   if (codec && WEBM_NATIVE.has(codec)) return copy();
   if (await canEncode('opus', format)) {
-    const note = `Audio converted from ${from} to Opus (WebM can’t hold ${from}).`;
+    const note = `Audio converted from ${from} to Opus for WebM.`;
     return { plan: { action: 'transcode', from, to: 'Opus', note }, options: { codec: 'opus' } };
   }
   return { plan: { action: 'none', from, note: 'Audio not included: this browser can’t encode audio for WebM.' }, options: { discard: true } };

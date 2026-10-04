@@ -18,7 +18,7 @@ describe('planAudio', () => {
   it('MP4 keeps a codec it cannot convert, and says why that may matter', async () => {
     const r = await planAudio(track('opus'), 'mp4', nothing);
     expect(r.plan).toMatchObject({ action: 'copy', to: 'Opus' });
-    expect(r.plan.note).toMatch(/some players and editors can’t play it/);
+    expect(r.plan.note).toMatch(/Some players can’t play it in MP4/);
   });
 
   it('WebM copies Opus / Vorbis, converts the rest to Opus, or drops audio it cannot encode', async () => {

@@ -57,7 +57,7 @@ export function decodeGif(bytes: Uint8Array): DecodedGif {
   try {
     parsed = parseGIF(toArrayBuffer(bytes));
   } catch {
-    throw new MediaError('decode-failed', 'This GIF is damaged and could not be read.');
+    throw new MediaError('decode-failed', 'The GIF is damaged.');
   }
   const globalPalette = parsed.lsd.gct.exists ? paletteBytes(parsed.gct) : null;
   const gct = parsed.gct;

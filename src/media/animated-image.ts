@@ -86,6 +86,6 @@ export async function loadAnimatedImage(bytes: Uint8Array, name: string, format:
   } catch (error) {
     decoder.close();
     if (error instanceof MediaError) throw error;
-    throw new MediaError('decode-failed', `This animated ${format} could not be decoded. It may be damaged.`);
+    throw new MediaError('decode-failed', 'The file may be damaged.');
   }
 }

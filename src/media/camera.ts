@@ -32,7 +32,7 @@ export async function openCamera(
   if (!globalThis.isSecureContext) {
     throw new MediaError(
       'camera-blocked',
-      'The camera only works on a secure page. Open the app over https:// (or on localhost) and try again.',
+      'The camera only works over https:// or on localhost.',
     );
   }
   const devices = globalThis.navigator?.mediaDevices;
@@ -54,7 +54,7 @@ export async function openCamera(
   const track = stream.getVideoTracks()[0];
   if (!track) {
     stop();
-    throw new MediaError('camera-unavailable', 'The camera delivered no video.');
+    throw new MediaError('camera-unavailable', 'The camera sent no video.');
   }
 
   const element = document.createElement('video');
@@ -102,20 +102,20 @@ function cameraError(error: unknown): MediaError {
     case 'SecurityError':
       return new MediaError(
         'camera-blocked',
-        'Camera access is blocked. Allow the camera for this site (the camera icon in the address bar), then try again.',
+        'Allow the camera for this site (camera icon in the address bar), then try again.',
       );
     case 'NotFoundError':
-      return new MediaError('camera-unavailable', 'No camera was found. Connect one and try again.');
+      return new MediaError('camera-unavailable', 'No camera found. Connect one and try again.');
     case 'OverconstrainedError':
       return new MediaError('camera-unavailable', 'No camera supports the requested settings.');
     case 'NotReadableError':
     case 'AbortError':
       return new MediaError(
         'camera-unavailable',
-        'The camera couldn’t start. Another app may be using it; close that app and try again.',
+        'The camera couldn’t start. Close any other app using it and try again.',
       );
     default:
-      return new MediaError('camera-unavailable', 'The camera couldn’t be opened.');
+      return new MediaError('camera-unavailable', 'The camera couldn’t be opened. Try again.');
   }
 }
 
@@ -128,7 +128,7 @@ function firstFrame(video: HTMLVideoElement): Promise<void> {
     const onLoaded = () => {
       cleanup();
       if (video.videoWidth > 0 && video.videoHeight > 0) resolve();
-      else reject(new MediaError('camera-unavailable', 'The camera delivered no picture.'));
+      else reject(new MediaError('camera-unavailable', 'The camera sent no picture.'));
     };
     const timer = setTimeout(() => {
       cleanup();

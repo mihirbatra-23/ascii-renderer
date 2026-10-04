@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Integration harness</title>
+    <style>
+      :root { color-scheme: dark; font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+      body { margin: 0; padding: 16px; background: #0b0b0c; color: #e8e6df; }
+      #stage { width: 960px; max-width: 100%; aspect-ratio: 16 / 9; border: 1px solid #333; }
+      pre { white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <p>
+      Real engine + media + export wired end to end, without UI. Driven by
+      <code>tests/e2e/integration.spec.ts</code> through <code>window.integrationHarness</code>.
+    </p>
+    <div id="stage"></div>
+    <pre id="log"></pre>
+    <script type="module" src="./integration.ts"></script>
+  </body>
+</html>

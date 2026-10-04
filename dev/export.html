@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Export harness</title>
+    <style>
+      body { margin: 16px; font: 13px/1.4 ui-monospace, monospace; background: #111; color: #ddd; }
+      #log { white-space: pre-wrap; }
+      img, canvas { max-width: 100%; image-rendering: pixelated; border: 1px solid #333; }
+    </style>
+  </head>
+  <body>
+    <h1>Export harness</h1>
+    <p>Driven by tests/e2e/export.spec.ts through <code>window.exportHarness</code>. Load a file to try it by hand.</p>
+    <input id="file" type="file" />
+    <div id="log"></div>
+    <div id="out"></div>
+    <script type="module" src="./export.ts"></script>
+  </body>
+</html>

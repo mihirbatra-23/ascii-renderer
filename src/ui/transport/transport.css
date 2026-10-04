@@ -1,0 +1,59 @@
+/* Transport parts the boards drew statically: live seconds ruler, readout details, trim tooltip. */
+.tp-row .vr{margin:0 6px}
+.kv .of{color:var(--tx-3)}
+.kv.dur{margin:0 8px 0 4px}
+
+/* ruler ticks are an SVG (thinned to the strip width), so the board's gradient ticks go */
+.tp .tl-r{background:none}
+.tl-r svg{position:absolute;left:0;bottom:0;width:100%;height:6px;overflow:visible;shape-rendering:crispEdges}
+.tl-r .mj{fill:var(--tick-on)}
+.tl-r .mn{fill:var(--tick)}
+.tl-r span{white-space:nowrap}
+
+.tl{cursor:pointer;user-select:none;touch-action:none}
+.ph b{pointer-events:auto;cursor:ew-resize}
+.strip .hd:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.strip .hd.is-drag::after{border-color:var(--g3)}
+.hd-tip{position:absolute;z-index:2;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);height:20px;padding:0 6px;display:grid;place-items:center;border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--g1);box-shadow:var(--shadow-pop);font:var(--fs-11)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-1);white-space:nowrap;pointer-events:none}
+
+/* The scrub slider fills the strip; the dimming, trim brackets and playhead are its siblings on top. */
+.strip .scrub{position:absolute;inset:0;border-radius:inherit}
+.strip .scrub>canvas{position:absolute;inset:0;width:100%;height:100%;border-radius:inherit}
+.strip .scrub:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+
+/* Controls never shrink below their box; the readouts give way instead. */
+.tp-row{min-width:0;overflow:hidden}
+.tp-row .play,.tp-row .btn,.tp-row .seg{flex:none}
+.tc{flex:none;white-space:nowrap}
+.tp-row .speed-menu{display:none}
+
+/* A narrow stage (tablet portrait, split-screen windows, 200% zoom): drop the frame counter and the
+   duration, Loop keeps its icon, speed becomes a menu. */
+@container stage (max-width:640px){
+  .tp-row .kv,.tp-row .vr{display:none}
+  .tp-row .lbl-opt,.tp-row .btn kbd{display:none}
+  .tp-row .speed-seg{display:none}
+  .tp-row .speed-menu{display:inline-flex}
+}
+@container stage (max-width:420px){
+  .tc small{display:none}
+}
+@media (max-width:640px){
+  .tp-row .speed-menu{display:none}
+}
+
+/* A live camera: only play / pause and what the camera delivers. */
+.tp.live .tp-row{gap:var(--s3)}
+.tp.live .live-kv{display:flex}
+
+/* Touch: the 10 px trim brackets get a 32 × 48 px hit area, so a near miss trims instead of scrubbing. */
+@media (pointer:coarse){
+  .strip .hd::before{content:"";position:absolute;inset:-4px -11px}
+}
+
+/* A short window (a phone in landscape, SHORT_QUERY): a thinner strip, so the clip's preview keeps
+   more of the stage. The seconds ruler stays: the playhead's frame flag sits in it. */
+@media (min-width:641px) and (max-height:500px){
+  .tp .tl{padding-bottom:var(--s2)}
+  .tp .strip{height:28px}
+}

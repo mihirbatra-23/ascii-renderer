@@ -1,9 +1,9 @@
 # ASCII Renderer: design spec
 
-This spec describes the app's interface: one layout and one component set, shipped as two themes that differ only in tokens. The screenshots in this folder are the reference screens; this document gives the rules behind them.
+This spec describes the app's interface: one layout, one component set and one theme (Graphite / Signal). The screenshots in this folder are the reference screens; this document gives the rules behind them.
 
-- **Tokens:** `tokens.css`. Variant A is on `:root`; variant B is under `[data-theme="b"]`.
-- **Reference screens (1440 × 900):** `a-start.png`, `a-editor.png`, `a-editor-video.png`, `a-export.png`, `a-compare.png` and `b-editor.png`. `a-editor-phone.png` shows the 390 × 844 layout.
+- **Tokens:** `tokens.css`, all on `:root`.
+- **Reference screens (1440 × 900):** `a-start.png`, `a-editor.png`, `a-editor-video.png`, `a-export.png` and `a-compare.png`. `a-editor-phone.png` shows the 390 × 844 layout.
 
 ---
 
@@ -23,17 +23,9 @@ Principles that hold across every screen:
 - Overlays are transform-only layers, and rulers are drawn on a 2D canvas.
 - Fonts are self-hosted.
 
-### The two variants
+### Theme
 
-They share the same layout, components, type, spacing, radii and motion. They differ in three token groups only:
-
-| Group | A · Graphite / Signal | B · Carbon / Volt |
-|---|---|---|
-| Surface temperature (`--g*`, `--line*`, `--tx*`, `--tick*`) | Cool graphite: `--g1 #0F1011`, `--tx-2 #A6AAB2` | Warm carbon: `--g1 #11100D`, `--tx-2 #AEAA9F` |
-| Accent (`--acc*`) | International orange `#FF6A2B`; text on accent `#140A05` | Volt chartreuse `#C9F04F`; text on accent `#121608` |
-| Render ink and paper (`--ink*`, `--paper`) | Warm paper-white ink `#E6E4DF` on `#0B0B0C` | Cool white ink `#E4E7E8` on `#0A0B0B` |
-
-The two variants mirror each other on purpose. A is cool chrome with warm ink; B is warm chrome with cool ink. In both, the artwork reads as a material rather than as more UI text. Ship A as the default; B is a one-attribute switch (`<html data-theme="b">`).
+The app ships one theme, Graphite / Signal: cool graphite chrome (`--g1 #0F1011`, `--tx-2 #A6AAB2`), an international orange accent (`#FF6A2B`, text on accent `#140A05`) and warm paper-white render ink (`#E6E4DF` on `#0B0B0C`). Cool chrome with warm ink makes the artwork read as a material rather than as more UI text.
 
 ---
 
@@ -47,17 +39,20 @@ columns: 1fr (stage)    | var(--w-dock)  336px, 304px at <= 1280px
 ```
 
 - **Top bar** (48 px, `--g1`, bottom hairline), from left to right:
+  - Back to start screen (ghost arrow icon button; it opens the close confirmation below);
   - wordmark;
   - a 1 × 20 px divider;
-  - the source chip (icon, filename, mono meta, close ×);
+  - the source chip (icon, filename, mono meta);
   - flexible space;
   - undo / redo (ghost icon buttons);
   - a divider;
-  - GitHub (ghost, icon and label);
-  - Open ⌘O (secondary split button: the main part opens the file picker; its chevron, "More ways to open", lists Choose a file…, Paste from clipboard and Camera);
+  - GitHub (ghost, GitHub mark and label);
+  - Open ⌘O (secondary split button: the main part opens the file picker; its chevron, "More ways to open", lists Choose file…, Paste and Camera);
   - Export ⌘E (primary).
 
-  Padding is 16 px left, 12 px right, and the gap is 12 px.
+  Padding is 8 px left (so the back arrow's glyph lands on x = 16), 12 px right, and the gap is 12 px.
+
+  Back, the wordmark and the phone More sheet's Close file / Stop camera all open one confirmation: a 400 px alert dialog with no header, the title "Close {file name}?" (camera: "Stop the camera?"), the line "Your settings are kept." and a footer with Cancel and Close file (camera: Stop camera). Focus starts on Cancel; Enter confirms from anywhere else in the dialog, Esc cancels and returns focus to Back.
 - **Stage header** (48 px, `--g0`): the view segmented control (Output / Split / Source), in Split the compare menu ("vs Original ▾" / "vs Ramp ▾"), and an optional context label on the left; the Rulers toggle, zoom group (− 75% +) and Fit on the right. It is the same height as the dock header, so the two hairlines line up. It follows the stage's own width (container queries), not the window's: at ≤ 720 px the context label hides; at ≤ 500 px (≤ 640 px while Split shows its compare menu) the view switch and Fit become icon-only, keeping their names as labels; at ≤ 440 px the compare menu shows only "vs ▾". The "Ramp render" choice is disabled, with the reason under it, while the output is itself Ramp without contour lines (the split then shows the original).
 - **Stage viewport:** the frame is centred both ways. The frame reserves 28 px on the left and 24 px on top for the rulers or dimension lines, and has a 10 px gap before the caption.
 - **Dock:** a sticky 48 px header, a scrolling body and an optional sticky footer. Sections are separated by hairlines.
@@ -93,7 +88,7 @@ The boards use cell widths of 6, 5.6 (video), 5 (≤ 1280) and 4 (≤ 1100) px t
 | 1101–1280 | Dock 304 px. Value fields 52 px. Source meta drops the file size. Status bar drops GPU. Format tiles and fact cells tighten their padding. |
 | 641–1100 | Ruler labels thin to every 20 columns, so numerals stay at 10 px. The transport hides In / Out / Dur (they stay in the export sheet and keyboard ⇧I / ⇧O), and Loop becomes icon plus kbd; on a stage ≤ 640 px the frame counter and duration go and the speed segment collapses to a "1× ▾" menu. GitHub becomes icon-only (with an `aria-label` and tooltip). **Mode tiles keep their labels** (5 × 51 px tiles fit "Halftone" at 12 px). At 1024 × 768 the dock body scrolls; Mode, Grid and Tone stay above the fold. Below about 900 px the start screen's URL field takes its own line under Choose file / Paste / Camera. |
 | ≤ 500 tall (wider than 640) | A phone in landscape or a short window: the rulers, dimension lines and caption are hidden and the fit padding drops to 8 px, and the timeline strip is 28 px, so the preview keeps most of the stage. |
-| ≤ 640 (phone) | Single column. Top bar shows the wordmark, an Open icon button, Export and a ⋯ More button. More opens a sheet with what the hidden desktop chrome offered: Undo / Redo and Reset all, the view (Output / Split / Source, and what Split compares with), zoom (Out / In / Fit / 100%), the built-in and saved looks with Save current… and Copy settings link, Paste / Camera / Close file, the theme and the Shortcuts sheet. A mode strip (5 tiles, 52 px) is pinned under the top bar. The preview is full width at 16:9 with a one-line readout ("Grid 160 × 45 · Render 2.4 ms · FPS 60"; a clip shows its transport there instead, a camera both). While the sheet is at Full, toasts sit under the top bar instead of over the sheet. The dock becomes a bottom sheet with Adjust / Glyphs / Color tabs. Rulers, the stage header and the status bar are hidden. The transport becomes a strip above the sheet: prev, play, next, timecode, loop and the timeline with trim. |
+| ≤ 640 (phone) | Single column. Top bar shows the wordmark, an Open icon button, Export and a ⋯ More button. More opens a sheet with what the hidden desktop chrome offered: Undo / Redo and Reset all, the view (Output / Split / Source, and what Split compares with), zoom (Out / In / Fit / 100%), the built-in and saved looks with Save as preset… and Copy settings link, Paste / Camera / Close file, and the Shortcuts sheet. A mode strip (5 tiles, 52 px) is pinned under the top bar. The preview is full width at 16:9 with a one-line readout ("Grid 160 × 45 · Render 2.4 ms · FPS 60"; a clip shows its transport there instead, a camera both). While the sheet is at Full, toasts sit under the top bar instead of over the sheet. The dock becomes a bottom sheet with Adjust / Glyphs / Color tabs. Rulers, the stage header and the status bar are hidden. The transport becomes a strip above the sheet: prev, play, next, timecode, loop and the timeline with trim. |
 
 ### Phone sheet
 
@@ -181,15 +176,16 @@ Hairlines first. `--shadow-pop` is used only on popovers, menus, toasts, the pro
 
 - **Content width:** 1040 px. The hero grid is `1fr 360px` and bottom-aligned.
 - **Headline:** "Images, GIFs and video, rendered in type." The word "type." is set in Geist Mono in `--ink`, not the accent.
+- **Hero description:** "Matches each cell of your image to the glyph with the closest shape. Adjust it live, then export it as an image, text or video. Runs in your browser."
 - **Drop zone:** 280 px tall. It has a 22 px ruler strip on top (one numeral every 10 columns, which ties it to the editor) and a 16 px dot grid in `--line-2`.
 - **Centre stack:**
   - a 40 px icon tile;
   - the title;
-  - the sub-line "It opens in the editor at once. Nothing is uploaded.";
-  - the actions row: Choose file ⌘O (primary), Paste ⌘V and Camera (secondary; Camera only where the page may use one), "or", and a 320 px URL field with a Load button inside;
+  - the actions row: Choose file ⌘O (primary), Paste ⌘V and Camera (secondary; Camera only where the page may use one), "or", and a 320 px URL form: the field and a separate 32 px secondary Load button 8 px after it (disabled while the field is empty);
   - the formats line.
 - **Samples:** three 336 px tiles. Each shows a live ASCII preview (72 × 20 cells) above a 44 px footer with an icon, name, mono meta and a kbd 1–3.
-- **Footer** (44 px): version and licence on the left; a kbd legend and "Files never leave your device" (lock icon) on the right.
+- **Header and footer:** both sticky with solid `--g1` fills and hairlines; the page scrolls between them. The header holds the wordmark, Shortcuts ? and GitHub (the GitHub mark; icon-only on phones).
+- **Footer** (44 px, 40 px on phones): "ASCII Renderer v0.1.0" on the left, "Files stay on your device" (lock icon) on the right. This is the start screen's only privacy line.
 - **Phone:** stacked. The title reads "Open an image, GIF or video". Buttons go full width. Tiles become rows with a 120 px preview.
 - **Opening:** while the first file loads, the start screen stays and the drop zone title reads "Opening torus.png…" over an indeterminate meter; a file that fails leaves the start screen as it was.
 - **Drag-over:** the whole window is a drop target. The drop zone border and dot grid switch to accent and the title becomes "Release to open sunset.gif" with its meta (see `*-states`).
@@ -486,7 +482,7 @@ See §4.3 for anatomy.
 ## 6. States matrix
 
 | Component | Hover | Focus-visible | Active / selected | Disabled | Dragging | Loading / progress | Error |
-|---|---|---|---|---|---|---|---|
+|---|---|---|---|
 | Button | `--g3` / `--line-3` | 2 px accent outline +2 | `--g4`; toggles `--g3` | `--tx-4` | n/a | Label becomes "Exporting…"; width does not change | n/a |
 | Segment | `--g2`, `--tx-1` | inset 2 px accent | `--g3` + underline | `--tx-4` | n/a | n/a | n/a |
 | Slider | thumb 20 px | accent thumb + halo | n/a | `.row.off` | accent thumb + fill, field border | n/a | n/a |
@@ -625,28 +621,28 @@ See `ModeSpecimen` in `src/ui/icons.tsx`.
 
 ### Contrast (computed from `tokens.css`, WCAG 2.x relative luminance)
 
-| Pair | Use | Required | A · Graphite / Signal | B · Carbon / Volt |
-|---|---|---|---|---|
-| `--tx-1` on `--g1` | primary text | 4.5 | #EDEEF0 / #0F1011 = **16.41:1** | #F0EEE8 / #11100D = **16.40:1** |
-| `--tx-2` on `--g1` | secondary text | 4.5 | #A6AAB2 / #0F1011 = **8.18:1** | #AEAA9F / #11100D = **8.20:1** |
-| `--tx-2` on `--g3` | secondary on hover/selected | 4.5 | #A6AAB2 / #1C1D20 = **7.23:1** | #AEAA9F / #201E1A = **7.17:1** |
-| `--tx-3` on `--g0` | labels on stage | 4.5 | #868B94 / #09090A = **5.81:1** | #8E8A7F / #0B0A08 = **5.74:1** |
-| `--tx-3` on `--g1` | labels on chrome | 4.5 | #868B94 / #0F1011 = **5.56:1** | #8E8A7F / #11100D = **5.52:1** |
-| `--tx-3` on `--g2` | labels in controls | 4.5 | #868B94 / #151618 = **5.29:1** | #8E8A7F / #181713 = **5.20:1** |
-| `--tx-3` on `--g3` | labels on selected tile (floor) | 4.5 | #868B94 / #1C1D20 = **4.92:1** | #8E8A7F / #201E1A = **4.83:1** |
-| `--acc` on `--g1` | accent marks on chrome | 3 (non-text) | #FF6A2B / #0F1011 = **6.67:1** | #C9F04F / #11100D = **14.55:1** |
-| `--acc` on `--g0` | focus ring on stage | 3 (non-text) | #FF6A2B / #09090A = **6.96:1** | #C9F04F / #0B0A08 = **15.13:1** |
-| `--acc-ink` on `--acc` | text on primary button | 4.5 | #140A05 / #FF6A2B = **6.83:1** | #121608 / #C9F04F = **14.04:1** |
-| `--acc-ink` on `--acc-hi` | text on primary hover | 4.5 | #140A05 / #FF7D45 = **7.69:1** | #121608 / #D6F76E = **15.20:1** |
-| `--tick-on` on `--g1` | slider fill / lit ticks vs chrome | 3 (non-text) | #7D828B / #0F1011 = **4.93:1** | #85817A / #11100D = **4.91:1** |
-| `--tick-on` on `--g4` | slider fill vs rail | 3 (non-text) | #7D828B / #26282C = **3.82:1** | #85817A / #2B2925 = **3.75:1** |
-| `--tx-1` on `--g1` | slider thumb vs chrome | 3 (non-text) | #EDEEF0 / #0F1011 = **16.41:1** | #F0EEE8 / #11100D = **16.40:1** |
-| `--danger` on `--g2` | error icon in toast | 3 (non-text) | #FF6B73 / #151618 = **6.55:1** | #FF6B6B / #181713 = **6.46:1** |
-| `--ink` on `--paper` | render ink on paper (default) | n/a (artwork) | #E6E4DF / #0B0B0C = **15.48:1** | #E4E7E8 / #0A0B0B = **15.85:1** |
-| `--tx-4` on `--g1` | disabled text only | exempt | #5B5F67 / #0F1011 = **2.97:1** | #5F5C55 / #11100D = **2.85:1** |
+| Pair | Use | Required | Value |
+|---|---|---|---|
+| `--tx-1` on `--g1` | primary text | 4.5 | #EDEEF0 / #0F1011 = **16.41:1** |
+| `--tx-2` on `--g1` | secondary text | 4.5 | #A6AAB2 / #0F1011 = **8.18:1** |
+| `--tx-2` on `--g3` | secondary on hover/selected | 4.5 | #A6AAB2 / #1C1D20 = **7.23:1** |
+| `--tx-3` on `--g0` | labels on stage | 4.5 | #868B94 / #09090A = **5.81:1** |
+| `--tx-3` on `--g1` | labels on chrome | 4.5 | #868B94 / #0F1011 = **5.56:1** |
+| `--tx-3` on `--g2` | labels in controls | 4.5 | #868B94 / #151618 = **5.29:1** |
+| `--tx-3` on `--g3` | labels on selected tile (floor) | 4.5 | #868B94 / #1C1D20 = **4.92:1** |
+| `--acc` on `--g1` | accent marks on chrome | 3 (non-text) | #FF6A2B / #0F1011 = **6.67:1** |
+| `--acc` on `--g0` | focus ring on stage | 3 (non-text) | #FF6A2B / #09090A = **6.96:1** |
+| `--acc-ink` on `--acc` | text on primary button | 4.5 | #140A05 / #FF6A2B = **6.83:1** |
+| `--acc-ink` on `--acc-hi` | text on primary hover | 4.5 | #140A05 / #FF7D45 = **7.69:1** |
+| `--tick-on` on `--g1` | slider fill / lit ticks vs chrome | 3 (non-text) | #7D828B / #0F1011 = **4.93:1** |
+| `--tick-on` on `--g4` | slider fill vs rail | 3 (non-text) | #7D828B / #26282C = **3.82:1** |
+| `--tx-1` on `--g1` | slider thumb vs chrome | 3 (non-text) | #EDEEF0 / #0F1011 = **16.41:1** |
+| `--danger` on `--g2` | error icon in toast | 3 (non-text) | #FF6B73 / #151618 = **6.55:1** |
+| `--ink` on `--paper` | render ink on paper (default) | n/a (artwork) | #E6E4DF / #0B0B0C = **15.48:1** |
+| `--tx-4` on `--g1` | disabled text only | exempt | #5B5F67 / #0F1011 = **2.97:1** |
 
 - **Hairlines:** `--line*` borders are decorative. Every control is identifiable without them, by its fill, label or position. Where a boundary carries meaning (switch track, value field), the state is also shown by a fill or a value of at least 3:1.
-- **Focus:** every interactive element shows a 2 px `--acc` outline on `:focus-visible` (≥ 6.6:1 against every surface in both variants). Segments use an inset ring so it is not clipped. Value fields show focus with a border and ring.
+- **Focus:** every interactive element shows a 2 px `--acc` outline on `:focus-visible` (≥ 6.6:1 against every surface). Segments use an inset ring so it is not clipped. Value fields show focus with a border and ring.
 - **Hit targets:** at least 32 × 32 px everywhere, with ≥ 4 px between neighbouring targets, which meets WCAG 2.5.8 with margin. On phone, sheet tabs are 44 px and mode-strip tiles 52 px. Icon-only buttons (undo, redo, rulers, zoom, close, prev / next, phone Open) carry an `aria-label` and a tooltip that shows the shortcut.
 - **Roles:**
   - radiogroups for mode, colour, scale, speed and fps; `aria-pressed` for the view switch, rulers and loop;

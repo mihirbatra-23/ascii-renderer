@@ -12,7 +12,7 @@ Turn images, GIFs, video and webcam input into ASCII art, live in the browser. E
 - A split view that compares the render with the original or with a plain brightness ramp
 - Video and GIF playback with trimming and a stability control that stops glyphs flickering
 - Export to PNG, SVG, TXT, HTML, GIF, MP4 and WebM at the source's aspect ratio
-- Mono, source colour and duotone, in two UI themes
+- Mono, source color and duotone
 - Settings links that recreate a look
 
 ## How it works

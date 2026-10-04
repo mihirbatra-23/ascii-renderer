@@ -176,7 +176,7 @@ Hairlines first. `--shadow-pop` is used only on popovers, menus, toasts, the pro
 
 - **Content width:** 1040 px. The hero grid is `1fr 360px` and bottom-aligned.
 - **Headline:** "Images, GIFs and video, rendered in type." The word "type." is set in Geist Mono in `--ink`, not the accent.
-- **Hero description:** "Matches each cell of your image to the glyph with the closest shape. Adjust it live, then export it as an image, text or video. Runs in your browser."
+- **Hero description:** "Match each cell of your image or video to the glyph with the closest shape and export it as an image, text or video without leaving your browser."
 - **Drop zone:** 280 px tall. It has a 22 px ruler strip on top (one numeral every 10 columns, which ties it to the editor) and a 16 px dot grid in `--line-2`.
 - **Centre stack:**
   - a 40 px icon tile;

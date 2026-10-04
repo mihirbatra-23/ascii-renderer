@@ -70,8 +70,8 @@ export default function StartScreen() {
             rendered in <span className="type">type.</span>
           </h1>
           <p>
-            Matches each cell of your image to the glyph with the closest shape. Adjust it live, then export it as an image, text or
-            video. Runs in your browser.
+            Match each cell of your image or video to the glyph with the closest shape and export it as an image, text or video
+            without leaving your browser.
           </p>
         </div>
         <DropZone />

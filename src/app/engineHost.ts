@@ -66,8 +66,9 @@ function followParams(engine: RendererEngine): () => void {
   return useStore.subscribe(
     (s) => s.params,
     (params) => {
-      engine.setParams(params).then(requestRender, (e: unknown) => {
-        toast({ kind: 'error', title: 'Couldn’t load the font', body: e instanceof Error ? e.message : String(e) });
+      engine.setParams(params).then(requestRender, () => {
+        // The reason (a font fetch or parse error) is internal; the user can only pick another font.
+        toast({ kind: 'error', title: 'Couldn’t load the font', body: 'Try another font.' });
       });
     },
   );

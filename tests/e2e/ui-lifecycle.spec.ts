@@ -131,8 +131,8 @@ test('a damaged GIF says it cannot be read, without a pointless Try again', asyn
     const { openFile } = await __appImport('/src/app/controller.ts');
     await openFile(new Blob([bytes]), 'garbage.gif');
   });
-  const toast = page.locator('.toast').filter({ hasText: 'Couldn’t decode garbage.gif' });
-  await expect(toast).toContainText('This GIF has no readable frames. It may be damaged or incomplete.');
+  const toast = page.locator('.toast').filter({ hasText: 'Couldn’t open garbage.gif' });
+  await expect(toast).toContainText('The GIF has no readable frames. It may be damaged or incomplete.');
   await expect(toast.getByRole('button', { name: 'Try again' })).toHaveCount(0);
 });
 
@@ -190,12 +190,12 @@ test('a file that fails from the start screen never flashes the editor, and focu
   await chooser.setFiles({ name: 'doc.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.7\n' + 'x'.repeat(2000)) });
   const toast = page.locator('.toast').filter({ hasText: 'That file type isn’t supported' });
   await expect(toast).toBeVisible();
-  await expect(toast).toContainText('doc.pdf can’t be opened here. Try PNG, JPG, WEBP, AVIF, GIF, SVG, MP4, WEBM or MOV.');
+  await expect(toast).toContainText('doc.pdf can’t be opened. Use PNG, JPG, WEBP, AVIF, GIF, SVG, MP4, WEBM or MOV.');
   expect(await page.evaluate(() => (window as unknown as { __editorSeen: boolean }).__editorSeen)).toBe(false);
   await expect(choose).toBeFocused();
   // The announcement is the toast's title and body once, not the title twice, and it is
   // said by one live region only: the toast host's alert region.
-  const message = 'That file type isn’t supported. doc.pdf can’t be opened here. Try PNG, JPG, WEBP, AVIF, GIF, SVG, MP4, WEBM or MOV.';
+  const message = 'That file type isn’t supported. doc.pdf can’t be opened. Use PNG, JPG, WEBP, AVIF, GIF, SVG, MP4, WEBM or MOV.';
   await expect(page.locator('.sr.toast-live[role="alert"]')).toHaveText(message);
   expect(await liveRegionsSaying(page, 'doc.pdf')).toBe(1);
 });
@@ -204,7 +204,7 @@ test('an empty file says what to do next', async ({ page }) => {
   const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('button', { name: /Choose file/ }).click()]);
   await chooser.setFiles({ name: 'empty.png', mimeType: 'image/png', buffer: Buffer.alloc(0) });
   const toast = page.locator('.toast').filter({ hasText: 'empty.png is empty' });
-  await expect(toast).toContainText('Nothing was copied into it. Choose the original file again.');
+  await expect(toast).toContainText('The file has no data. Try the original file.');
 });
 
 test('the start screen shows what is opening while the first file loads', async ({ page }) => {
@@ -256,7 +256,8 @@ test('closing returns to the start screen and stops the clip', async ({ page }) 
     return true;
   });
   expect(element).toBe(true);
-  await page.getByRole('button', { name: 'Close testsrc2_4s.mp4' }).click();
+  await page.getByRole('button', { name: 'Back to start screen' }).click();
+  await page.getByRole('alertdialog', { name: 'Close testsrc2_4s.mp4?' }).getByRole('button', { name: 'Close file' }).click();
   await expect(page.getByRole('region', { name: 'Open a file' })).toBeVisible();
   const after = await page.evaluate(async () => {
     const { runtime } = await __appImport('/src/app/runtime.ts');

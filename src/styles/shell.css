@@ -23,6 +23,9 @@
 .src-meta b{font-weight:400;color:var(--tx-2)}
 .dotsep{display:inline-block;width:3px;height:3px;border-radius:1px;background:var(--tx-4);margin:0 7px 2px;vertical-align:middle}
 .acts{display:flex;align-items:center;gap:var(--s2)}
+/* Back to start screen: the first item, a 32 px ghost button whose glyph lands on x = 16. */
+.top:has(.back){padding-left:var(--s2)}
+.top .back{margin-right:calc(-1 * var(--s1))}
 
 /* ---------- status bar ---------- */
 .status{display:flex;align-items:stretch;height:var(--h-status);padding:0 var(--s1);background:var(--g1);border-top:1px solid var(--line);font:var(--fs-11)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-3);white-space:nowrap;overflow:hidden}
@@ -41,6 +44,9 @@
 .dh h2{margin:0;font-size:var(--fs-13);font-weight:600;letter-spacing:-.005em;flex:1;display:flex;align-items:center;gap:var(--s2)}
 .dh h2 small{font:var(--fs-12)/1 var(--mono);font-weight:400;color:var(--tx-3)}
 .dh kbd{margin-right:8px}
+/* header controls (Presets, Reset all) are 32 px like every other control */
+.dh .btn:not(.icon){height:var(--h-ctl);font-size:var(--fs-13);padding:0 var(--s3)}
+.dh .btn[aria-haspopup="menu"]{gap:6px;padding:0 var(--s2) 0 var(--s3)}
 .db{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
 .df{flex:none;display:flex;align-items:center;gap:var(--s2);min-height:var(--h-bar);padding:var(--s2) var(--s2) var(--s2) var(--s4);border-top:1px solid var(--line);background:var(--g1)}
 .df .hint{margin:0;flex:1}

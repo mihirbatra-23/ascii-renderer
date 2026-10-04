@@ -1,7 +1,7 @@
 /**
  * The Shortcuts sheet (spec §10): every action in the shortcut registry, grouped, so it can never
  * drift from the keys that actually work (screens that add actions, such as the start screen's
- * 1–3, appear while they are mounted). Also holds the theme switch.
+ * 1–3, appear while they are mounted).
  *
  * Open state is `store.ui.shortcutsOpen`: the ? shortcut, the top bar and the start screen set it.
  * A centred dialog on desktop, a bottom sheet on phones (kit Dialog).
@@ -12,14 +12,14 @@ import { Dialog } from '../kit';
 import './ShortcutsOverlay.css';
 
 // Ordered so the two desktop columns balance: File, Edit, View, General | Render, Playback, Start.
-const GROUPS: readonly { group: ShortcutGroup; aux?: string }[] = [
+const GROUPS: readonly { group: ShortcutGroup; title?: string; aux?: string }[] = [
   { group: 'File' },
   { group: 'Edit' },
   { group: 'View' },
   { group: 'General' },
   { group: 'Render' },
   { group: 'Playback', aux: 'GIF and video' },
-  { group: 'Start', aux: 'Start screen' },
+  { group: 'Start', title: 'Start screen' },
 ];
 
 export default function ShortcutsOverlay() {
@@ -36,14 +36,14 @@ function ShortcutList() {
   const actions = useShortcuts();
   return (
     <div className="kb-groups">
-      {GROUPS.map(({ group, aux }) => {
+      {GROUPS.map(({ group, title = group, aux }) => {
         const list = actions.filter((a) => a.group === group);
         if (!list.length) return null;
         const headId = `kb-${group}`;
         return (
           <section key={group} className="kb-grp" aria-labelledby={headId}>
             <header className="sh">
-              <h3 id={headId}>{group}</h3>
+              <h3 id={headId}>{title}</h3>
               {aux && (
                 <span className="aux">
                   <em>{aux}</em>

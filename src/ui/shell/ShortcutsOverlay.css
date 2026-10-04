@@ -1,5 +1,5 @@
 /* Shortcuts sheet (ShortcutsOverlay.tsx) on the kit dialog: grouped rows of label + kbd chips,
-   two balanced columns on desktop, one on phones; the theme switch sits in a footer row. */
+   two balanced columns on desktop, one on phones. */
 @media (min-width:641px){.dialog.kb-sheet{width:min(720px,calc(100vw - 32px));max-height:min(760px,calc(100vh - 64px))}}
 .kb-sheet .dlg-b{padding:var(--s4) var(--s4) 0}
 .kb-groups{columns:2;column-gap:var(--s6)}
@@ -11,8 +11,7 @@
 .kb-alt{display:inline-flex;align-items:center;gap:6px}
 .kb-or{font:var(--fs-11)/1 var(--mono);color:var(--tx-3)}
 .kb-row kbd{color:var(--tx-2)}
-.kb-theme{position:sticky;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:var(--s3);margin:0 calc(-1 * var(--s4));padding:var(--s2) var(--s4);border-top:1px solid var(--line);background:var(--g1);font-size:var(--fs-13);color:var(--tx-2)}
 @media (max-width:640px){
   .kb-groups{columns:1}
-  .kb-theme{padding-bottom:calc(var(--s2) + env(safe-area-inset-bottom))}
+  .kb-sheet .dlg-b{padding-bottom:env(safe-area-inset-bottom)}
 }

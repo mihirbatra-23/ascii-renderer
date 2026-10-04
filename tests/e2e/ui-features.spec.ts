@@ -46,7 +46,7 @@ test.describe('settings links', () => {
     const before = await store<number>(page, 's.getState().params.columns');
     await page.evaluate((hash) => (location.hash = hash), `#s=${payload({ columns: 77 })}`);
     await expect.poll(() => store<number>(page, 's.getState().params.columns')).toBe(77);
-    await expect(page.locator('.toast').filter({ hasText: 'Settings from the link applied' })).toBeVisible();
+    await expect(page.locator('.toast').filter({ hasText: 'Applied settings from the link' })).toBeVisible();
     await page.keyboard.press('ControlOrMeta+z');
     expect(await store<number>(page, 's.getState().params.columns')).toBe(before);
   });
@@ -55,8 +55,8 @@ test.describe('settings links', () => {
   // rather than replacing it with its own.
   test('arriving by a link says so, and a sample then opens in the link’s look', async ({ page }) => {
     await boot(page, `#s=${payload({ mode: 'braille', contrast: 1.5, colorMode: 'mono', invert: true })}`);
-    await expect(page.locator('.toast').filter({ hasText: 'Look from the link is ready' })).toBeVisible();
-    await expect(page.locator('.sr.toast-live[role="status"]')).toContainText('Look from the link is ready');
+    await expect(page.locator('.toast').filter({ hasText: 'Settings from the link are ready' })).toBeVisible();
+    await expect(page.locator('.sr.toast-live[role="status"]')).toContainText('Settings from the link are ready');
     await page.keyboard.press('1');
     await ready(page);
     expect(await store(page, '({ mode: s.getState().params.mode, contrast: s.getState().params.contrast, invert: s.getState().params.invert })')).toEqual({
@@ -72,7 +72,7 @@ test.describe('settings links', () => {
     await page.keyboard.press('1');
     await ready(page);
     expect(await store<string>(page, 's.getState().params.mode')).toBe('shape');
-    const notice = page.locator('.toast').filter({ hasText: 'Using torus.png’s look' });
+    const notice = page.locator('.toast').filter({ hasText: 'Applied settings from torus.png' });
     await notice.getByRole('button', { name: 'Undo' }).click();
     expect(await store(page, '({ mode: s.getState().params.mode, contrast: s.getState().params.contrast })')).toEqual({ mode: 'blocks', contrast: 1.7 });
   });
@@ -123,38 +123,38 @@ test('a toast keeps its own clock when the screen changes underneath it', async 
   expect(goneAt - shownAt).toBeLessThan(6500);
 });
 
-test('Split compares with the original or a Ramp render, and the chips say which', async ({ page }) => {
+test('Split compares with the source or a Ramp render, and the chips say which', async ({ page }) => {
   await boot(page);
   await page.keyboard.press('1');
   await ready(page);
   await page.keyboard.press('s');
   // The accessible name starts with the visible text (WCAG 2.5.3 label in name).
-  const menu = page.getByRole('button', { name: /^vs Original/ });
-  await expect(menu).toHaveText(/vs Original/);
-  await expect(page.locator('.split .chip.l')).toHaveText('Original');
+  const menu = page.getByRole('button', { name: /^vs Source/ });
+  await expect(menu).toHaveText(/vs Source/);
+  await expect(page.locator('.split .chip.l')).toHaveText('Source');
   await menu.click();
-  await page.getByRole('menuitemradio', { name: /Ramp render/ }).click();
+  await page.getByRole('menuitemradio', { name: /^Ramp/ }).click();
   const rampMenu = page.getByRole('button', { name: /^vs Ramp/ });
   await expect(rampMenu).toHaveText(/vs Ramp/);
-  await expect(page.locator('.split .chip.l')).toHaveText('ASCII·Ramp');
-  await expect(page.locator('.split .chip.r')).toHaveText('ASCII·Shape');
+  await expect(page.locator('.split .chip.l')).toHaveText('Ramp');
+  await expect(page.locator('.split .chip.r')).toHaveText('Shape');
   expect(await store<string>(page, 's.getState().view.compareWith')).toBe('ramp');
   // Ramp against Ramp with contour lines on: the right chip names what the left lacks.
   await page.evaluate(() => __appImport('/src/state/store.ts').then(({ useStore }) => useStore.getState().setParams({ mode: 'ramp', edges: true })));
-  await expect(page.locator('.split .chip.r')).toHaveText('ASCII·Ramp + contours');
+  await expect(page.locator('.split .chip.r')).toHaveText('Ramp + contour lines');
   await expect
     .poll(() => page.evaluate(() => __appImport('/src/app/engineHost.ts').then((h) => h.getStageLayout()?.viewport.compareWith)))
     .toBe('ramp');
-  // without contours a Ramp render is the output itself, so the split shows the original
-  // and the menu says why Ramp render is unavailable (the choice is kept for later).
+  // without contour lines a Ramp render is the output itself, so the split shows the source
+  // and the menu says why Ramp is unavailable (the choice is kept for later).
   await page.evaluate(() => __appImport('/src/state/store.ts').then(({ useStore }) => useStore.getState().setParams({ edges: false })));
-  await expect(page.locator('.split .chip.l')).toHaveText('Original');
-  await expect(page.locator('.split .chip.r')).toHaveText('ASCII·Ramp');
+  await expect(page.locator('.split .chip.l')).toHaveText('Source');
+  await expect(page.locator('.split .chip.r')).toHaveText('Ramp');
   await expect
     .poll(() => page.evaluate(() => __appImport('/src/app/engineHost.ts').then((h) => h.getStageLayout()?.viewport.compareWith)))
     .toBe('source');
   await menu.click();
-  const rampItem = page.getByRole('menuitemradio', { name: /Ramp render/ });
+  const rampItem = page.getByRole('menuitemradio', { name: /^Ramp/ });
   await expect(rampItem).toHaveAttribute('aria-disabled', 'true');
   await expect(rampItem).toHaveAccessibleDescription(/Same as the output/);
   await page.keyboard.press('Escape');
@@ -169,8 +169,8 @@ test('the editor’s Open button keeps one-click picking and lists the other way
   await page.keyboard.press('1');
   await ready(page);
   await page.getByRole('button', { name: 'More ways to open' }).click();
-  await expect(page.getByRole('menuitem', { name: /Choose a file/ })).toBeVisible();
-  await expect(page.getByRole('menuitem', { name: /Paste from clipboard/ })).toBeVisible();
+  await expect(page.getByRole('menuitem', { name: /Choose file…/ })).toBeVisible();
+  await expect(page.getByRole('menuitem', { name: /^Paste/ })).toBeVisible();
   await expect(page.getByRole('menuitem', { name: /Camera/ })).toBeVisible();
   await page.keyboard.press('Escape');
   const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('button', { name: 'Open', exact: true }).click()]);

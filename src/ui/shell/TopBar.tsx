@@ -1,12 +1,13 @@
 /**
- * Top bar (spec §2): wordmark | source chip (icon, name, mono meta, close ×) … undo / redo |
+ * Top bar (spec §2): Back | wordmark | source chip (icon, name, mono meta) … undo / redo |
  * GitHub · Open ⌘O (with a menu of the other ways in: paste, camera) · Export ⌘E (the screen's one
- * primary action, aria-expanded while open).
+ * primary action, aria-expanded while open). Back, the wordmark and the phone menu's Close file all
+ * ask first (LeaveDialog).
  *
  * Phones keep the wordmark, an Open icon button and Export, plus a ⋯ button for everything the
- * desktop shows elsewhere (undo, presets, view, zoom, camera, shortcuts, theme: PhoneMenu).
+ * desktop shows elsewhere (undo, presets, view, zoom, camera, shortcuts: PhoneMenu).
  */
-import { cameraAvailable, closeMedia, openCamera } from '../../app/controller';
+import { cameraAvailable, openCamera } from '../../app/controller';
 import { shortcutLabel } from '../../app/shortcuts';
 import { selectCanRedo, selectCanUndo, selectHasMedia, useStore, type MediaInfo } from '../../state/store';
 import { Icon } from '../icons';
@@ -14,12 +15,14 @@ import { Button, IconButton, LinkButton, MenuButton, Tooltip, type MenuEntry } f
 import { dims, formatBytes, formatFps } from '../stage/format';
 import { pasteAndOpen, pickAndOpen } from '../start/openers';
 import { REPO_URL } from '../start/samples';
+import LeaveDialog, { requestLeave } from './LeaveDialog';
 import PhoneMenu from './PhoneMenu';
 
 export default function TopBar() {
   return (
     <header className="top">
       <PageHeading />
+      <IconButton className="back" icon="arrow-l" label="Back to start screen" onClick={requestLeave} />
       <Wordmark />
       <span className="vr desk-only" />
       <SourceChip />
@@ -28,7 +31,7 @@ export default function TopBar() {
       <span className="vr desk-only" />
       <div className="acts">
         <Tooltip label="GitHub repository">
-          <LinkButton variant="ghost" icon="branch" className="gh desk-only" href={REPO_URL} target="_blank" rel="noreferrer" aria-label="GitHub repository">
+          <LinkButton variant="ghost" icon="github" className="gh desk-only" href={REPO_URL} target="_blank" rel="noreferrer" aria-label="GitHub repository (opens in a new tab)">
             <span className="lbl-opt" aria-hidden="true">
               GitHub
             </span>
@@ -39,6 +42,7 @@ export default function TopBar() {
         <ExportButton />
         <PhoneMenu />
       </div>
+      <LeaveDialog />
     </header>
   );
 }
@@ -57,7 +61,7 @@ function Wordmark() {
       aria-label="ASCII Renderer home"
       onClick={(e) => {
         e.preventDefault();
-        closeMedia();
+        requestLeave();
       }}
     >
       <span className="wm-a">ASCII</span>
@@ -69,10 +73,10 @@ function Wordmark() {
 /** Open ⌘O picks a file in one click; the attached chevron lists the other ways in. */
 function OpenGroup() {
   const items: MenuEntry[] = [
-    { id: 'file', label: 'Choose a file…', aux: shortcutLabel('file.open'), onSelect: pickAndOpen },
-    { id: 'paste', label: 'Paste from clipboard', aux: shortcutLabel('file.paste'), onSelect: pasteAndOpen },
+    { id: 'file', label: 'Choose file…', aux: shortcutLabel('file.open'), onSelect: pickAndOpen },
+    { id: 'paste', label: 'Paste', aux: shortcutLabel('file.paste'), onSelect: pasteAndOpen },
   ];
-  if (cameraAvailable()) items.push({ id: 'camera', label: 'Camera', aux: 'Live', onSelect: () => void openCamera() });
+  if (cameraAvailable()) items.push({ id: 'camera', label: 'Camera', onSelect: () => void openCamera() });
   return (
     <div className="open-split desk-only" role="group" aria-label="Open">
       <Button icon="folder" kbd={shortcutLabel('file.open')} onClick={pickAndOpen}>
@@ -86,7 +90,6 @@ function OpenGroup() {
 function SourceChip() {
   const info = useStore((s) => s.media.info);
   if (!info) return null;
-  const close = info.live ? 'Stop the camera' : `Close ${info.name}`;
   return (
     <div className="src">
       <Icon name={info.live ? 'camera' : info.kind === 'image' ? 'image' : 'film'} />
@@ -102,7 +105,6 @@ function SourceChip() {
       <span className="src-meta">
         <Meta info={info} />
       </span>
-      <IconButton icon="x" size="sm" label={close} onClick={closeMedia} />
     </div>
   );
 }

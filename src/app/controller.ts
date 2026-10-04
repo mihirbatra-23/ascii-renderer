@@ -49,7 +49,7 @@ export async function openSample(url: string, name: string): Promise<void> {
   let blob: Blob;
   try {
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`The server answered ${res.status}${res.statusText ? ` ${res.statusText}` : ''}.`);
+    if (!res.ok) throw new Error(`The server returned ${res.status}${res.statusText ? ` ${res.statusText}` : ''}.`);
     blob = await res.blob();
   } catch (e) {
     if (seq === openSeq) fail(e, name, () => void openSample(url, name), 'Couldn’t load the sample');
@@ -150,7 +150,7 @@ function firstFrame(player: Player, live: boolean): Promise<{ frame: FrameSource
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       off();
-      reject(new MediaError('decode-failed', 'No picture arrived from this source.'));
+      reject(new MediaError('decode-failed', 'No picture came from this source.'));
     }, FIRST_FRAME_TIMEOUT_MS);
     const off = player.onFrame((frame, time) => {
       clearTimeout(timer);
@@ -315,7 +315,7 @@ function retryable(e: unknown): boolean {
   return !(e instanceof MediaError) || e.transient;
 }
 
-const SUPPORTED = `Try ${FORMATS.slice(0, -1).join(', ')} or ${FORMATS.at(-1)}.`;
+const SUPPORTED = `Use ${FORMATS.slice(0, -1).join(', ')} or ${FORMATS.at(-1)}.`;
 
 type ErrorToast = ToastOptions & { body: string };
 
@@ -324,16 +324,16 @@ function errorToast(e: unknown, name: string, title?: string): ErrorToast {
   if (!(e instanceof MediaError)) return { kind: 'error', title: title ?? `Couldn’t open ${name}`, body: message };
   switch (e.code) {
     case 'unsupported-format':
-      return { kind: 'error', icon: 'file-x', title: 'That file type isn’t supported', body: `${name} can’t be opened here. ${SUPPORTED}` };
+      return { kind: 'error', icon: 'file-x', title: 'That file type isn’t supported', body: `${name} can’t be opened. ${SUPPORTED}` };
     case 'heic-unsupported':
-      return { kind: 'error', icon: 'file-x', title: 'HEIC isn’t supported here', body: message };
+      return { kind: 'error', icon: 'file-x', title: 'HEIC isn’t supported here', body: 'Convert it to JPEG or PNG, then open that file.' };
     case 'too-large':
       return { kind: 'error', title: `${name} is too large`, body: message };
     case 'empty-file':
-      return { kind: 'error', icon: 'file-x', title: `${name} is empty`, body: 'Nothing was copied into it. Choose the original file again.' };
+      return { kind: 'error', icon: 'file-x', title: `${name} is empty`, body: 'The file has no data. Try the original file.' };
     case 'decode-failed':
     case 'codec-unsupported':
-      return { kind: 'error', title: `Couldn’t decode ${name}`, body: message };
+      return { kind: 'error', title: `Couldn’t open ${name}`, body: message };
     case 'camera-blocked':
       return { kind: 'error', title: 'Camera access is blocked', body: message };
     case 'camera-unavailable':

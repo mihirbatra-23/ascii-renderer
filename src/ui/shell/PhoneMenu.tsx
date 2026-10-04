@@ -1,15 +1,15 @@
 /**
  * Phones only (the ⋯ button in the top bar): one sheet with what the desktop spreads over the top
  * bar, the dock header and the stage header, which phones hide: undo / redo, Reset all,
- * the built-in and saved looks (and saving one, copying a settings link), Output / Split / Source (and what Split compares with), zoom,
- * the other ways in (paste, camera), closing the file, the Shortcuts sheet and the theme.
+ * the built-in and saved presets (and saving one, copying a settings link), Output / Split / Source (and what Split compares with), zoom,
+ * the other ways in (paste, camera), closing the file (through the same confirmation as Back) and the Shortcuts sheet.
  *
  * It is the kit Dialog, so it is a bottom sheet with a focus trap and Escape. Actions that change
  * what the preview shows close the sheet so the result is visible; undo, redo and zoom keep it
  * open because they are often repeated.
  */
 import { useState, type ReactNode } from 'react';
-import { cameraAvailable, closeMedia, openCamera } from '../../app/controller';
+import { cameraAvailable, openCamera } from '../../app/controller';
 import { copySettingsLink } from '../../app/permalink';
 import { useStageLayout } from '../../app/engineHost';
 import { BUILTIN_PRESETS, defaultParams, paramsEqual } from '../../state/params';
@@ -20,6 +20,7 @@ import { Button, Dialog, IconButton, Segmented, type SegmentedOption } from '../
 import { effectiveCompare, rampCompareBlocked } from '../stage/compare';
 import { fitView, formatZoom, zoomStep, zoomTo } from '../stage/viewActions';
 import { pasteAndOpen } from '../start/openers';
+import { requestLeave } from './LeaveDialog';
 import './PhoneMenu.css';
 
 const VIEWS: readonly SegmentedOption<ViewMode>[] = [
@@ -29,7 +30,7 @@ const VIEWS: readonly SegmentedOption<ViewMode>[] = [
 ];
 
 const COMPARE: readonly SegmentedOption<CompareWith>[] = [
-  { value: 'source', label: 'Original' },
+  { value: 'source', label: 'Source' },
   { value: 'ramp', label: 'Ramp' },
 ];
 
@@ -48,9 +49,9 @@ export default function PhoneMenu() {
         <EditGroup />
         <ViewGroup onDone={close} />
         <ZoomGroup />
-        <LooksGroup onDone={close} onSave={savePreset} />
+        <PresetsGroup onDone={close} onSave={savePreset} />
         <SourceGroup onDone={close} />
-        <AppGroup onDone={close} />
+        <HelpGroup onDone={close} />
       </Dialog>
       {/* Outside the More sheet, which closes first; the same dialog as the dock's Presets menu. */}
       <PresetDialog mode={presetDialog} onClose={() => setPresetDialog(null)} />
@@ -152,7 +153,7 @@ function ZoomGroup() {
   );
 }
 
-function LooksGroup({ onDone, onSave }: { onDone(): void; onSave(): void }) {
+function PresetsGroup({ onDone, onSave }: { onDone(): void; onSave(): void }) {
   const userPresets = useStore((s) => s.userPresets);
   // The same feedback as the dock's Presets menu: a toast that says what changed, with Undo.
   const apply = (name: string) => {
@@ -160,7 +161,7 @@ function LooksGroup({ onDone, onSave }: { onDone(): void; onSave(): void }) {
     onDone();
   };
   return (
-    <Group title="Looks" aux="Presets">
+    <Group title="Presets">
       <div className="pm-grid">
         {BUILTIN_PRESETS.map((p) => (
           <Button key={p.name} onClick={() => apply(p.name)}>
@@ -175,7 +176,7 @@ function LooksGroup({ onDone, onSave }: { onDone(): void; onSave(): void }) {
       </div>
       <div className="pm-row pm-more">
         <Button icon="plus" onClick={onSave}>
-          Save current…
+          Save as preset…
         </Button>
         <Button
           icon="link"
@@ -209,7 +210,7 @@ function SourceGroup({ onDone }: { onDone(): void }) {
           </Button>
         )}
         {info && (
-          <Button icon="x" onClick={then(closeMedia)}>
+          <Button icon="x" onClick={then(requestLeave)}>
             {info.live ? 'Stop camera' : 'Close file'}
           </Button>
         )}
@@ -218,13 +219,13 @@ function SourceGroup({ onDone }: { onDone(): void }) {
   );
 }
 
-function AppGroup({ onDone }: { onDone(): void }) {
+function HelpGroup({ onDone }: { onDone(): void }) {
   const showShortcuts = () => {
     onDone();
     useStore.getState().setUi({ shortcutsOpen: true });
   };
   return (
-    <Group title="App">
+    <Group title="Help">
       <Button icon="keyboard" stretch="wide" onClick={showShortcuts}>
         Keyboard shortcuts
       </Button>

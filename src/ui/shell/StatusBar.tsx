@@ -1,13 +1,13 @@
 /**
  * Status bar (spec §5): dim caps keys with bright values, hairline-separated, 28 px.
  *
- *   still   ● Live · MODE · GRID · RENDER ms · FPS · GPU              | CURSOR · ZOOM · 🔒 On-device
+ *   still   ● Ready · MODE · GRID · RENDER ms · FPS · GPU              | CURSOR · ZOOM · 🔒 On-device
  *   clip    ● Playing · RATE · GRID · RENDER ms/f · FPS · DECODE      | CURSOR · ZOOM · 🔒 On-device
- *   camera  ● Camera · RATE · GRID · RENDER ms/f · FPS                 | CURSOR · ZOOM · 🔒 On-device
+ *   camera  ● Live · RATE   · GRID · RENDER ms/f · FPS                 | CURSOR · ZOOM · 🔒 On-device
  *   split   …                                                         | VIEW Split 50% · ZOOM · …
- *   export  ● Live · MODE · GRID · RENDER                             | EXPORT PNG 2560 × 1440 · 2× · …
+ *   export  ● Ready · MODE · GRID · RENDER                             | EXPORT PNG 2560 × 1440 · 2× · …
  *   encode  ● Encoding (accent dot) · CODEC · FRAMES · SPEED            | OUTPUT 2560 × 1440 · 2× · …
- *   record  ● Recording (accent dot) · CONTAINER · TIME · FRAMES        | OUTPUT …
+ *   record  ● Recording (accent dot) · FORMAT · TIME    · FRAMES        | OUTPUT …
  *
  * RENDER is the GPU time of a frame (analysis and compose) averaged over recent frames when the
  * browser has GPU timers, else the CPU time to submit one; FPS is what was actually drawn in the
@@ -81,7 +81,7 @@ function LiveItems() {
   const playing = useStore((s) => s.playback.playing);
   const exporting = useStore((s) => s.exportUi.open);
   const clip = kind === 'animation' || kind === 'video';
-  const word = loading ? 'Loading' : clip ? (playing ? (live ? 'Camera' : 'Playing') : 'Paused') : 'Live';
+  const word = loading ? 'Loading' : clip ? (playing ? (live ? 'Live' : 'Playing') : 'Paused') : 'Ready';
   return (
     <>
       <State word={word} />
@@ -108,7 +108,7 @@ function RateItem({ live }: { live: boolean }) {
   const fps = useStore((s) => s.media.info?.fps);
   const rate = useStore((s) => (live ? 1 : s.playback.rate));
   return (
-    <KV k="Rate" priority="p2" title={live ? 'The camera’s frame rate' : rate !== 1 ? `Playing at ${rate}×` : 'The source’s frame rate'}>
+    <KV k="Rate" priority="p2" title={live ? 'Camera frame rate' : rate !== 1 ? `Playing at ${rate}×` : 'Source frame rate'}>
       {fps ? formatFps(fps * rate) : '–'}
     </KV>
   );
@@ -121,8 +121,8 @@ function GridItem() {
 }
 
 const RENDER_TITLE = {
-  gpu: 'GPU time per frame (analysis and compose), averaged over recent frames',
-  cpu: 'Time to render a frame on the main thread, averaged over recent frames (this browser has no GPU timer)',
+  gpu: 'Average GPU time per frame.',
+  cpu: 'Average time per frame. This browser has no GPU timer.',
 } as const;
 
 function RenderItem({ perFrame }: { perFrame: boolean }) {
@@ -139,7 +139,7 @@ function RenderItem({ perFrame }: { perFrame: boolean }) {
 function FpsItem() {
   const fps = useStore((s) => s.stats.fps);
   return (
-    <KV k="FPS" priority="p3" title={fps ? 'Frames drawn in the last second' : 'Idle: the preview redraws only when something changes'}>
+    <KV k="FPS" priority="p3" title={fps ? 'Frames drawn in the last second' : 'Idle. The preview redraws only when something changes.'}>
       {fps || '–'}
     </KV>
   );
@@ -181,14 +181,14 @@ function EncodeItems() {
   );
 }
 
-/** "Recording · CONTAINER MP4 · TIME 00:12.40 · FRAMES 372": a camera recorded in real time. */
+/** "Recording · FORMAT MP4 · TIME 00:12.40 · FRAMES 372": a camera recorded in real time. */
 function RecordItems() {
   const rec = useStore((s) => s.job.recording);
   if (!rec) return null;
   return (
     <>
       <State word="Recording" on />
-      <KV k="Container">{rec.container === 'mp4' ? 'MP4' : 'WebM'}</KV>
+      <KV k="Format">{rec.container === 'mp4' ? 'MP4' : 'WebM'}</KV>
       <KV k="Time">{formatTimecode(rec.elapsedSec)}</KV>
       <KV k="Frames" priority="p3">
         {rec.frames}
@@ -204,7 +204,7 @@ function SpeedItem({ done }: { done: number }) {
   const elapsed = (performance.now() - startedAt) / 1000;
   const speed = outFps && done > 0 && elapsed > 0.5 ? done / outFps / elapsed : null;
   return (
-    <KV k="Speed" title="Encoded media time per second of encoding">
+    <KV k="Speed" title="Seconds of video encoded per second">
       {speed === null ? '–' : `${speed.toFixed(1)}× realtime`}
     </KV>
   );
@@ -226,7 +226,7 @@ function RightItems() {
 function CursorItem() {
   const probe = useStore((s) => s.view.probe);
   return (
-    <KV k="Cursor" end priority="p3" title={probe ? undefined : 'Point at the preview to probe a cell'}>
+    <KV k="Cursor" end priority="p3" title={probe ? undefined : 'Point at the preview to read a cell'}>
       {probe ? `C${String(probe.col).padStart(3, '0')} R${String(probe.row).padStart(2, '0')}` : '–'}
     </KV>
   );

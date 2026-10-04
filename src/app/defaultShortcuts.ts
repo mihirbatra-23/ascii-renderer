@@ -72,17 +72,17 @@ const DEFAULTS: ShortcutAction[] = [
     inInputs: true,
     handler: pickAndOpen,
   },
-  { id: 'file.paste', label: 'Paste an image', group: 'File', keys: ['mod+v'], displayOnly: true },
+  { id: 'file.paste', label: 'Paste a file or link', group: 'File', keys: ['mod+v'], displayOnly: true },
   {
     id: 'export.toggle',
-    label: 'Export',
+    label: 'Open or close Export',
     group: 'File',
     keys: ['mod+e'],
     inInputs: true,
     enabled: hasMedia,
     handler: () => state().setExportUi({ open: !state().exportUi.open }),
   },
-  { id: 'export.download', label: 'Download the export', group: 'File', keys: ['mod+enter'], inInputs: true },
+  { id: 'export.download', label: 'Download or record', group: 'File', keys: ['mod+enter'], inInputs: true },
 
   // Edit
   { id: 'edit.undo', label: 'Undo', group: 'Edit', keys: ['mod+z'], repeat: true, handler: () => state().undo() },
@@ -91,7 +91,7 @@ const DEFAULTS: ShortcutAction[] = [
   // Render
   {
     id: 'render.mode',
-    label: 'Cycle render mode',
+    label: 'Next mode',
     group: 'Render',
     keys: ['m'],
     enabled: hasMedia,
@@ -111,14 +111,14 @@ const DEFAULTS: ShortcutAction[] = [
   },
   {
     id: 'render.color',
-    label: 'Cycle colour: Mono, Source, Duotone',
+    label: 'Next color mode',
     group: 'Render',
     keys: ['d'],
     enabled: hasMedia,
     handler: () => {
       const mode = cycle(COLOR_MODES, state().params.colorMode);
       state().setParam('colorMode', mode);
-      state().announce(`Colour: ${COLOR_LABELS[mode]}`);
+      state().announce(`Color: ${COLOR_LABELS[mode]}`);
     },
   },
   { id: 'grid.less', label: 'Fewer columns (Shift: 10)', group: 'Render', keys: ['[', 'shift+['], repeat: true, enabled: hasMedia, handler: (e) => stepColumns(e, -1) },
@@ -127,15 +127,15 @@ const DEFAULTS: ShortcutAction[] = [
   // View
   {
     id: 'view.compare',
-    label: 'Toggle Split compare',
+    label: 'Toggle Split view',
     group: 'View',
     keys: ['\\', 's'],
     enabled: hasMedia,
     handler: toggleSplit,
   },
   { id: 'view.rulers', label: 'Toggle rulers', group: 'View', keys: ['r'], enabled: hasMedia, handler: toggleRulers },
-  { id: 'view.fit', label: 'Fit to stage', group: 'View', keys: ['0', 'f'], enabled: hasMedia, handler: fitView },
-  { id: 'view.actual', label: 'Actual size', group: 'View', keys: ['1'], enabled: hasMedia, handler: actualSize },
+  { id: 'view.fit', label: 'Zoom to fit', group: 'View', keys: ['0', 'f'], enabled: hasMedia, handler: fitView },
+  { id: 'view.actual', label: 'Zoom to 100%', group: 'View', keys: ['1'], enabled: hasMedia, handler: actualSize },
 
   // Playback (GIF and video)
   {
@@ -167,7 +167,7 @@ const DEFAULTS: ShortcutAction[] = [
   },
   {
     id: 'playback.in',
-    label: 'Set in point at the playhead',
+    label: 'Set In at the playhead',
     group: 'Playback',
     keys: ['shift+i'],
     enabled: isClip,
@@ -180,7 +180,7 @@ const DEFAULTS: ShortcutAction[] = [
   },
   {
     id: 'playback.out',
-    label: 'Set out point at the playhead',
+    label: 'Set Out at the playhead',
     group: 'Playback',
     keys: ['shift+o'],
     enabled: isClip,
@@ -204,7 +204,7 @@ const DEFAULTS: ShortcutAction[] = [
   },
   {
     id: 'panel.close',
-    label: 'Close Export or the open sheet',
+    label: 'Close Export or this sheet',
     group: 'General',
     keys: ['escape'],
     inInputs: true,

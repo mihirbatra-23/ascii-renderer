@@ -65,7 +65,7 @@ test('a still opens with its source chip, a caption from the real geometry and l
   await expect(cap).toContainText('Aspect locked 16:9');
   await expect(page.getByRole('img', { name: 'ASCII render of torus.png, 160 by 45 cells' })).toBeVisible();
   const status = page.getByRole('contentinfo', { name: 'Status' });
-  await expect(status).toContainText('Live');
+  await expect(status).toContainText('Ready');
   await expect(status).toContainText('160 × 45');
   await expect(status).toContainText('WebGL2');
   // Fitted: the grid is centred in the art area, keeps the source aspect and leaves the 32 px pad.
@@ -131,19 +131,19 @@ test('zoom buttons and keys step, F fits, 1 is actual size', async ({ page }) =>
   await expect(zoom).toHaveText('100%');
 });
 
-test('split compare: the handle is a keyboard slider and the caption follows it', async ({ page }) => {
+test('split compare: the handle is a keyboard slider and the status bar follows it', async ({ page }) => {
   await openSample(page);
   await page.getByRole('button', { name: 'Split' }).click();
   const knob = page.getByRole('slider', { name: 'Split position' });
   await expect(knob).toHaveAttribute('aria-valuenow', '50');
-  await expect(page.locator('.chip')).toHaveText(['Original', 'ASCII·Shape']);
+  await expect(page.locator('.chip')).toHaveText(['Source', 'Shape']);
   await knob.focus();
   await page.keyboard.press('ArrowRight');
   await expect(knob).toHaveAttribute('aria-valuenow', '51');
   await page.keyboard.press('Shift+ArrowLeft');
   await expect(knob).toHaveAttribute('aria-valuenow', '41');
   await page.keyboard.press('End');
-  await expect(page.locator('.cap')).toContainText('Split 100%');
+  await expect(page.getByRole('contentinfo', { name: 'Status' })).toContainText('Split 100%');
   // Dragging the handle follows the pointer across the frame.
   const g = await grid(page);
   const k = (await knob.boundingBox())!;
@@ -166,7 +166,7 @@ test('export swaps rulers for dimension lines and reads zoom against the export 
   await expect(page.locator('.dim.h')).toHaveText('1440 px');
   await expect(page.locator('.zoom-v')).toHaveText('50%');
   await expect(page.locator('.cap')).toContainText('Output 2560 × 1440 px at 2×');
-  await expect(page.locator('.cap')).toContainText('No crop, no squash');
+  await expect(page.locator('.cap')).toContainText('Aspect matches source');
   await expect(page.getByRole('contentinfo', { name: 'Status' })).toContainText('PNG 2560 × 1440 · 2×');
 });
 
@@ -200,7 +200,7 @@ test('an unsupported file is a toast, and the last good frame stays', async ({ p
   await openFixture(page, path.resolve('package.json'));
   const alert = page.getByRole('alert');
   await expect(alert).toContainText('That file type isn’t supported');
-  await expect(alert).toContainText('package.json can’t be opened here.');
+  await expect(alert).toContainText('package.json can’t be opened.');
   await expect(page.locator('.src-name')).toHaveText('torus.png');
   expect(await store<string>(page, 's.getState().media.status')).toBe('ready');
 });
@@ -243,15 +243,41 @@ test('pasting a link the server will not share explains CORS', async ({ page }) 
   });
   const alert = page.getByRole('alert');
   await expect(alert).toContainText('cors-refused.test');
-  await expect(alert).toContainText('does not let other sites read its files');
+  await expect(alert).toContainText('blocks other sites');
   await expect(page.locator('.src-name')).toHaveText('torus.png');
 });
 
-test('close returns to the start screen', async ({ page }) => {
+test('Back asks first: Cancel and Esc stay (focus back on Back), Enter or Close file returns to the start screen', async ({ page }) => {
   await openSample(page);
-  await page.getByRole('button', { name: 'Close torus.png' }).click();
+  const back = page.getByRole('button', { name: 'Back to start screen' });
+  const dialog = page.getByRole('alertdialog', { name: 'Close torus.png?' });
+  await back.click();
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toHaveAccessibleDescription(/^This returns to the start screen\. Your settings stay/);
+  await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused();
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+  await expect(dialog).toBeHidden();
+  await expect(back).toBeFocused();
+
+  await back.click();
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(back).toBeFocused();
+  expect(await store<string>(page, 's.getState().media.status')).toBe('ready');
+
+  // The wordmark asks the same; Enter confirms. Settings survive the close.
+  await store(page, "s.getState().setParam('contrast', 1.4)");
+  await page.getByRole('link', { name: 'ASCII Renderer home' }).click();
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press('Enter');
   await expect(page.locator('.src-name')).toHaveCount(0);
   expect(await store<string>(page, 's.getState().media.status')).toBe('empty');
+  expect(await store<number>(page, 's.getState().params.contrast')).toBe(1.4);
+
+  await openSample(page);
+  await back.click();
+  await dialog.getByRole('button', { name: 'Close file' }).click();
+  await expect(page.locator('.src-name')).toHaveCount(0);
 });
 
 test('phone: a 16:9 preview with a one-line readout, no rulers or caption', async ({ page }) => {

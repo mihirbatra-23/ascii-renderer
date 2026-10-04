@@ -19,9 +19,10 @@
 @media (max-width:960px){
   .top .src-meta{display:none}
 }
-/* Under ~760 px the file name needs the room more than the repository link does. */
+/* Under ~760 px the file name needs the room more than the repository link does (the start
+   screen keeps its GitHub icon button). */
 @media (max-width:760px){
-  .top .gh{display:none}
+  .app .top .gh{display:none}
 }
 
 /* Open ⌘O joined to the chevron that lists the other ways in (paste, camera). */

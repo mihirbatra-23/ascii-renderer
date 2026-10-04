@@ -159,7 +159,7 @@ test('the zoom readout is not a live region; deliberate zoom steps are announced
   await page.getByRole('button', { name: 'Zoom in' }).click();
   await expect(live).toHaveText(/^Zoom \d+(\.\d)?%$/);
   await page.keyboard.press('f');
-  await expect(live).toHaveText('Fit to stage');
+  await expect(live).toHaveText('Zoom to fit');
 });
 
 test('keyboard toggles and undo say what they did', async ({ page }) => {
@@ -197,7 +197,7 @@ test('the trim handles are not inside the timeline slider', async ({ page }) => 
 test.describe('phone', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
 
-  test('the More sheet gives phones undo, looks, reset, view, zoom, shortcuts and theme', async ({ page }) => {
+  test('the More sheet gives phones undo, presets, reset, view, zoom, close and shortcuts', async ({ page }) => {
     await boot(page);
     await page.getByRole('button', { name: /Open sample torus\.png/ }).click();
     await page.waitForFunction(`__appImport('/src/state/store.ts').then(({ useStore }) => useStore.getState().stats.cols > 0)`);
@@ -206,9 +206,10 @@ test.describe('phone', () => {
     const sheet = page.getByRole('dialog', { name: 'More' });
     await expect(sheet).toBeVisible();
     for (const name of ['Undo', 'Redo', 'Reset all', 'Fit', 'Keyboard shortcuts', 'Paste']) await expect(sheet.getByRole('button', { name, exact: true })).toBeVisible();
-    await expect(sheet.getByRole('radiogroup', { name: 'Theme' })).toBeVisible();
+    await expect(sheet.getByRole('radiogroup', { name: 'Theme' })).toHaveCount(0);
+    for (const name of ['Edit', 'View', 'Zoom', 'Presets', 'Source', 'Help']) await expect(sheet.getByRole('heading', { name, exact: true })).toBeVisible();
 
-    // A look closes the sheet so its result shows; Undo brings the previous one back.
+    // A preset closes the sheet so its result shows; Undo brings the previous one back.
     await sheet.getByRole('button', { name: 'Teletext' }).click();
     await expect(sheet).toBeHidden();
     expect(await store<string>(page, 's.getState().params.mode')).toBe('blocks');
@@ -224,21 +225,25 @@ test.describe('phone', () => {
     expect(await store<string>(page, 's.getState().view.compareWith')).toBe('ramp');
 
     await more.click();
-    await sheet.getByRole('radio', { name: 'Carbon' }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'b');
     await sheet.getByRole('button', { name: 'Keyboard shortcuts' }).click();
     await expect(page.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeVisible();
     await page.keyboard.press('Escape');
 
-    // saving a look and copying a settings link, as the dock's Presets menu offers on desktop.
+    // saving a preset and copying a settings link, as the dock's Presets menu offers on desktop.
     await more.click();
-    await sheet.getByRole('button', { name: 'Save current…' }).click();
+    await sheet.getByRole('button', { name: 'Save as preset…' }).click();
     const save = page.getByRole('dialog', { name: 'Save preset' });
     await expect(save).toBeVisible();
     await save.getByRole('button', { name: 'Save' }).click();
     expect(await store<number>(page, 's.getState().userPresets.length')).toBe(1);
     await more.click();
     await expect(sheet.getByRole('button', { name: 'Copy settings link' })).toBeVisible();
+    // Close file asks first, with the same dialog as Back.
+    await sheet.getByRole('button', { name: 'Close file' }).click();
+    const confirm = page.getByRole('alertdialog', { name: 'Close torus.png?' });
+    await expect(confirm).toBeVisible();
+    await confirm.getByRole('button', { name: 'Close file' }).click();
+    await expect.poll(() => store<string>(page, 's.getState().media.status')).toBe('empty');
   });
 
   // the phone editor's landmarks and heading levels (axe: region, heading-order, banner).

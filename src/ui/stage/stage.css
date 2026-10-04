@@ -1,0 +1,85 @@
+/*
+ * The live viewport (design spec §2 "Frame sizing"). The art area (.va) holds the engine canvas;
+ * around it 28px left and 24px top are kept for the rulers or dimension lines and 26px below for
+ * the caption, so the grid and its furniture centre together as on the boards. Every overlay is
+ * placed from the engine's layout by transform (component looks: src/styles/stage.css).
+ */
+.vp{flex:1;min-height:0;position:relative;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
+.vp.pannable{cursor:grab}
+.vp.is-panning{cursor:grabbing}
+.va{position:absolute;left:28px;top:24px;right:0;bottom:26px;overflow:hidden}
+.va .art-canvas{position:absolute;left:0;top:0;display:block}
+.frm{position:absolute;left:0;top:0;box-shadow:0 0 0 1px var(--line-2);pointer-events:none;will-change:transform}
+
+/* rulers: one 2D canvas per axis, moved by transform; the cursor ticks are one-cell accent marks */
+.ruler{position:absolute;pointer-events:none;will-change:transform}
+.ruler canvas{position:absolute;left:0;top:0;display:block}
+.ruler.x{top:0;height:18px}
+.ruler.y{left:0;width:22px}
+.ruler .mk{position:absolute;background:var(--acc);will-change:transform}
+.ruler.x .mk{left:0;bottom:0;height:7px}
+.ruler.y .mk{right:0;top:0;width:7px}
+
+@media (max-width:640px){
+  /* a full-width 16:9 box under the mode strip; no rulers, caption or stage header. The frame's
+     hairline is a shadow outside .va, so .vp (overflow hidden) keeps 1px below it for the bottom edge. */
+  .vp{flex:none;height:calc((100vw - 32px) * 9 / 16 + 17px)}
+  .va{left:16px;right:16px;top:16px;bottom:1px;box-shadow:0 0 0 1px var(--line-2)}
+  .frm{display:none}
+}
+
+/* A short window (a phone in landscape): no rulers, dimension lines or caption, so the preview keeps
+   most of the stage. Keep in step with SHORT_QUERY (kit/util.ts). */
+@media (min-width:641px) and (max-height:500px){
+  .va{left:8px;top:8px;right:8px;bottom:8px}
+  .ruler,.dim,.cap{display:none}
+}
+
+/* The stage header and the transport adapt to the stage's own width (the dock takes a fixed share),
+   so they are written as container queries on .stage rather than viewport breakpoints. */
+.stage{container:stage/inline-size}
+
+/* stage header pieces */
+.sbar{min-width:0}
+.sbar>:not(.sp){flex:none}
+.sbar .lbl{white-space:nowrap}
+.views .vw-i{display:none}
+.zoom .zoom-v{min-width:56px;height:100%;border-left:1px solid var(--line-2);border-right:1px solid var(--line-2);display:grid;place-items:center;font:var(--fs-12)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-1)}
+.zoom button{flex:none}
+.cmp-b .cmp-l{font:var(--fs-12)/1 var(--mono);color:var(--tx-2)}
+
+@container stage (max-width:720px){
+  .sbar .lbl{display:none}
+}
+@container stage (max-width:500px){
+  .sbar{gap:var(--s1);padding:0 var(--s3)}
+  /* the view switch keeps its names as labels and shows icons */
+  .views .vw-i{display:block}
+  .views .vw-l{display:none}
+  .views button{padding:0 10px}
+  .sbar .fit-b{width:var(--h-ctl);padding:0;justify-content:center}
+  .sbar .fit-b .fit-l{display:none}
+  .zoom .zoom-v{min-width:46px}
+  .zoom button{width:26px}
+}
+/* Split adds the compare trigger (~120 px), so the header compacts earlier while it is there: icon-only view switch and Fit from 640 px, then the trigger keeps only "vs". */
+@container stage (max-width:640px){
+  .sbar:has(.cmp-b){gap:var(--s1);padding:0 var(--s3)}
+  .sbar:has(.cmp-b) .views .vw-i{display:block}
+  .sbar:has(.cmp-b) .views .vw-l{display:none}
+  .sbar:has(.cmp-b) .views button{padding:0 10px}
+  .sbar:has(.cmp-b) .fit-b{width:var(--h-ctl);padding:0;justify-content:center}
+  .sbar:has(.cmp-b) .fit-b .fit-l{display:none}
+}
+@container stage (max-width:440px){
+  .cmp-b .cmp-w{display:none}
+}
+@container stage (max-width:600px){
+  .cap .cap-src,.cap .cap-hint{display:none}
+}
+@container stage (max-width:420px){
+  .cap .cap-out{display:none}
+}
+
+/* The engine canvas's own layer: above the transparency checker, below every overlay. */
+.va .va-canvas{position:absolute;inset:0}

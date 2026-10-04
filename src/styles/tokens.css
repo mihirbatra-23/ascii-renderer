@@ -1,0 +1,141 @@
+/* ==========================================================================
+   ASCII Renderer: design tokens
+   Variant A "Graphite / Signal"  -> :root (default)
+   Variant B "Carbon / Volt"      -> [data-theme="b"]
+   The two variants share every layout, component, size and type token.
+   They differ in exactly three groups: surface temperature (g*, line*, tx*, tick*),
+   accent hue (acc*), and render ink/paper (ink*, paper). Nothing else.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* ---- surfaces: cool graphite (hue ~220, chroma ~0.004) ---- */
+  --g0: #09090A;          /* stage / deepest ground */
+  --g1: #0F1011;          /* chrome: top bar, dock, status bar */
+  --g2: #151618;          /* controls at rest, value fields */
+  --g3: #1C1D20;          /* hover, selected tile/segment */
+  --g4: #26282C;          /* pressed, switch track off, slider rail */
+
+  /* ---- hairlines ---- */
+  --line:   #1D1F22;      /* section dividers, chrome edges */
+  --line-2: #2A2D31;      /* control borders at rest */
+  --line-3: #3A3D43;      /* hover / selected borders */
+
+  /* ---- text (all >= 4.5:1 on g1, g2, g3) ---- */
+  --tx-1: #EDEEF0;        /* primary          15.9:1 on g1 */
+  --tx-2: #A6AAB2;        /* secondary         8.0:1 on g1 */
+  --tx-3: #868B94;        /* labels, meta      5.4:1 on g1, 4.8:1 on g3 (floor) */
+  --tx-4: #5B5F67;        /* disabled + decorative only, never body text */
+
+  /* ---- measuring marks ---- */
+  --tick:    #34373D;     /* ruler + slider ticks */
+  --tick-on: #7D828B;     /* lit ticks, slider fill (3:1+ vs g1 and g4) */
+
+  /* ---- accent: international orange ---- */
+  --acc:      #FF6A2B;    /* 6.7:1 on g1 */
+  --acc-hi:   #FF7D45;    /* hover */
+  --acc-ink:  #140A05;    /* text on accent, 6.9:1 */
+  --acc-soft: rgba(255, 106, 43, .14);
+  --acc-line: rgba(255, 106, 43, .60);
+
+  /* ---- semantic (errors only; never decorative) ---- */
+  --danger:      #FF6B73;
+  --danger-soft: rgba(255, 107, 115, .12);
+
+  /* ---- render defaults (what the GPU draws; user-editable swatches) ---- */
+  --ink:        #E6E4DF;  /* warm paper-white: reads as material, not UI text */
+  --ink-shadow: #747069;  /* duotone shadow ink (lifted from #5C5953 so low-key photos keep shadow detail) */
+  --paper:      #0B0B0C;
+
+  /* duotone tone steps (5 levels of ink mixed toward shadow ink) */
+  --k1: color-mix(in oklab, var(--ink) 0%,   var(--ink-shadow));
+  --k2: color-mix(in oklab, var(--ink) 30%,  var(--ink-shadow));
+  --k3: color-mix(in oklab, var(--ink) 55%,  var(--ink-shadow));
+  --k4: color-mix(in oklab, var(--ink) 78%,  var(--ink-shadow));
+  --k5: var(--ink);
+
+  /* transparent-background checker (export preview only) */
+  --chk-a: #0C0D0E;
+  --chk-b: #131416;
+
+  /* ---- type ---- */
+  --sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --fs-10: 10px;   /* ruler numerals, status keys (caps)            floor  */
+  --fs-11: 11px;   /* section heads (mono caps), kbd, status values         */
+  --fs-12: 12px;   /* values, hints, meta, sub-labels                       */
+  --fs-13: 13px;   /* UI body, control labels, buttons                      */
+  --fs-14: 14px;   /* wordmark, timecode                                     */
+  --fs-18: 18px;   /* Columns readout                                         */
+  --fs-24: 24px;   /* export pixel readout                                    */
+  --fs-40: 40px;   /* start headline (28px on phone)                          */
+
+  /* ---- spacing (4/8) ---- */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 40px; --s8: 48px;
+
+  /* ---- radii ---- */
+  --r-xs: 2px;     /* ruler marks, playhead flag */
+  --r-sm: 3px;     /* kbd, chips, swatch chips */
+  --r-md: 4px;     /* buttons, fields, segments, selects */
+  --r-lg: 6px;     /* tiles, cards, drop zone, toasts */
+  --r-sheet: 14px; /* phone bottom sheet (top corners only) */
+
+  /* ---- shell sizes ---- */
+  --h-top: 48px;      /* top bar */
+  --h-bar: 48px;      /* stage header + dock header (aligned) */
+  --h-status: 28px;   /* status bar */
+  --h-ctl: 32px;      /* every control / row: the hit-target floor */
+  --w-dock: 336px;    /* 304px at <= 1280px */
+
+  /* ---- elevation (only popovers, toasts, phone sheet) ---- */
+  --shadow-pop: 0 1px 0 rgba(255,255,255,.03) inset, 0 12px 32px -8px rgba(0,0,0,.7), 0 0 0 1px rgba(0,0,0,.5);
+
+  /* ---- motion ---- */
+  --t-fast: 90ms;     /* hover, press */
+  --t-base: 160ms;    /* toggles, segment underline, tooltip */
+  --t-slow: 240ms;    /* sheet, dock panel swap */
+  --ease-out: cubic-bezier(.2, .7, .2, 1);
+  --ease-in-out: cubic-bezier(.6, 0, .3, 1);
+}
+
+/* ==========================================================================
+   Variant B: "Carbon / Volt"
+   warm carbon surfaces (hue ~75, chroma ~0.005), volt chartreuse accent,
+   neutral-cool render ink.
+   ========================================================================== */
+[data-theme="b"] {
+  --g0: #0B0A08;
+  --g1: #11100D;
+  --g2: #181713;
+  --g3: #201E1A;
+  --g4: #2B2925;
+
+  --line:   #22201C;
+  --line-2: #302E29;
+  --line-3: #43403A;
+
+  --tx-1: #F0EEE8;
+  --tx-2: #AEAA9F;
+  --tx-3: #8E8A7F;
+  --tx-4: #5F5C55;
+
+  --tick:    #393630;
+  --tick-on: #85817A;
+
+  --acc:      #C9F04F;
+  --acc-hi:   #D6F76E;
+  --acc-ink:  #121608;
+  --acc-soft: rgba(201, 240, 79, .12);
+  --acc-line: rgba(201, 240, 79, .55);
+
+  --danger:      #FF6B6B;
+  --danger-soft: rgba(255, 107, 107, .12);
+
+  --ink:        #E4E7E8;
+  --ink-shadow: #6D7274;
+  --paper:      #0A0B0B;
+
+  --chk-a: #0D0D0C;
+  --chk-b: #141412;
+}

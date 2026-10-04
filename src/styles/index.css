@@ -1,0 +1,10 @@
+/* Stylesheet entry: tokens first, then base, kit, and the per-area component styles. */
+@import './tokens.css';
+@import './base.css';
+@import './kit.css';
+@import './shell.css';
+@import './stage.css';
+@import './dock.css';
+@import './transport.css';
+@import './export.css';
+@import './start.css';

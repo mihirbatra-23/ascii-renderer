@@ -1,0 +1,82 @@
+/* App shell: grid, top bar, dock frame, status bar, phone layout (design spec §2). */
+
+/* ---------- shell grid ---------- */
+.app{display:grid;grid-template-columns:minmax(0,1fr) var(--w-dock);grid-template-rows:var(--h-top) minmax(0,1fr) var(--h-status);height:100vh;height:100dvh;min-height:640px;overflow:hidden}
+.top{grid-column:1/-1;grid-row:1}
+.stage{grid-column:1;grid-row:2;position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--g0)}
+.stage-main{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+.dock{grid-column:2;grid-row:2;display:flex;flex-direction:column;min-height:0;background:var(--g1);border-left:1px solid var(--line)}
+.status{grid-column:1/-1;grid-row:3}
+
+/* dock panel swap (Adjust <-> Export): cross-fade with an 8px slide */
+.dock-panel{flex:1;min-height:0;display:flex;flex-direction:column;animation:panel-in var(--t-slow) var(--ease-in-out)}
+@keyframes panel-in{from{opacity:0;transform:translateX(var(--slide))}}
+
+/* ---------- top bar ---------- */
+.top{display:flex;align-items:center;gap:var(--s3);padding:0 var(--s3) 0 var(--s4);background:var(--g1);border-bottom:1px solid var(--line);min-width:0}
+.wm{display:flex;align-items:center;gap:var(--s2);text-decoration:none;color:var(--tx-1);white-space:nowrap;border-radius:var(--r-sm)}
+.wm-a{font:600 12px/1 var(--mono);letter-spacing:.08em;padding:4px 5px 4px 6px;border:1px solid var(--line-3);border-radius:var(--r-sm)}
+.wm-b{font:500 var(--fs-14)/1 var(--sans);letter-spacing:-.01em}
+.src{display:flex;align-items:center;gap:var(--s2);min-width:0;color:var(--tx-3)}
+.src-name{color:var(--tx-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.src-meta{font:var(--fs-12)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-3);white-space:nowrap;margin-left:var(--s1)}
+.src-meta b{font-weight:400;color:var(--tx-2)}
+.dotsep{display:inline-block;width:3px;height:3px;border-radius:1px;background:var(--tx-4);margin:0 7px 2px;vertical-align:middle}
+.acts{display:flex;align-items:center;gap:var(--s2)}
+
+/* ---------- status bar ---------- */
+.status{display:flex;align-items:stretch;height:var(--h-status);padding:0 var(--s1);background:var(--g1);border-top:1px solid var(--line);font:var(--fs-11)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-3);white-space:nowrap;overflow:hidden}
+.status .it{display:flex;align-items:center;gap:6px;padding:0 10px;border-right:1px solid var(--line)}
+.status .it.end{border-right:0;border-left:1px solid var(--line)}
+.status .k{font-size:var(--fs-10);letter-spacing:.08em;text-transform:uppercase;color:var(--tx-3)}
+.status .v{color:var(--tx-2)}
+.status .v.hi{color:var(--tx-1)}
+.status .dot{width:6px;height:6px;border-radius:1px;background:var(--tx-2)}
+.status .dot.on{background:var(--acc)}
+.status .i{width:12px;height:12px}
+.status .sp{border:0}
+
+/* ---------- dock frame: sticky header, scrolling body, optional sticky footer ---------- */
+.dh{height:var(--h-bar);flex:none;display:flex;align-items:center;gap:var(--s2);padding:0 var(--s2) 0 var(--s4);border-bottom:1px solid var(--line)}
+.dh h2{margin:0;font-size:var(--fs-13);font-weight:600;letter-spacing:-.005em;flex:1;display:flex;align-items:center;gap:var(--s2)}
+.dh h2 small{font:var(--fs-12)/1 var(--mono);font-weight:400;color:var(--tx-3)}
+.dh kbd{margin-right:8px}
+.db{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
+.df{flex:none;display:flex;align-items:center;gap:var(--s2);min-height:var(--h-bar);padding:var(--s2) var(--s2) var(--s2) var(--s4);border-top:1px solid var(--line);background:var(--g1)}
+.df .hint{margin:0;flex:1}
+
+/* ---------- phone: mode strip under the top bar ---------- */
+.mstrip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--s1);padding:var(--s2) var(--s3);border-bottom:1px solid var(--line);background:var(--g1)}
+.mstrip .mode{height:52px;gap:6px;border-radius:var(--r-md)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1280px){
+  :root{--w-dock:304px}
+  .src-meta .opt{display:none}
+  .status .opt{display:none}
+}
+@media (max-width:1100px){
+  .btn .lbl-opt{display:none}
+  .top .btn.gh{width:var(--h-ctl);padding:0}
+}
+@media (max-width:640px){
+  .app{display:flex;flex-direction:column;height:100vh;height:100dvh;min-height:0;position:relative}
+  .top{flex:none;height:var(--h-top);padding:0 var(--s2) 0 var(--s4)}
+  .stage{flex:none;height:auto}
+  .stage-main{flex:none}
+  .status,.src{display:none!important}
+  .dock{position:absolute;left:0;right:0;bottom:0;height:var(--sheet-h,47%);border-left:0;border-top:1px solid var(--line-2);border-radius:var(--r-sheet) var(--r-sheet) 0 0;box-shadow:0 -12px 32px rgba(0,0,0,.5);z-index:5;transition:height var(--t-slow) var(--ease-out)}
+  .dock.is-dragging{transition:none}
+  /* 12px in the layout like the board; the ::after reaches 12px above the sheet edge so the drag target is 24px tall
+     (not over a clip's timeline, which ends right at the sheet edge) */
+  .grab{display:block;flex:none;position:relative;width:100%;height:12px;margin:0;padding:0;border:0;background:transparent;cursor:grab;touch-action:none}
+  .grab::before{content:"";position:absolute;left:50%;top:8px;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:var(--line-3)}
+  .grab::after{content:"";position:absolute;left:0;right:0;top:-12px;bottom:0}
+  .app:has(.tp) .grab::after{top:0}
+  .grab:focus-visible{outline-offset:-2px;border-radius:var(--r-sheet) var(--r-sheet) 0 0}
+  .dh{height:40px;border-bottom:0}
+  /* sheet tabs: .db[data-tab] shows only the sections tagged with that tab (default: adjust) */
+  .db .sec[data-tab]{display:none}
+  .db:not([data-tab]) .sec[data-tab~="adjust"],.db[data-tab="adjust"] .sec[data-tab~="adjust"],.db[data-tab="glyphs"] .sec[data-tab~="glyphs"],.db[data-tab="color"] .sec[data-tab~="color"]{display:block}
+  .df{padding:var(--s3) var(--s4) calc(var(--s3) + env(safe-area-inset-bottom))}
+}

@@ -1,0 +1,80 @@
+/* Stage components: header, loading meter, probe, caption, export dimension lines, split compare,
+   drag-over. The live viewport layout (art area, frame, rulers) is in src/ui/stage/stage.css. */
+
+/* ---------- stage header ---------- */
+.sbar{height:var(--h-bar);flex:none;display:flex;align-items:center;gap:var(--s2);padding:0 var(--s4);border-bottom:1px solid var(--line);background:var(--g0)}
+.sbar .lbl{font:var(--fs-12)/1 var(--mono);color:var(--tx-3);margin-left:var(--s2)}
+.zoom{display:flex;align-items:center;height:var(--h-ctl);border:1px solid var(--line-2);border-radius:var(--r-md);overflow:hidden;background:var(--g1)}
+.zoom button{width:30px;height:100%;border:0;background:transparent;color:var(--tx-2);display:grid;place-items:center;transition:background var(--t-fast),color var(--t-fast)}
+.zoom button:hover{background:var(--g2);color:var(--tx-1)}
+.zoom button:focus-visible{outline-offset:-2px}
+.zoom button:disabled{color:var(--tx-4);background:transparent;cursor:not-allowed}
+.zoom output{min-width:56px;height:100%;border-left:1px solid var(--line-2);border-right:1px solid var(--line-2);display:grid;place-items:center;font:var(--fs-12)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-1)}
+
+/* first-frame loading: a 2px indeterminate meter under the stage header */
+.loadbar{position:absolute;left:0;right:0;top:0;height:2px;overflow:hidden;pointer-events:none;z-index:3}
+.loadbar::after{content:"";position:absolute;top:0;bottom:0;left:0;width:25%;background:var(--acc);animation:loadbar 1.2s linear infinite}
+@keyframes loadbar{from{transform:translateX(-100%)}to{transform:translateX(400%)}}
+
+/* DOM ASCII art (start-screen sample tiles): exactly cols x rows cells. Geist Mono advance = .6em, so fs = cw/.6 and lh = 2cw */
+.art{display:block;margin:0;width:calc(var(--cols) * var(--cw));height:calc(var(--rows) * var(--lh));font:400 var(--fs)/var(--lh) var(--mono);letter-spacing:0;color:var(--ink);background:var(--paper);white-space:pre;overflow:hidden;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;box-shadow:0 0 0 1px var(--line-2);user-select:text}
+.art i{font-style:normal}
+.art .k1{color:var(--k1)}.art .k2{color:var(--k2)}.art .k3{color:var(--k3)}.art .k4{color:var(--k4)}.art .k5{color:var(--k5)}
+
+/* export preview of a transparent background (spec §4.4): a checker at the grid rect, under the
+   canvas (which then draws transparent paper); placed by transform like the frame */
+.chk{position:absolute;left:0;top:0;pointer-events:none;will-change:transform;background:repeating-conic-gradient(var(--chk-a) 0 25%,var(--chk-b) 0 50%) 0 0/16px 16px}
+
+/* cell probe: outline + tag are transform-only overlay layers */
+.probe{position:absolute;left:0;top:0;box-shadow:0 0 0 1px var(--acc);pointer-events:none;will-change:transform}
+.tag{position:absolute;left:0;top:0;display:flex;align-items:center;gap:8px;height:24px;padding:0 8px;font:var(--fs-11)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-2);background:var(--g1);border:1px solid var(--line-2);border-radius:var(--r-sm);white-space:nowrap;pointer-events:none;box-shadow:var(--shadow-pop);will-change:transform}
+.tag b{color:var(--tx-1);font-weight:500}
+.tag .gl{display:inline-grid;place-items:center;min-width:16px;height:16px;padding:0 3px;border-radius:2px;background:var(--g3);color:var(--tx-1)}
+.probe,.tag{animation:fade-in var(--t-fast) linear 80ms both}
+/* the probe hides while any slider is dragged or value scrubbed (kit sets html[data-adjusting]) */
+html[data-adjusting] .probe,html[data-adjusting] .tag,html[data-adjusting] .ruler .mk{visibility:hidden}
+
+/* caption under the frame */
+.cap{position:absolute;left:0;top:0;display:flex;gap:16px;margin:0;font:var(--fs-11)/16px var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-3);white-space:nowrap;overflow:hidden;pointer-events:none}
+.cap b{font-weight:400;color:var(--tx-2)}
+.cap .ok{display:inline-flex;align-items:center;gap:6px;color:var(--tx-2)}
+.cap .ok .i{width:12px;height:12px}
+.cap .warn{pointer-events:auto}
+.cap .warn .i{color:var(--danger)}
+.cap .r{margin-left:auto}
+
+/* export dimension lines (neutral technical drawing; accent is reserved for the Download action) */
+.dim{position:absolute;left:0;top:0;color:var(--tx-3);pointer-events:none;will-change:transform}
+.dim.w{height:9px;border-left:1px solid var(--tx-3);border-right:1px solid var(--tx-3)}
+.dim.w::before{content:"";position:absolute;left:0;right:0;top:4px;border-top:1px solid var(--tx-3)}
+.dim.h{width:9px;border-top:1px solid var(--tx-3);border-bottom:1px solid var(--tx-3)}
+.dim.h::before{content:"";position:absolute;top:0;bottom:0;left:4px;border-left:1px solid var(--tx-3)}
+.dim span{position:absolute;font:500 var(--fs-11)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-1);background:var(--g0);padding:2px 8px;white-space:nowrap}
+.dim.w span{left:50%;top:-1px;transform:translateX(-50%)}
+.dim.h span{top:50%;left:-4px;transform:translate(-50%,-50%) rotate(-90deg);padding:2px 8px}
+
+/* split compare: the engine draws the source left of the split; these are the divider, handle and chips */
+.split{position:absolute;inset:0;pointer-events:none}
+.split .div{position:absolute;left:0;top:0;width:1px;margin-left:-.5px;background:var(--tx-1);will-change:transform}
+.split .knob{position:absolute;left:0;top:0;width:32px;height:32px;margin:-16px 0 0 -16px;padding:0;border-radius:50%;background:var(--g1);border:1px solid var(--tx-1);display:grid;place-items:center;color:var(--tx-1);pointer-events:auto;cursor:ew-resize;touch-action:none;box-shadow:var(--shadow-pop);will-change:transform}
+.split .knob{transition:background var(--t-fast)}
+.split .knob:hover{background:var(--g3)}
+.split .knob:focus-visible{outline-offset:2px}
+.chip{position:absolute;top:0;height:24px;display:flex;align-items:center;gap:6px;padding:0 8px;font:var(--fs-11)/1 var(--mono);color:var(--tx-1);background:color-mix(in srgb,var(--g1) 88%,transparent);border:1px solid var(--line-2);border-radius:var(--r-sm);pointer-events:none;white-space:nowrap}
+.chip.l{left:0}
+.chip em{font-style:normal;color:var(--tx-3)}
+
+/* editor drag-over: dashed accent frame 10px in, "Drop to replace …" pill */
+.drop-ov{position:absolute;inset:10px;z-index:30;display:grid;place-items:center;border:1px dashed var(--acc);border-radius:var(--r-lg);background:color-mix(in srgb,var(--g0) 70%,transparent);pointer-events:none;animation:fade-in var(--t-fast) linear}
+.drop-ov .pill{display:flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:var(--r-md);background:var(--g1);border:1px solid var(--line-2);font-size:var(--fs-13);color:var(--tx-1)}
+
+/* phone readout under the preview */
+.pstat{display:flex;justify-content:center;gap:var(--s3);padding:var(--s2) 0 0;font:var(--fs-11)/16px var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-3)}
+.pstat b{font-weight:400;color:var(--tx-2)}
+
+@media (max-width:640px){
+  .sbar,.cap,.dim{display:none!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .loadbar::after{animation:none;width:100%;opacity:.5}
+}

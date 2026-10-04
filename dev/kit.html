@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="data:," />
+    <title>Components and states</title>
+    <style>
+      /* Documentation-only layout for the kit sheet (mirrors the design board a-states). */
+      body { height: auto; }
+      #root { height: auto; }
+      .sb { max-width: 1360px; margin: 0 auto; padding: 40px 40px 64px; }
+      .sb-h { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+      .sb-h h1 { margin: 12px 0 0; font: 500 28px/32px var(--sans); letter-spacing: -.02em; }
+      .sb-h p { margin: 8px 0 0; max-width: 560px; font-size: var(--fs-13); line-height: 20px; color: var(--tx-2); }
+      .toks { display: grid; grid-template-columns: repeat(8, 72px); gap: 8px; }
+      .tok { display: grid; gap: 6px; font: var(--fs-10)/1 var(--mono); color: var(--tx-3); }
+      .tok i { display: block; height: 32px; border-radius: var(--r-sm); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }
+      .tok b { font-weight: 400; color: var(--tx-2); text-transform: uppercase; }
+      .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
+      .card { border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--g1); padding: 16px 20px 20px; min-width: 0; }
+      .card.span2 { grid-column: span 2; }
+      .card > h2 { display: flex; align-items: center; justify-content: space-between; margin: 0 0 16px; font: 500 var(--fs-11)/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--tx-3); }
+      .card > h2 span { font: var(--fs-12)/1 var(--sans); letter-spacing: 0; text-transform: none; color: var(--tx-3); }
+      .spec-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 20px 24px; }
+      .spec { display: grid; justify-items: start; gap: 8px; min-width: 0; }
+      .spec > small { font: var(--fs-11)/1 var(--mono); color: var(--tx-3); }
+      .spec.w { width: 100%; }
+      .spec.half { width: calc(50% - 12px); }
+      .note { margin: 16px 0 0; font-size: var(--fs-12); line-height: 18px; color: var(--tx-3); }
+      .note b { font-weight: 500; color: var(--tx-2); }
+      .dockbox { width: 304px; padding: 4px 0; background: var(--g1); }
+
+      /* simulated interaction states (documentation only) */
+      .btn.is-hover { background: var(--g3); border-color: var(--line-3); }
+      .btn.ghost.is-hover { background: var(--g2); border-color: transparent; color: var(--tx-1); }
+      .btn.primary.is-hover { background: var(--acc-hi); border-color: var(--acc-hi); }
+      .btn.is-active { background: var(--g4); }
+      .btn.primary.is-active { filter: brightness(.92); }
+      .is-focus { outline: 2px solid var(--acc); outline-offset: 2px; }
+      .seg button.is-hover { color: var(--tx-1); background: var(--g2); }
+      .seg button.is-focus { outline-offset: -2px; }
+      .trk.is-focus { outline: none; }
+      .trk.is-hover .th { height: 20px; margin-top: -10px; }
+      .trk.is-focus .th { background: var(--acc); box-shadow: 0 0 0 2px var(--g1), 0 0 0 4px var(--acc-line); }
+      .trk.is-focus .fill { background: var(--acc); }
+      .val.is-hover { border-color: var(--line-3); background: var(--g3); }
+      .mode.is-hover { background: var(--g3); color: var(--tx-1); }
+      .mode.is-focus { outline-offset: 1px; }
+      .sw.is-focus { outline: 2px solid var(--acc); outline-offset: 2px; }
+      .menu.static { position: static; }
+
+      .pop { width: 240px; padding: 12px; border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--g2); box-shadow: var(--shadow-pop); }
+      .pop .pk { height: 120px; border-radius: var(--r-md); background: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, hsl(32 25% 60%)); }
+      .pop .hue { height: 10px; margin: 10px 0; border-radius: 2px; background: linear-gradient(90deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00); }
+      .mini-dz { position: relative; width: 100%; height: 150px; border: 1px solid var(--line-2); border-radius: var(--r-lg); background: radial-gradient(circle at 1px 1px, var(--line-2) 1px, transparent 1.5px) 11px 7px/16px 16px, var(--g0); display: grid; place-items: center; text-align: center; }
+      .mini-dz.over { border-color: var(--acc); box-shadow: inset 0 0 0 1px var(--acc); background: radial-gradient(circle at 1px 1px, var(--acc-line) 1px, transparent 1.5px) 11px 7px/16px 16px, color-mix(in srgb, var(--acc) 4%, var(--g0)); }
+      .mini-dz .t { font: 500 15px/20px var(--sans); color: var(--tx-1); }
+      .mini-dz .s { margin-top: 4px; font: var(--fs-12)/1 var(--mono); color: var(--tx-3); }
+      .mini-dz.over .s { color: var(--tx-2); }
+      .stage-over { position: relative; width: 100%; height: 150px; border-radius: var(--r-lg); background: var(--g0); overflow: hidden; border: 1px solid var(--line-2); }
+      .stage-over pre { margin: 0; font: 5px/6px var(--mono); color: var(--k3); opacity: .35; white-space: pre; }
+      .buf { width: 100%; padding: 12px 16px; border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--g0); }
+      .buf .strip { height: 24px; }
+      .phones { display: flex; gap: 24px; }
+      .ph-mini { position: relative; width: 150px; height: 300px; border: 1px solid var(--line-3); border-radius: 18px; background: var(--g0); overflow: hidden; }
+      .ph-mini .pv { position: absolute; left: 10px; right: 10px; top: 46px; height: 72px; border-radius: 3px; background: var(--paper); box-shadow: 0 0 0 1px var(--line-2); display: grid; place-items: center; font: var(--fs-10)/1 var(--mono); color: var(--tx-3); }
+      .ph-mini .tb { position: absolute; left: 0; right: 0; top: 0; height: 20px; border-bottom: 1px solid var(--line); background: var(--g1); }
+      .ph-mini .ms { position: absolute; left: 0; right: 0; top: 20px; height: 18px; border-bottom: 1px solid var(--line); background: var(--g1); }
+      .ph-mini .sh2 { position: absolute; left: 0; right: 0; bottom: 0; border-top: 1px solid var(--line-3); border-radius: 12px 12px 0 0; background: var(--g1); }
+      .ph-mini .sh2::before { content: ""; position: absolute; top: 5px; left: 50%; width: 22px; height: 3px; margin-left: -11px; border-radius: 2px; background: var(--line-3); }
+      .ph-mini .sh2 i { position: absolute; left: 10px; right: 10px; height: 6px; border-radius: 2px; background: var(--g3); }
+      .ph-cap { margin-top: 8px; font: var(--fs-11)/16px var(--mono); color: var(--tx-3); }
+      .ph-cap b { font-weight: 400; color: var(--tx-2); }
+      .probe-demo { position: relative; width: 100%; height: 120px; border-radius: var(--r-lg); background: var(--paper); box-shadow: 0 0 0 1px var(--line-2); overflow: hidden; }
+      .probe-demo pre { margin: 0; padding: 8px 10px; font: 10px/12px var(--mono); color: var(--k4); white-space: pre; }
+      .legend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+      .legend div { font-size: var(--fs-12); line-height: 18px; color: var(--tx-3); }
+      .legend b { display: block; font: 500 var(--fs-11)/16px var(--mono); color: var(--tx-2); }
+      .tip.static { position: static; animation: none; }
+      .live { display: grid; gap: 4px; width: 304px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./kit.tsx"></script>
+  </body>
+</html>

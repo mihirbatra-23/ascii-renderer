@@ -1,0 +1,76 @@
+/* Start screen (design spec §4.1): hero, drop zone with ruler strip, sample tiles, footer. */
+
+.spg{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:var(--g0)}
+.spg>.top{flex:none;height:var(--h-top)}
+.start{flex:1;width:100%;max-width:1040px;margin:0 auto;padding:44px 0 32px}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 360px;align-items:end;gap:var(--s6)}
+.hero h1{margin:0;font:500 var(--fs-40)/44px var(--sans);letter-spacing:-.03em;color:var(--tx-1)}
+.hero h1 .type{font:500 38px/44px var(--mono);letter-spacing:-.04em;color:var(--ink)}
+.hero h1 .cur{display:inline-block;width:.55em;height:4px;margin-left:2px;background:var(--acc);vertical-align:baseline}
+.hero p{margin:0 0 4px;font-size:var(--fs-14);line-height:22px;color:var(--tx-2)}
+.dz{position:relative;margin-top:var(--s6);height:280px;border:1px solid var(--line-2);border-radius:var(--r-lg);background:
+   radial-gradient(circle at 1px 1px,var(--line-2) 1px,transparent 1.5px) 11px 23px/16px 16px,var(--g0);overflow:hidden}
+.dz-r{position:absolute;left:0;right:0;top:0;height:22px;border-bottom:1px solid var(--line);background:
+    linear-gradient(90deg,var(--tick-on) 1px,transparent 1px) 12px 100%/64px 6px repeat-x,
+    linear-gradient(90deg,var(--tick) 1px,transparent 1px) 12px 100%/6.4px 3px repeat-x,var(--g1);
+  font:var(--fs-10)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-3)}
+.dz-r span{position:absolute;top:5px;transform:translateX(4px)}
+.dz-in{position:absolute;inset:22px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 var(--s5)}
+.dz-ic{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--line-3);border-radius:var(--r-lg);background:var(--g2);color:var(--tx-1)}
+.dz h2{margin:var(--s4) 0 0;font:500 19px/24px var(--sans);letter-spacing:-.01em}
+.dz .sub{margin:6px 0 0;font-size:var(--fs-13);color:var(--tx-2)}
+.dz-acts{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s5)}
+.dz-acts .or{font:var(--fs-11)/1 var(--mono);color:var(--tx-3);padding:0 var(--s1)}
+.dz-acts .field{width:320px}
+.dz .fmts-l{text-wrap:balance;margin:var(--s4) 0 0;font:var(--fs-11)/1 var(--mono);letter-spacing:.06em;color:var(--tx-3)}
+/* As separate items the line wraps between formats; the dots only sit between items on one line (desktop),
+   so a wrapped phone line never starts with '·'. */
+.dz .fmts-l:has(>span){display:flex;flex-wrap:wrap;justify-content:center;gap:6px 0}
+.dz .fmts-l>span+span::before{content:"·";margin:0 .6em}
+.dz.over{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc);background:radial-gradient(circle at 1px 1px,var(--acc-line) 1px,transparent 1.5px) 11px 23px/16px 16px,color-mix(in srgb,var(--acc) 4%,var(--g0))}
+.dz:not(.over):hover{border-color:var(--line-3)}
+.cm{position:absolute;width:12px;height:12px;border-color:var(--tx-3);border-style:solid;border-width:0}
+.cm.tl{left:-1px;top:22px;border-left-width:1px;border-top-width:0}
+.samples{margin-top:var(--s7)}
+.samples .sh{margin-bottom:var(--s3)}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s4)}
+.tile{display:block;text-decoration:none;color:inherit;border:1px solid var(--line-2);border-radius:var(--r-lg);background:var(--g1);overflow:hidden;transition:border-color var(--t-fast)}
+.tile:hover{border-color:var(--line-3)}
+.tile:focus-visible{outline-offset:2px}
+button.tile{width:100%;padding:0;text-align:left;font:inherit}
+.tile .art{--cols:72;--rows:20;--cw:4.6667px;--lh:9.3333px;--fs:7.7778px;box-shadow:none;border-bottom:1px solid var(--line)}
+.tile-f{display:flex;align-items:center;gap:var(--s2);height:44px;padding:0 var(--s3) 0 var(--s4);color:var(--tx-3)}
+.tile-f .n{color:var(--tx-1);font-weight:500}
+.tile-f .m{margin-left:auto;font:var(--fs-12)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-3)}
+.sfoot{flex:none;display:flex;align-items:center;gap:var(--s4);height:44px;padding:0 var(--s4);border-top:1px solid var(--line);background:var(--g1);font-size:var(--fs-12);color:var(--tx-3)}
+.sfoot .lg{display:flex;align-items:center;gap:6px}
+.sfoot .lg+.lg{margin-left:var(--s2)}
+.sfoot .lock{display:flex;align-items:center;gap:6px;color:var(--tx-2)}
+.sfoot .lock .i{width:14px;height:14px}
+@media (max-width:1100px){.start{max-width:none;padding-left:var(--s5);padding-right:var(--s5)}.hero{grid-template-columns:1fr}.tile .art{--cw:calc((100vw - 48px - 32px) / 3 / 72);--lh:calc(var(--cw) * 2);--fs:calc(var(--cw) / .6)}}
+@media (max-width:640px){
+  .start{padding:var(--s5) var(--s4) var(--s5)}
+  .hero{gap:var(--s3)}
+  .hero h1{font-size:28px;line-height:32px}
+  .hero h1 .type{font-size:27px;line-height:32px}
+  .hero p{font-size:var(--fs-13);line-height:20px}
+  .dz{height:auto;margin-top:var(--s5)}
+  .dz-in{position:relative;inset:auto;padding:var(--s6) var(--s4) var(--s5)}
+  .dz-acts{flex-direction:column;align-items:stretch;width:100%}
+  .dz-acts .or{display:none}
+  .dz-acts .field{width:100%}
+  .dz-acts>.btn{width:100%}
+  .dz .fmts-l{letter-spacing:0;line-height:16px;padding:0 var(--s2)}
+  .dz .fmts-l:has(>span){gap:4px 12px}
+  .dz .fmts-l>span+span::before{content:none}
+  .samples .sh .aux{display:none}
+  .samples{margin-top:var(--s6)}
+  .tiles{grid-template-columns:1fr;gap:var(--s3)}
+  .tile{display:grid;grid-template-columns:120px minmax(0,1fr);align-items:stretch}
+  .tile .art{--cw:1.6667px;--lh:3.3333px;--fs:2.7778px;border-bottom:0;border-right:1px solid var(--line);height:67px}
+  .tile-f{flex-wrap:wrap;height:auto;padding:var(--s3);row-gap:4px;align-content:center}
+  .tile-f .m{margin-left:0;width:100%;order:3}
+  .sfoot{display:none}
+  .top .gh{width:var(--h-ctl);padding:0}
+  .top .gh .lbl-opt{display:none}
+}

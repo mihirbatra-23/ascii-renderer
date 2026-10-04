@@ -21,10 +21,8 @@ import {
   defaultParams,
   paramsEqual,
   sanitizeParams,
-  themeColors,
   type ParamKey,
   type ParamSection,
-  type Theme,
 } from './params';
 import { readPersisted, writePersisted } from './persist';
 
@@ -157,10 +155,11 @@ export interface DragInfo {
 }
 
 export interface UiState {
-  theme: Theme;
   sheetTab: SheetTab;
   sheetDetent: SheetDetent;
   shortcutsOpen: boolean;
+  /** The "Close {file}?" confirmation that Back, the wordmark and the phone menu open (shell/LeaveDialog). */
+  leaveOpen: boolean;
   dragOver: DragInfo | null;
   /** Latest polite announcement; `id` changes so repeating the same text is re-announced. */
   announcement: { id: number; text: string };
@@ -206,7 +205,6 @@ export interface AppState {
   setExportUi(patch: Partial<ExportUiState>): void;
   setJob(patch: Partial<JobState>): void;
   setUi(patch: Partial<UiState>): void;
-  setTheme(theme: Theme): void;
   /** Polite screen-reader announcement (mode changes, export start/finish, errors). */
   announce(text: string): void;
 }
@@ -256,13 +254,26 @@ const MAX_USER_PRESETS = 100;
 const SCALES: readonly ExportScale[] = [1, 2, 4];
 
 const saved = readPersisted();
-const initialTheme: Theme = saved.theme === 'b' ? 'b' : 'a';
+
+/** The removed Carbon theme's render colors, which older builds stored as the params' defaults. */
+const CARBON_COLORS = { ink: '#e4e7e8', shadowInk: '#6d7274', paper: '#0a0b0b' } as const;
+
+/**
+ * Stored params from an older build. Its `theme` field is ignored (the next write drops it); a
+ * Carbon user's untouched Carbon ink and paper become today's defaults, customized colors stay.
+ */
+export function loadParams(input: unknown): RenderParams {
+  const defaults = defaultParams();
+  const params = sanitizeParams(input, defaults);
+  const carbon = (Object.keys(CARBON_COLORS) as (keyof typeof CARBON_COLORS)[]).every((k) => params[k] === CARBON_COLORS[k]);
+  return carbon ? { ...params, ink: defaults.ink, shadowInk: defaults.shadowInk, paper: defaults.paper } : params;
+}
 
 /**
  * User presets from storage: named, deduplicated by name (the later one wins, as savePreset does)
  * and capped, each with sanitised params.
  */
-export function loadUserPresets(input: unknown, theme: Theme): UserPreset[] {
+export function loadUserPresets(input: unknown): UserPreset[] {
   if (!Array.isArray(input)) return [];
   const byName = new Map<string, UserPreset>();
   for (const p of input) {
@@ -270,7 +281,7 @@ export function loadUserPresets(input: unknown, theme: Theme): UserPreset[] {
     const name = p.name.trim().slice(0, MAX_PRESET_NAME);
     if (!name) continue;
     byName.delete(name);
-    byName.set(name, { name, params: sanitizeParams(p.params, defaultParams(theme)) });
+    byName.set(name, { name, params: sanitizeParams(p.params, defaultParams()) });
   }
   return [...byName.values()].slice(-MAX_USER_PRESETS);
 }
@@ -329,9 +340,9 @@ export const useStore = create<AppState>()(
     }
 
     return {
-      params: sanitizeParams(saved.params, defaultParams(initialTheme)),
+      params: loadParams(saved.params),
       history: { past: [], future: [] },
-      userPresets: loadUserPresets(saved.userPresets, initialTheme),
+      userPresets: loadUserPresets(saved.userPresets),
       media: { status: 'empty' },
       view: { ...INITIAL_VIEW, rulers: saved.rulers !== false },
       playback: INITIAL_PLAYBACK,
@@ -339,10 +350,10 @@ export const useStore = create<AppState>()(
       exportUi: loadExportUi(saved.exportUi),
       job: IDLE_JOB,
       ui: {
-        theme: initialTheme,
         sheetTab: 'adjust',
         sheetDetent: 'half',
         shortcutsOpen: false,
+        leaveOpen: false,
         dragOver: null,
         announcement: { id: 0, text: '' },
       },
@@ -372,7 +383,7 @@ export const useStore = create<AppState>()(
       },
 
       resetParams(section) {
-        const defaults = defaultParams(get().ui.theme);
+        const defaults = defaultParams();
         if (!section) return changeParams(defaults);
         const patch: Partial<RenderParams> = {};
         for (const key of PARAM_SECTIONS[section]) Object.assign(patch, { [key]: defaults[key] });
@@ -407,15 +418,6 @@ export const useStore = create<AppState>()(
       setJob: (patch) => set({ job: { ...get().job, ...patch } }),
       setUi: (patch) => set({ ui: { ...get().ui, ...patch } }),
 
-      setTheme(theme) {
-        const { ui, params } = get();
-        if (ui.theme === theme) return;
-        // Untouched render colours follow the theme's ink and paper; customised ones are kept.
-        const prev = themeColors(ui.theme);
-        const untouched = params.ink === prev.ink && params.shadowInk === prev.shadowInk && params.paper === prev.paper;
-        set({ ui: { ...ui, theme }, ...(untouched ? { params: { ...params, ...themeColors(theme) } } : {}) });
-      },
-
       announce(text) {
         set({ ui: { ...get().ui, announcement: { id: ++announceId, text } } });
       },
@@ -426,10 +428,10 @@ export const useStore = create<AppState>()(
 // ---------------------------------------------------------------- persistence (save)
 
 useStore.subscribe(
-  (s) => [s.params, s.ui.theme, s.exportUi, s.view.rulers, s.userPresets] as const,
-  ([params, theme, exportUi, rulers, userPresets]) => {
+  (s) => [s.params, s.exportUi, s.view.rulers, s.userPresets] as const,
+  ([params, exportUi, rulers, userPresets]) => {
     const { scale, motionScale, margin, transparent, pixelSnap, svgText, includeAudio } = exportUi;
-    writePersisted({ params, theme, rulers, userPresets, exportUi: { scale, motionScale, margin, transparent, pixelSnap, svgText, includeAudio } });
+    writePersisted({ params, rulers, userPresets, exportUi: { scale, motionScale, margin, transparent, pixelSnap, svgText, includeAudio } });
   },
   { equalityFn: (a, b) => a.every((v, i) => v === b[i]) },
 );

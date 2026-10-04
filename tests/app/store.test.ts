@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { defaultParams, sanitizeParams } from '../../src/state/params';
-import { describeParamChange, INITIAL_EXPORT_UI, loadExportUi, loadUserPresets } from '../../src/state/store';
+import { describeParamChange, INITIAL_EXPORT_UI, loadExportUi, loadParams, loadUserPresets } from '../../src/state/store';
 
 /** Everything restored from localStorage is validated, so the UI never promises what the file won't be. */
 describe('restoring persisted state', () => {
@@ -38,16 +38,22 @@ describe('restoring persisted state', () => {
         { name: 'Night', params: { contrast: 1.6, columns: -3, edges: true } },
         { name: 'x'.repeat(200), params: 'nope' },
       ],
-      'a',
     );
     expect(presets.map((p) => p.name)).toEqual(['Night', 'x'.repeat(60)]);
-    expect(presets[0].params).toEqual({ ...defaultParams('a'), contrast: 1.6, columns: 40, edges: true });
-    expect(presets[1].params).toEqual(defaultParams('a'));
-    expect(loadUserPresets({ not: 'an array' }, 'a')).toEqual([]);
+    expect(presets[0].params).toEqual({ ...defaultParams(), contrast: 1.6, columns: 40, edges: true });
+    expect(presets[1].params).toEqual(defaultParams());
+    expect(loadUserPresets({ not: 'an array' })).toEqual([]);
+  });
+
+  it('moves a Carbon user’s untouched render colors to the defaults and keeps customized ones', () => {
+    const defaults = defaultParams();
+    const carbon = { ink: '#e4e7e8', shadowInk: '#6d7274', paper: '#0a0b0b' };
+    expect(loadParams({ ...defaults, ...carbon, contrast: 1.4 })).toEqual({ ...defaults, contrast: 1.4 });
+    expect(loadParams({ ...defaults, ...carbon, ink: '#ff0000' })).toEqual({ ...defaults, ...carbon, ink: '#ff0000' });
   });
 
   it('validates the edge layer like every other parameter', () => {
-    const base = defaultParams('a');
+    const base = defaultParams();
     expect(sanitizeParams({ edges: true, edgeThreshold: 0.333 }, base)).toMatchObject({ edges: true, edgeThreshold: 0.33 });
     expect(sanitizeParams({ edges: 1, edgeThreshold: Number.NaN }, base)).toMatchObject({ edges: base.edges, edgeThreshold: base.edgeThreshold });
     expect(sanitizeParams({ edgeThreshold: -2 }, base).edgeThreshold).toBe(0);
@@ -55,7 +61,7 @@ describe('restoring persisted state', () => {
 });
 
 describe('undo announcements', () => {
-  const base = defaultParams('a');
+  const base = defaultParams();
   it('names what changed', () => {
     expect(describeParamChange(base, { ...base, contrast: 1.3 })).toBe('Contrast');
     expect(describeParamChange(base, { ...base, contrast: 1.3, gamma: 0.8 })).toBe('Contrast and Gamma');

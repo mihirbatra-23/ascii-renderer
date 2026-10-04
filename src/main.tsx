@@ -9,13 +9,9 @@ import '@fontsource/geist-mono/500.css';
 import '@fontsource/geist-mono/600.css';
 import './styles/index.css';
 import App from './App';
-import { applyTheme } from './app/hooks';
 import { applySettingsFromUrl } from './app/permalink';
 import { prepareEngineWhenIdle } from './app/engineHost';
-import { useStore } from './state/store';
 
-// Before the first paint, so variant B never flashes variant A.
-applyTheme(useStore.getState().ui.theme);
 // A settings link wins over the stored params, and the editor starts in its look.
 applySettingsFromUrl();
 

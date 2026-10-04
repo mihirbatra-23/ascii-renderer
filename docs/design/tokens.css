@@ -1,10 +1,5 @@
 /* ==========================================================================
-   ASCII Renderer: design tokens
-   Variant A "Graphite / Signal"  -> :root (default)
-   Variant B "Carbon / Volt"      -> [data-theme="b"]
-   The two variants share every layout, component, size and type token.
-   They differ in exactly three groups: surface temperature (g*, line*, tx*, tick*),
-   accent hue (acc*), and render ink/paper (ink*, paper). Nothing else.
+   ASCII Renderer: design tokens ("Graphite / Signal", the app's only theme)
    ========================================================================== */
 
 :root {
@@ -97,45 +92,4 @@
   --t-slow: 240ms;    /* sheet, dock panel swap */
   --ease-out: cubic-bezier(.2, .7, .2, 1);
   --ease-in-out: cubic-bezier(.6, 0, .3, 1);
-}
-
-/* ==========================================================================
-   Variant B: "Carbon / Volt"
-   warm carbon surfaces (hue ~75, chroma ~0.005), volt chartreuse accent,
-   neutral-cool render ink.
-   ========================================================================== */
-[data-theme="b"] {
-  --g0: #0B0A08;
-  --g1: #11100D;
-  --g2: #181713;
-  --g3: #201E1A;
-  --g4: #2B2925;
-
-  --line:   #22201C;
-  --line-2: #302E29;
-  --line-3: #43403A;
-
-  --tx-1: #F0EEE8;
-  --tx-2: #AEAA9F;
-  --tx-3: #8E8A7F;
-  --tx-4: #5F5C55;
-
-  --tick:    #393630;
-  --tick-on: #85817A;
-
-  --acc:      #C9F04F;
-  --acc-hi:   #D6F76E;
-  --acc-ink:  #121608;
-  --acc-soft: rgba(201, 240, 79, .12);
-  --acc-line: rgba(201, 240, 79, .55);
-
-  --danger:      #FF6B6B;
-  --danger-soft: rgba(255, 107, 107, .12);
-
-  --ink:        #E4E7E8;
-  --ink-shadow: #6D7274;
-  --paper:      #0A0B0B;
-
-  --chk-a: #0D0D0C;
-  --chk-b: #141412;
 }

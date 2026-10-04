@@ -31,7 +31,7 @@ export interface ToneRun {
 export type Thumb = readonly (readonly ToneRun[])[];
 
 // Thumbnails are a fixed showcase, so they use the app defaults, not the user's current params.
-const PARAMS = { ...defaultParams('a'), columns: THUMB_COLS };
+const PARAMS = { ...defaultParams(), columns: THUMB_COLS };
 
 const CACHE_KEY = 'ascii-renderer:thumbs';
 /** Everything the stored thumbnails were made from; any difference discards them. */

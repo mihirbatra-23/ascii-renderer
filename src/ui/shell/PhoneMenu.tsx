@@ -20,7 +20,6 @@ import { Button, Dialog, IconButton, Segmented, type SegmentedOption } from '../
 import { effectiveCompare, rampCompareBlocked } from '../stage/compare';
 import { fitView, formatZoom, zoomStep, zoomTo } from '../stage/viewActions';
 import { pasteAndOpen } from '../start/openers';
-import ThemeToggle from './ThemeToggle';
 import './PhoneMenu.css';
 
 const VIEWS: readonly SegmentedOption<ViewMode>[] = [
@@ -75,7 +74,7 @@ function Group({ title, aux, children }: { title: string; aux?: string; children
 function EditGroup() {
   const canUndo = useStore(selectCanUndo);
   const canRedo = useStore(selectCanRedo);
-  const atDefaults = useStore((s) => paramsEqual(s.params, defaultParams(s.ui.theme)));
+  const atDefaults = useStore((s) => paramsEqual(s.params, defaultParams()));
   const { undo, redo } = useStore.getState();
   return (
     <Group title="Edit">
@@ -226,10 +225,6 @@ function AppGroup({ onDone }: { onDone(): void }) {
   };
   return (
     <Group title="App">
-      <div className="pm-field">
-        <span>Theme</span>
-        <ThemeToggle />
-      </div>
       <Button icon="keyboard" stretch="wide" onClick={showShortcuts}>
         Keyboard shortcuts
       </Button>

@@ -15,7 +15,7 @@ import { SliderRow, SwitchRow } from '../kit';
 
 type BooleanParamKey = { [K in ParamKey]: RenderParams[K] extends boolean ? K : never }[ParamKey];
 
-const DEFAULTS = { a: defaultParams('a'), b: defaultParams('b') } as const;
+const DEFAULTS = defaultParams();
 
 export const store = () => useStore.getState();
 
@@ -29,7 +29,7 @@ export function commitLive(): void {
 
 export function ParamSlider({ param, label, disabled }: { param: NumericParamKey; label: string; disabled?: boolean }) {
   const value = useStore((s) => s.params[param]);
-  const defaultValue = useStore((s) => DEFAULTS[s.ui.theme][param]);
+  const defaultValue = DEFAULTS[param];
   const { min, max, step, bipolar, format } = NUMERIC_SPECS[param];
   return (
     <SliderRow

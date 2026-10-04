@@ -1,7 +1,0 @@
-/* Theme switch (ThemeToggle.tsx). Each option previews its theme's accent; the values are fixed
-   because only the active theme's tokens are in scope (tokens.css --acc for A and B). */
-.theme-tg .theme-chip{width:8px;height:8px;flex:none;border-radius:2px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
-.theme-tg .theme-chip.a{background:#FF6A2B}
-.theme-tg .theme-chip.b{background:#C9F04F}
-.seg.theme-tg.sm{height:28px}
-.seg.theme-tg.sm button{padding:0 10px;font-size:var(--fs-12)}

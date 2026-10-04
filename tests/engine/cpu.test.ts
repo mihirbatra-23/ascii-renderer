@@ -352,7 +352,7 @@ describe('render quality regressions', () => {
     const levels = measureLevels(img.rgba, img.width, img.height);
     for (const preset of BUILTIN_PRESETS) {
       for (const dither of [preset.params.dither ?? DEFAULT_PARAMS.dither, 0.5]) {
-        const p = { ...defaultParams('a'), ...preset.params, dither, columns: 120 };
+        const p = { ...defaultParams(), ...preset.params, dither, columns: 120 };
         const { snapshot } = run(img, p, levels);
         const { cols, rows } = snapshot;
         let black = 0;
@@ -394,7 +394,7 @@ describe('render quality regressions', () => {
     const levels = measureLevels(rgba, w, w);
     for (const patch of [{}, { invert: true }, { brightness: 0.3 }, { contrast: 0.6 }, { paper: '#f4f1ea', ink: '#151515' }, { autoLevels: false }]) {
       for (const mode of ['shape', 'ramp', 'braille', 'blocks', 'halftone'] as const) {
-        const { snapshot } = run(img, params({ ...defaultParams('a'), mode, columns: 60, ...patch }), levels);
+        const { snapshot } = run(img, params({ ...defaultParams(), mode, columns: 60, ...patch }), levels);
         const at = (fx: number, fy: number) => snapshot.chars[Math.floor(fy * snapshot.rows) * snapshot.cols + Math.floor(fx * snapshot.cols)];
         const label = `${mode} ${JSON.stringify(patch)}`;
         // Corners and the ring's hole are transparent.

@@ -3,9 +3,9 @@
  *
  *   #s=<base64url JSON>      JSON = { v: 1, p: { …params that differ from the defaults } }
  *
- *   encodeSettings(params, theme)    → the hash payload (no '#s=')
- *   decodeSettings(payload, theme)   → full, sanitised params, or null when the payload is unusable
- *   settingsLink(params, theme)      → the shareable URL for the current page
+ *   encodeSettings(params)           → the hash payload (no '#s=')
+ *   decodeSettings(payload)          → full, sanitised params, or null when the payload is unusable
+ *   settingsLink(params)             → the shareable URL for the current page
  *   copySettingsLink()               copies it; shows its own toast and announcement, never rejects
  *   applySettingsFromUrl()           on load and on hashchange: a link wins over the stored params;
  *                                    the hash is removed afterwards so a reload keeps later edits
@@ -17,9 +17,10 @@
  * out of range into the engine.
  */
 import type { RenderParams } from '../engine/types';
-import { defaultParams, paramsEqual, sanitizeParams, type ParamKey, type Theme } from '../state/params';
+import { defaultParams, paramsEqual, sanitizeParams, type ParamKey } from '../state/params';
 import { useStore } from '../state/store';
 import { toast } from '../ui/kit';
+import { formatCombo, shortcutLabel } from './shortcuts';
 
 const PREFIX = '#s=';
 const VERSION = 1;
@@ -38,19 +39,20 @@ interface Payload {
   p: Partial<Record<ParamKey, unknown>>;
 }
 
-/** Only what differs from the theme's defaults, so links stay short and follow future default changes. */
-export function encodeSettings(params: RenderParams, theme: Theme): string {
-  const defaults = defaultParams(theme);
+/** Only what differs from the defaults, so links stay short and follow future default changes. */
+export function encodeSettings(params: RenderParams): string {
+  const defaults = defaultParams();
   const p: Partial<Record<ParamKey, unknown>> = {};
   for (const key of Object.keys(defaults) as ParamKey[]) if (params[key] !== defaults[key]) p[key] = params[key];
   return toBase64Url(JSON.stringify({ v: VERSION, p } satisfies Payload));
 }
 
 /**
- * Full params for a payload: the receiver's defaults (for its theme) with the link's values on top.
+ * Full params for a payload: the defaults with the link's values on top (links made with the removed
+ * Carbon theme carry its ink and paper only if they differed from that theme's defaults).
  * Null for anything that is not a version-1 settings object.
  */
-export function decodeSettings(payload: string, theme: Theme): RenderParams | null {
+export function decodeSettings(payload: string): RenderParams | null {
   let data: unknown;
   try {
     data = JSON.parse(fromBase64Url(payload));
@@ -60,24 +62,24 @@ export function decodeSettings(payload: string, theme: Theme): RenderParams | nu
   if (!data || typeof data !== 'object') return null;
   const { v, p } = data as { v?: unknown; p?: unknown };
   if (v !== VERSION || !p || typeof p !== 'object') return null;
-  return sanitizeParams(p, defaultParams(theme));
+  return sanitizeParams(p, defaultParams());
 }
 
-export function settingsLink(params: RenderParams, theme: Theme): string {
+export function settingsLink(params: RenderParams): string {
   const { origin, pathname, search } = window.location;
-  return `${origin}${pathname}${search}${PREFIX}${encodeSettings(params, theme)}`;
+  return `${origin}${pathname}${search}${PREFIX}${encodeSettings(params)}`;
 }
 
 export async function copySettingsLink(): Promise<void> {
-  const { params, ui } = useStore.getState();
-  const link = settingsLink(params, ui.theme);
+  const { params } = useStore.getState();
+  const link = settingsLink(params);
   try {
     await navigator.clipboard.writeText(link);
   } catch {
     toast({ kind: 'error', icon: 'link', title: 'Couldn’t copy the link', body: 'This browser blocked clipboard access. Allow it for this site, then try again.' });
     return;
   }
-  toast({ kind: 'success', icon: 'link', title: 'Settings link copied', body: 'It opens with these settings. Files are never part of the link.' });
+  toast({ kind: 'success', icon: 'link', title: 'Settings link copied', body: 'The link holds your settings, not your file.' });
 }
 
 /**
@@ -90,7 +92,7 @@ export function applySettingsFromUrl(): boolean {
   if (!hash.startsWith(PREFIX)) return false;
   history.replaceState(history.state, '', `${window.location.pathname}${window.location.search}`);
   const store = useStore.getState();
-  const params = decodeSettings(hash.slice(PREFIX.length), store.ui.theme);
+  const params = decodeSettings(hash.slice(PREFIX.length));
   if (!params) {
     toast({ kind: 'error', icon: 'link', title: 'That settings link can’t be read', body: 'It may be cut off, or made by a newer version. Your settings are unchanged.' });
     return false;
@@ -100,8 +102,8 @@ export function applySettingsFromUrl(): boolean {
   // Said on arrival too, when the start screen has nothing to show the look on yet.
   toast(
     store.media.info
-      ? { kind: 'info', icon: 'link', title: 'Settings from the link applied', body: 'Undo brings back your previous settings.' }
-      : { kind: 'info', icon: 'link', title: 'Look from the link is ready', body: 'Open a file or a sample to see it.' },
+      ? { kind: 'info', icon: 'link', title: 'Applied settings from the link', body: `Undo (${shortcutLabel('edit.undo') || formatCombo('mod+z')}) restores your previous settings.` }
+      : { kind: 'info', icon: 'link', title: 'Settings from the link are ready', body: 'Open a file or sample to see them.' },
   );
   return true;
 }

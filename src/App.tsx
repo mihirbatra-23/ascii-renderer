@@ -10,7 +10,7 @@
  * fields that change the layout, so parameter edits never re-render the shell.
  */
 import { lazy, Suspense, useEffect, useRef, type CSSProperties } from 'react';
-import { useDocumentTitle, useGlobalShortcuts, usePasteToOpen, useSettingsLinks, useThemeSync, useWindowFileDrop } from './app/hooks';
+import { useDocumentTitle, useGlobalShortcuts, usePasteToOpen, useSettingsLinks, useWindowFileDrop } from './app/hooks';
 import { selectIsAnimated, useStore, type SheetDetent } from './state/store';
 import Inspector from './ui/inspector/Inspector';
 import { ModeTiles, SheetGrab, ToastHost, type SheetDetentSpec } from './ui/kit';
@@ -30,7 +30,6 @@ const loadExportPanel = () => import('./ui/export/ExportPanel');
 const ExportPanel = lazy(loadExportPanel);
 
 export default function App() {
-  useThemeSync();
   useDocumentTitle();
   useGlobalShortcuts();
   useWindowFileDrop();

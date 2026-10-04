@@ -1,10 +1,9 @@
 /**
- * App-level effects mounted once by App: theme attribute, document title, global shortcuts,
+ * App-level effects mounted once by App: document title, global shortcuts,
  * window-wide file drop and paste, settings links pasted into the address bar. They talk to the
  * store and the controller; screens only read `ui.dragOver`.
  */
 import { useEffect } from 'react';
-import type { Theme } from '../state/params';
 import { useStore } from '../state/store';
 import { openFile } from './controller';
 import { registerDefaultShortcuts } from './defaultShortcuts';
@@ -13,22 +12,6 @@ import { listenForSettingsLinks } from './permalink';
 import { installShortcutListener } from './shortcuts';
 import { toast } from '../ui/kit';
 import { openUrl, parseHttpUrl } from '../ui/start/openers';
-
-/** Variant B is one attribute on <html>; variant A is the :root default. The browser chrome follows --g1. */
-export function applyTheme(theme: Theme): void {
-  const root = document.documentElement;
-  if (theme === 'b') root.dataset.theme = 'b';
-  else delete root.dataset.theme;
-  const chrome = getComputedStyle(root).getPropertyValue('--g1').trim();
-  if (chrome) document.querySelector('meta[name="theme-color"]')?.setAttribute('content', chrome);
-}
-
-export function useThemeSync(): void {
-  useEffect(() => {
-    applyTheme(useStore.getState().ui.theme);
-    return useStore.subscribe((s) => s.ui.theme, applyTheme);
-  }, []);
-}
 
 const APP_TITLE = 'ASCII Renderer';
 
@@ -91,7 +74,7 @@ export function useWindowFileDrop(): void {
       void openFile(file);
       // One file is shown at a time; say so instead of silently dropping the rest.
       const rest = files.length - 1;
-      if (rest > 0) toast({ kind: 'info', title: `Opened ${file.name}`, body: `One file at a time: ${rest === 1 ? 'the other file was' : `the other ${rest} were`} not opened.` });
+      if (rest > 0) toast({ kind: 'info', title: `Opened ${file.name}`, body: `Only one file opens at a time. ${rest === 1 ? '1 other file was' : `${rest} other files were`} skipped.` });
     };
 
     window.addEventListener('dragenter', onEnter);

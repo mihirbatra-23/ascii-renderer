@@ -28,7 +28,6 @@ interface Palette {
 export function Rulers() {
   const layout = useStageLayout();
   const show = useStore((s) => s.view.rulers && !s.exportUi.open);
-  const theme = useStore((s) => s.ui.theme);
   const fontsReady = useFontsReady();
   const xRef = useRef<HTMLCanvasElement>(null);
   const yRef = useRef<HTMLCanvasElement>(null);
@@ -43,7 +42,7 @@ export function Rulers() {
     };
     drawX(xRef.current, layout, palette);
     drawY(yRef.current, layout, palette);
-  }, [layout, show, theme, fontsReady]);
+  }, [layout, show, fontsReady]);
 
   if (!layout || !show) return null;
   const { box } = layout;

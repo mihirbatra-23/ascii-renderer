@@ -9,7 +9,6 @@
 import { formatCombo, useShortcuts, type ShortcutAction, type ShortcutGroup } from '../../app/shortcuts';
 import { useStore } from '../../state/store';
 import { Dialog } from '../kit';
-import ThemeToggle from './ThemeToggle';
 import './ShortcutsOverlay.css';
 
 // Ordered so the two desktop columns balance: File, Edit, View, General | Render, Playback, Start.
@@ -29,10 +28,6 @@ export default function ShortcutsOverlay() {
   return (
     <Dialog open={open} onClose={() => setUi({ shortcutsOpen: false })} title="Keyboard shortcuts" className="kb-sheet">
       <ShortcutList />
-      <div className="kb-theme">
-        <span>Theme</span>
-        <ThemeToggle />
-      </div>
     </Dialog>
   );
 }

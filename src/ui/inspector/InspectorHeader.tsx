@@ -12,7 +12,7 @@ import { PresetDialog, type PresetDialogMode } from './PresetDialog';
 import { applyPresetWithUndo, resetAllWithUndo } from './presetActions';
 
 export function InspectorHeader() {
-  const atDefaults = useStore((s) => paramsEqual(s.params, defaultParams(s.ui.theme)));
+  const atDefaults = useStore((s) => paramsEqual(s.params, defaultParams()));
   return (
     <div className="dh desk-only">
       <h2>Adjust</h2>

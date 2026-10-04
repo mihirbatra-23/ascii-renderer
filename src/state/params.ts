@@ -1,5 +1,5 @@
 /**
- * Render-parameter metadata for the UI: app defaults (per theme), numeric ranges and formatting
+ * Render-parameter metadata for the UI: app defaults, numeric ranges and formatting
  * for sliders / value fields, dock sections (for "Reset section"), built-in presets and a
  * sanitiser for persisted values.
  */
@@ -15,7 +15,6 @@ import {
 } from '../engine/types';
 import { MAX_GLYPHS } from '../engine/charsets';
 
-export type Theme = 'a' | 'b';
 export type ParamKey = keyof RenderParams;
 export type NumericParamKey = {
   [K in ParamKey]: RenderParams[K] extends number ? K : never;
@@ -26,24 +25,17 @@ export const RENDER_MODES: readonly RenderMode[] = ['shape', 'ramp', 'braille', 
 export const COLOR_MODES: readonly ColorMode[] = ['mono', 'source', 'duotone'];
 
 /**
- * Render ink / paper per theme: the swatch defaults the GPU draws with (tokens.css --ink*, --paper).
+ * Render ink / paper: the swatch defaults the GPU draws with (tokens.css --ink*, --paper).
  * Duotone colours a cell mix(shadowInk, ink, smoothstep(tone)), so a dark cell is both sparse and
  * dim. The shadow ink is lifted from the boards' #5C5953 so low-key photos keep their shadows
  * (+15% displayed light on big_sur / terrain, still clearly two-tone; #8A867E all but
  * matched Mono and lost the duotone character).
  */
-const THEME_COLORS: Record<Theme, Pick<RenderParams, 'ink' | 'shadowInk' | 'paper'>> = {
-  a: { ink: '#e6e4df', shadowInk: '#747069', paper: '#0b0b0c' },
-  b: { ink: '#e4e7e8', shadowInk: '#6d7274', paper: '#0a0b0b' },
-};
+const DEFAULT_COLORS: Pick<RenderParams, 'ink' | 'shadowInk' | 'paper'> = { ink: '#e6e4df', shadowInk: '#747069', paper: '#0b0b0c' };
 
-/** The app's starting look: Geist Mono, Duotone in the theme's ink (design spec §4.2). */
-export function defaultParams(theme: Theme): RenderParams {
-  return { ...DEFAULT_PARAMS, font: 'geist-mono', colorMode: 'duotone', ...THEME_COLORS[theme] };
-}
-
-export function themeColors(theme: Theme): Pick<RenderParams, 'ink' | 'shadowInk' | 'paper'> {
-  return THEME_COLORS[theme];
+/** The app's starting look: Geist Mono, Duotone in the default ink (design spec §4.2). */
+export function defaultParams(): RenderParams {
+  return { ...DEFAULT_PARAMS, font: 'geist-mono', colorMode: 'duotone', ...DEFAULT_COLORS };
 }
 
 export interface NumericSpec {
@@ -86,18 +78,18 @@ export const PARAM_LABELS: Record<ParamKey, string> = {
   contrast: 'Contrast',
   gamma: 'Gamma',
   invert: 'Invert',
-  shapeSharpness: 'Shape sharpness',
+  shapeSharpness: 'Shape contrast',
   edgeSharpness: 'Edge sharpness',
   dither: 'Dither',
-  ditherPattern: 'Dither pattern',
-  halftoneAngle: 'Halftone angle',
+  ditherPattern: 'Dither',
+  halftoneAngle: 'Dot angle',
   halftoneShape: 'Dot shape',
-  colorMode: 'Colour',
+  colorMode: 'Color mode',
   ink: 'Ink',
   paper: 'Paper',
   shadowInk: 'Shadow',
   stability: 'Stability',
-  edges: 'Edges',
+  edges: 'Contour lines',
   edgeThreshold: 'Edge threshold',
 };
 
@@ -118,7 +110,7 @@ export type ParamSection = keyof typeof PARAM_SECTIONS;
  * Built-in looks. Each overrides only what defines it; everything else keeps the user's values.
  * Tuned on a test corpus (torus, planet, aerial, sonoma, macblue, line art):
  *
- *   Crisp lines     contour strokes from the edge layer over a fill of dots, so outlines read as
+ *   Line art        contour strokes from the edge layer over a fill of dots, so outlines read as
  *                   line art (the 'lines' glyph set alone filled bright areas with | walls)
  *   Soft photo      Ramp over the evenly stepped short set: smooth tone; full ASCII in Ramp is
  *                   letter noise, and dither above 0.08 printed a dot lattice over black
@@ -126,7 +118,7 @@ export type ParamSection = keyof typeof PARAM_SECTIONS;
  */
 export const BUILTIN_PRESETS: readonly { name: string; params: Partial<RenderParams> }[] = [
   {
-    name: 'Crisp lines',
+    name: 'Line art',
     params: { mode: 'ramp', charsetPreset: 'custom', customCharset: ' .:', contrast: 1.1, gamma: 1.2, dither: 0, edges: true, edgeThreshold: 0.3 },
   },
   {

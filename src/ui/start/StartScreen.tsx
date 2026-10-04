@@ -11,7 +11,6 @@ import { defaultParams } from '../../state/params';
 import { useStore } from '../../state/store';
 import { Icon } from '../icons';
 import { Button, LinkButton, MODE_LABELS, toast, Tooltip } from '../kit';
-import ThemeToggle from '../shell/ThemeToggle';
 import DropZone from './DropZone';
 import SampleTile from './SampleTile';
 import { APP_VERSION, REPO_URL, SAMPLES, type Sample } from './samples';
@@ -25,8 +24,8 @@ import './start.css';
  */
 function open(sample: Sample) {
   if (!linkLookUnedited()) {
-    const { params: before, setParams, ui } = useStore.getState();
-    const defaults = defaultParams(ui.theme);
+    const { params: before, setParams } = useStore.getState();
+    const defaults = defaultParams();
     const replaces = (Object.keys(sample.look) as (keyof typeof sample.look)[]).some(
       (k) => before[k] !== sample.look[k] && before[k] !== defaults[k],
     );
@@ -131,8 +130,6 @@ function StartFooter() {
       <span className="lic">
         ASCII Renderer <span className="mono">v{APP_VERSION}</span> · MIT licensed · open source
       </span>
-      <span className="vr" />
-      <ThemeToggle compact />
       <span className="sp" />
       {legend.map((l) => (
         <span key={l.label} className={l.all ? 'lg all' : 'lg'}>

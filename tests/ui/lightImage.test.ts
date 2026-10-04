@@ -4,7 +4,7 @@ import { defaultParams } from '../../src/state/params';
 import { invertHint, LIGHT_IMAGE_MEDIAN, medianInk, sampleLumaAlpha } from '../../src/ui/inspector/lightImage';
 import { fixturePath, loadRgba } from '../engine/helpers';
 
-const look = defaultParams('a');
+const look = defaultParams();
 
 async function median(name: string, params = look): Promise<number> {
   const { rgba, width, height } = await loadRgba(fixturePath(name));

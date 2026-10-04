@@ -286,7 +286,6 @@ function Playhead({ duration }: { duration: number }) {
  */
 const Filmstrip = memo(function Filmstrip({ media, clip, width }: { media: Media; clip: Clip; width: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const theme = useStore((s) => s.ui.theme);
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas || width <= 0) return;
@@ -314,6 +313,6 @@ const Filmstrip = memo(function Filmstrip({ media, clip, width }: { media: Media
       live = false;
       clearTimeout(timer);
     };
-  }, [media, clip, width, theme]);
+  }, [media, clip, width]);
   return <canvas ref={ref} aria-hidden="true" />;
 });

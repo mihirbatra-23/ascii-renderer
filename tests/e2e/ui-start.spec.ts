@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { appImport, trackAppModules } from './appModules';
 
-/** Start screen, Shortcuts sheet and theme switch (src/ui/start, src/ui/shell). */
+/** Start screen and Shortcuts sheet (src/ui/start, src/ui/shell). */
 
 const storeEval = <T>(page: Page, body: string) =>
   page.evaluate(`${appImport('/src/state/store.ts')}.then(({ useStore: s }) => { ${body} })`) as Promise<T>;
@@ -74,11 +74,20 @@ test('drag-over: accent edge and "Release to open" only for supported files', as
   await expect(zone.getByRole('heading', { level: 2 })).toHaveText('Drop an image, GIF or video', { useInnerText: true });
 });
 
-test('URL field: Enter on an empty field keeps focus there; a bad address explains itself', async ({ page }) => {
+test('URL field: Load waits for an address; Enter on an empty field keeps focus there; a bad address explains itself', async ({ page }) => {
   const field = page.getByRole('textbox', { name: 'Image or video URL' });
-  await page.getByRole('button', { name: 'Load' }).click();
+  const load = page.getByRole('button', { name: 'Load' });
+  await expect(load).toBeDisabled();
+  // Load is its own button beside the field, the same height and top edge.
+  const [f, b] = [(await field.locator('..').boundingBox())!, (await load.boundingBox())!];
+  expect(b.x).toBeGreaterThan(f.x + f.width);
+  expect(b.height).toBe(f.height);
+  expect(b.y).toBe(f.y);
+  await field.focus();
+  await field.press('Enter');
   await expect(field).toBeFocused();
   await field.fill('not a url');
+  await expect(load).toBeEnabled();
   await field.press('Enter');
   await expect(page.getByRole('alert')).toContainText('That isn’t a web address');
 });
@@ -87,7 +96,7 @@ test('? opens the Shortcuts sheet from the registry; Escape closes it', async ({
   await page.keyboard.press('Shift+Slash');
   const sheet = page.getByRole('dialog', { name: 'Keyboard shortcuts' });
   await expect(sheet).toBeVisible();
-  for (const group of ['File', 'Edit', 'View', 'General', 'Render', 'Playback', 'Start']) {
+  for (const group of ['File', 'Edit', 'View', 'General', 'Render', 'Playback', 'Start screen']) {
     await expect(sheet.getByRole('heading', { name: group, exact: true })).toBeVisible();
   }
   const sampleRow = sheet.locator('.kb-row', { hasText: 'Open a sample' });
@@ -102,18 +111,27 @@ test('? opens the Shortcuts sheet from the registry; Escape closes it', async ({
   await expect(sheet).toBeVisible();
 });
 
-test('theme switch: Carbon sets data-theme="b" and survives a reload', async ({ page }) => {
+test('footer: version and privacy line only; the header and footer stay put while the page scrolls', async ({ page }) => {
   const footer = page.locator('footer.sfoot');
-  await footer.getByRole('radio', { name: 'Carbon' }).click();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'b');
-  await expect(footer.getByRole('radio', { name: 'Carbon' })).toHaveAttribute('aria-checked', 'true');
-  await page.waitForTimeout(600); // persistence is debounced
-  await page.reload();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'b');
-  // Arrow keys move the radiogroup selection back to Graphite.
-  await page.locator('footer.sfoot').getByRole('radio', { name: 'Carbon' }).focus();
-  await page.keyboard.press('ArrowLeft');
-  await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'b');
+  await expect(footer).toHaveText(/^ASCII Renderer v\d+\.\d+\.\d+\s*Files stay on your device$/);
+  await expect(page.getByRole('radiogroup')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'GitHub repository (opens in a new tab)' })).toBeVisible();
+  await page.setViewportSize({ width: 1440, height: 600 });
+  await page.mouse.wheel(0, 2000);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+  expect((await page.locator('.spg > .top').boundingBox())!.y).toBeCloseTo(0, 0);
+  const f = (await footer.boundingBox())!;
+  expect(f.y + f.height).toBeCloseTo(600, 0);
+});
+
+test('a Carbon theme stored by an older build is ignored', async ({ page }) => {
+  await page.evaluate(() =>
+    localStorage.setItem('ascii-renderer:v1', JSON.stringify({ theme: 'b', params: { ink: '#e4e7e8', shadowInk: '#6d7274', paper: '#0a0b0b', contrast: 1.4 } })),
+  );
+  await openStart(page);
+  await expect(page.locator('html')).not.toHaveAttribute('data-theme');
+  const params = await storeEval<{ ink: string; paper: string; contrast: number }>(page, 'return s.getState().params');
+  expect(params).toMatchObject({ ink: '#e6e4df', paper: '#0b0b0c', contrast: 1.4 });
 });
 
 test('phone: stacked layout, "Open" title, full-width actions', async ({ page }) => {
@@ -126,4 +144,9 @@ test('phone: stacked layout, "Open" title, full-width actions', async ({ page })
   await expect(page.locator('.dz-r')).toBeHidden();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(0);
+  // The GitHub icon button and the one-line 40 px footer stay on phones.
+  await expect(page.getByRole('link', { name: 'GitHub repository (opens in a new tab)' })).toBeVisible();
+  const foot = (await page.locator('footer.sfoot').boundingBox())!;
+  expect(foot.height).toBe(40);
+  expect(foot.y + foot.height).toBe(844);
 });

@@ -34,7 +34,7 @@ export async function pasteFromClipboard(onUrl: (url: string) => void): Promise<
   try {
     items = await navigator.clipboard.read();
   } catch {
-    toast({ kind: 'info', icon: 'paste', title: 'Clipboard access is off', body: `Press ${PASTE()} to paste an image instead.` });
+    toast({ kind: 'info', icon: 'paste', title: 'Clipboard access is off', body: `Press ${PASTE()} to paste instead.` });
     return;
   }
   for (const item of items) {
@@ -51,7 +51,7 @@ export async function pasteFromClipboard(onUrl: (url: string) => void): Promise<
     const text = (await (await item.getType('text/plain')).text()).trim();
     if (parseHttpUrl(text)) return onUrl(text);
   }
-  toast({ kind: 'info', icon: 'paste', title: 'Nothing to paste', body: 'Copy an image or a link to one, then press Paste again.' });
+  toast({ kind: 'info', icon: 'paste', title: 'Nothing to paste', body: 'Copy an image, video or link, then try again.' });
 }
 
 export function parseHttpUrl(text: string): URL | null {
@@ -83,26 +83,26 @@ function typedUrl(text: string): URL | null {
 export async function openUrl(text: string, signal: AbortSignal): Promise<void> {
   const url = typedUrl(text);
   if (!url) {
-    toast({ kind: 'error', title: 'That isn’t a web address', body: 'Paste a full link that starts with https://.' });
+    toast({ kind: 'error', title: 'That isn’t a web address', body: 'Use a link like https://example.com/image.png.' });
     return;
   }
   // Browsers block plain-http downloads from an https page; say so instead of a vague failure.
   if (url.protocol === 'http:' && window.location.protocol === 'https:') {
-    toast({ kind: 'error', title: 'That link isn’t secure', body: 'This page is served over https, so it can only load https:// links. Download the file and drop it here instead.' });
+    toast({ kind: 'error', title: 'That link isn’t secure', body: 'Only https:// links can be loaded. Download the file and open it instead.' });
     return;
   }
   let blob: Blob;
   try {
     const res = await fetch(url, { signal, credentials: 'omit', referrerPolicy: 'no-referrer' });
     if (!res.ok) {
-      toast({ kind: 'error', title: `Couldn’t load ${url.hostname}`, body: `The server answered ${res.status}${res.statusText ? ` ${res.statusText}` : ''}.` });
+      toast({ kind: 'error', title: `Couldn’t load ${url.hostname}`, body: `The server returned ${res.status}${res.statusText ? ` ${res.statusText}` : ''}. Check the link and try again.` });
       return;
     }
     // Refused before downloading when the server says how big it is (the media limit applies anyway).
     const length = Number(res.headers.get('content-length'));
     if (length > MEDIA_LIMITS.maxFileBytes) {
       void res.body?.cancel();
-      toast({ kind: 'error', title: 'That file is too large', body: `It is ${formatBytes(length)}; files up to ${formatBytes(MEDIA_LIMITS.maxFileBytes)} can be opened.` });
+      toast({ kind: 'error', title: 'That file is too large', body: `It’s ${formatBytes(length)}. The limit is ${MEDIA_LIMITS.maxFileBytes / 1024 ** 3} GB.` });
       return;
     }
     blob = await res.blob();
@@ -111,7 +111,7 @@ export async function openUrl(text: string, signal: AbortSignal): Promise<void> 
     toast({
       kind: 'error',
       title: `Couldn’t load ${url.hostname}`,
-      body: 'The server is unreachable or does not let other sites read its files. Download the file and drop it here instead.',
+      body: 'The server can’t be reached or blocks other sites. Download the file and open it instead.',
     });
     return;
   }

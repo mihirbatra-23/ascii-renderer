@@ -1,13 +1,16 @@
-/* Start screen (design spec §4.1): hero, drop zone with ruler strip, sample tiles, footer. */
+/* Start screen (design spec §4.1): sticky header, hero, drop zone with ruler strip, sample tiles,
+   sticky footer. The page scrolls between the two bars. */
 
 .spg{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:var(--g0)}
-.spg>.top{flex:none;height:var(--h-top)}
+.spg>.top{flex:none;height:var(--h-top);position:sticky;top:0;z-index:10}
+/* Tabbing never leaves a focused tile or link under the sticky bars. */
+html:has(.spg){scroll-padding:var(--h-top) 0 44px}
 .start{flex:1;width:100%;max-width:1040px;margin:0 auto;padding:44px 0 32px}
 .hero{display:grid;grid-template-columns:minmax(0,1fr) 360px;align-items:end;gap:var(--s6)}
 .hero h1{margin:0;font:500 var(--fs-40)/44px var(--sans);letter-spacing:-.03em;color:var(--tx-1)}
 .hero h1 .type{font:500 38px/44px var(--mono);letter-spacing:-.04em;color:var(--ink)}
 .hero h1 .cur{display:inline-block;width:.55em;height:4px;margin-left:2px;background:var(--acc);vertical-align:baseline}
-.hero p{margin:0 0 4px;font-size:var(--fs-14);line-height:22px;color:var(--tx-2)}
+.hero p{margin:0 0 4px;font-size:var(--fs-14);line-height:22px;color:var(--tx-2);text-wrap:balance}
 .dz{position:relative;margin-top:var(--s6);height:280px;border:1px solid var(--line-2);border-radius:var(--r-lg);background:
    radial-gradient(circle at 1px 1px,var(--line-2) 1px,transparent 1.5px) 11px 23px/16px 16px,var(--g0);overflow:hidden}
 .dz-r{position:absolute;left:0;right:0;top:0;height:22px;border-bottom:1px solid var(--line);background:
@@ -18,10 +21,11 @@
 .dz-in{position:absolute;inset:22px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 var(--s5)}
 .dz-ic{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--line-3);border-radius:var(--r-lg);background:var(--g2);color:var(--tx-1)}
 .dz h2{margin:var(--s4) 0 0;font:500 19px/24px var(--sans);letter-spacing:-.01em}
-.dz .sub{margin:6px 0 0;font-size:var(--fs-13);color:var(--tx-2)}
 .dz-acts{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s5)}
+.dz h2+.dz-acts{margin-top:var(--s5)}
 .dz-acts .or{font:var(--fs-11)/1 var(--mono);color:var(--tx-3);padding:0 var(--s1)}
-.dz-acts .field{width:320px}
+.dz-acts .dz-url{width:320px}
+.dz-acts .dz-url .field{width:auto;flex:1;min-width:0}
 .dz .fmts-l{text-wrap:balance;margin:var(--s4) 0 0;font:var(--fs-11)/1 var(--mono);letter-spacing:.06em;color:var(--tx-3)}
 /* As separate items the line wraps between formats; the dots only sit between items on one line (desktop),
    so a wrapped phone line never starts with '·'. */
@@ -42,9 +46,7 @@ button.tile{width:100%;padding:0;text-align:left;font:inherit}
 .tile-f{display:flex;align-items:center;gap:var(--s2);height:44px;padding:0 var(--s3) 0 var(--s4);color:var(--tx-3)}
 .tile-f .n{color:var(--tx-1);font-weight:500}
 .tile-f .m{margin-left:auto;font:var(--fs-12)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-3)}
-.sfoot{flex:none;display:flex;align-items:center;gap:var(--s4);height:44px;padding:0 var(--s4);border-top:1px solid var(--line);background:var(--g1);font-size:var(--fs-12);color:var(--tx-3)}
-.sfoot .lg{display:flex;align-items:center;gap:6px}
-.sfoot .lg+.lg{margin-left:var(--s2)}
+.sfoot{flex:none;position:sticky;bottom:0;z-index:10;display:flex;align-items:center;gap:var(--s4);height:44px;padding:0 var(--s4);border-top:1px solid var(--line);background:var(--g1);font-size:var(--fs-12);color:var(--tx-3)}
 .sfoot .lock{display:flex;align-items:center;gap:6px;color:var(--tx-2)}
 .sfoot .lock .i{width:14px;height:14px}
 @media (max-width:1100px){.start{max-width:none;padding-left:var(--s5);padding-right:var(--s5)}.hero{grid-template-columns:1fr}.tile .art{--cw:calc((100vw - 48px - 32px) / 3 / 72);--lh:calc(var(--cw) * 2);--fs:calc(var(--cw) / .6)}}
@@ -58,19 +60,18 @@ button.tile{width:100%;padding:0;text-align:left;font:inherit}
   .dz-in{position:relative;inset:auto;padding:var(--s6) var(--s4) var(--s5)}
   .dz-acts{flex-direction:column;align-items:stretch;width:100%}
   .dz-acts .or{display:none}
-  .dz-acts .field{width:100%}
+  .dz-acts .dz-url{width:100%}
   .dz-acts>.btn{width:100%}
   .dz .fmts-l{letter-spacing:0;line-height:16px;padding:0 var(--s2)}
   .dz .fmts-l:has(>span){gap:4px 12px}
   .dz .fmts-l>span+span::before{content:none}
-  .samples .sh .aux{display:none}
   .samples{margin-top:var(--s6)}
   .tiles{grid-template-columns:1fr;gap:var(--s3)}
   .tile{display:grid;grid-template-columns:120px minmax(0,1fr);align-items:stretch}
   .tile .art{--cw:1.6667px;--lh:3.3333px;--fs:2.7778px;border-bottom:0;border-right:1px solid var(--line);height:67px}
   .tile-f{flex-wrap:wrap;height:auto;padding:var(--s3);row-gap:4px;align-content:center}
   .tile-f .m{margin-left:0;width:100%;order:3}
-  .sfoot{display:none}
+  .sfoot{height:40px;padding:0 var(--s4) env(safe-area-inset-bottom);gap:var(--s3)}
   .top .gh{width:var(--h-ctl);padding:0}
   .top .gh .lbl-opt{display:none}
 }

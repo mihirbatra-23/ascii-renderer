@@ -1,6 +1,6 @@
 /**
  * The start screen's drop zone (spec §4.1): ruler strip in grid units, dotted field, and the
- * ways to open something: Choose file (primary), Paste, Camera, or a URL. The whole window is
+ * ways to open something: Choose file (primary), Paste, Camera, or a URL (field + Load). The whole window is
  * the drop target (app/hooks.ts); this only mirrors `ui.dragOver` with the accent edge and
  * "Release to open".
  *
@@ -37,7 +37,6 @@ export default function DropZone() {
             <span className="phone-only">Open</span> an image, GIF or video
           </h2>
         )}
-        <p className="sub">It opens in the editor at once. Nothing is uploaded.</p>
         <Actions />
         <p className="fmts-l">
           {FORMATS.map((f) => (
@@ -107,7 +106,8 @@ function Actions() {
       <span className="or" aria-hidden="true">
         or
       </span>
-      {/* noValidate: a bad address gets the app's explanation, not the browser's bubble. */}
+      {/* noValidate: a bad address gets the app's explanation, not the browser's bubble. Load is
+          disabled while the field is empty, so it never invites a click that does nothing. */}
       <form className="dz-url" noValidate onSubmit={onSubmit}>
         <TextField
           type="url"
@@ -115,16 +115,14 @@ function Actions() {
           ref={input}
           icon="link"
           aria-label="Image or video URL"
-          placeholder="Paste an image or video URL"
+          placeholder="Image or video URL"
           value={url}
           readOnly={loading}
           onChange={(e) => setUrl(e.target.value)}
-          action={
-            <Button type="submit" size="sm" disabled={loading} aria-busy={loading}>
-              {loading ? 'Loading…' : 'Load'}
-            </Button>
-          }
         />
+        <Button type="submit" disabled={loading || !url.trim()} aria-busy={loading}>
+          {loading ? 'Loading…' : 'Load'}
+        </Button>
       </form>
     </div>
   );

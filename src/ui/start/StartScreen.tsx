@@ -1,7 +1,8 @@
 /**
  * Start screen (spec §4.1, a-start / a-start-phone): header, headline, drop zone, three live
- * sample tiles (keys 1–3) and a footer with the key legend, privacy line and theme switch.
- * Shown while nothing is open; the window-wide drop and ⌘V paste are App-level (app/hooks).
+ * sample tiles (keys 1–3) and a footer with the version and the privacy line. The header and footer
+ * are sticky; the page scrolls between them. Shown while nothing is open; the window-wide drop and
+ * ⌘V paste are App-level (app/hooks).
  */
 import { useEffect } from 'react';
 import { openSample } from '../../app/controller';
@@ -10,11 +11,10 @@ import { registerShortcut } from '../../app/shortcuts';
 import { defaultParams } from '../../state/params';
 import { useStore } from '../../state/store';
 import { Icon } from '../icons';
-import { Button, LinkButton, MODE_LABELS, toast, Tooltip } from '../kit';
+import { Button, LinkButton, toast, Tooltip } from '../kit';
 import DropZone from './DropZone';
 import SampleTile from './SampleTile';
 import { APP_VERSION, REPO_URL, SAMPLES, type Sample } from './samples';
-import { useShortcutLabel } from './useShortcutLabel';
 import './start.css';
 
 /**
@@ -33,8 +33,8 @@ function open(sample: Sample) {
     if (replaces) {
       toast({
         icon: 'check',
-        title: `Using ${sample.name}’s look`,
-        body: `${MODE_LABELS[sample.look.mode]}. Your other settings are kept.`,
+        title: `Applied settings from ${sample.name}`,
+        body: 'Mode, tone, glyphs and edges now match the sample. Other settings are unchanged.',
         trailing: { label: 'Undo', onClick: () => useStore.getState().setParams(before) },
       });
     }
@@ -70,20 +70,14 @@ export default function StartScreen() {
             rendered in <span className="type">type.</span>
           </h1>
           <p>
-            A GPU text-art studio that runs in your browser. Every control redraws the frame as you drag, and nothing you open
-            ever leaves this device.
+            Matches each cell of your image to the glyph with the closest shape. Adjust it live, then export it as an image, text or
+            video. Runs in your browser.
           </p>
         </div>
         <DropZone />
         <section className="samples" aria-labelledby="h-samples">
           <header className="sh">
             <h2 id="h-samples">Samples</h2>
-            <span className="aux">
-              <em>Procedural sources made for this project</em>
-              <span className="kbd-hint">
-                <em> · press</em> 1–{SAMPLES.length}
-              </span>
-            </span>
           </header>
           <div className="tiles">
             {SAMPLES.map((s) => (
@@ -110,7 +104,15 @@ function StartHeader() {
         Shortcuts
       </Button>
       <Tooltip label="GitHub repository">
-        <LinkButton variant="ghost" icon="branch" className="gh" href={REPO_URL} target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+        <LinkButton
+          variant="ghost"
+          icon="github"
+          className="gh"
+          href={REPO_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="GitHub repository (opens in a new tab)"
+        >
           <span className="lbl-opt">GitHub</span>
         </LinkButton>
       </Tooltip>
@@ -119,28 +121,15 @@ function StartHeader() {
 }
 
 function StartFooter() {
-  const legend = [
-    { combo: useShortcutLabel('file.open', 'mod+o'), label: 'Open' },
-    { combo: useShortcutLabel('file.paste', 'mod+v'), label: 'Paste' },
-    { combo: useShortcutLabel('export.toggle', 'mod+e'), label: 'Export' },
-    { combo: useShortcutLabel('help.shortcuts', '?'), label: 'All shortcuts', all: true },
-  ];
   return (
     <footer className="sfoot">
       <span className="lic">
-        ASCII Renderer <span className="mono">v{APP_VERSION}</span> · MIT licensed · open source
+        ASCII Renderer <span className="mono">v{APP_VERSION}</span>
       </span>
       <span className="sp" />
-      {legend.map((l) => (
-        <span key={l.label} className={l.all ? 'lg all' : 'lg'}>
-          <kbd>{l.combo}</kbd>
-          {l.label}
-        </span>
-      ))}
-      <span className="vr" />
       <span className="lock">
         <Icon name="lock" size={14} />
-        Files never leave your device
+        Files stay on your device
       </span>
     </footer>
   );

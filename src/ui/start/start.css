@@ -1,0 +1,55 @@
+/* Start screen additions on top of src/styles/start.css (the board port): pieces the React
+   markup needs that the static board did not. */
+
+/* The samples head is an h2 here (h1 headline, h2 sections); same look as the kit's .sh h3. */
+.samples .sh h2{margin:0;font:500 var(--fs-11)/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--tx-3)}
+
+/* Tiles are buttons, so the art box and footer are spans (styled as blocks by .art / .tile-f). */
+.tile-f .n{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* The URL field sits in a form so Enter loads it. */
+.dz-url{display:flex;margin:0}
+
+/* Choose file, Paste, Camera, "or" and the URL field need about 730 px: on a narrower zone the URL
+   form takes its own centred line instead of running out of the zone. */
+.dz-acts{flex-wrap:wrap;justify-content:center;row-gap:var(--s2)}
+@media (min-width:641px) and (max-width:900px){
+  .dz-acts .or{display:none}
+  .dz-url{flex:1 1 100%;justify-content:center}
+  .dz-acts .field{width:min(420px,100%)}
+}
+/* Three tiles abreast leave no room for the name and the meta on one line: keep the name. */
+.tile-f .m{white-space:nowrap}
+@media (min-width:641px) and (max-width:760px){
+  .tile-f .m{display:none}
+}
+
+/* Footer: licence, theme switch, key legend, privacy line. */
+.sfoot .lic{white-space:nowrap}
+.sfoot .lg{white-space:nowrap}
+@media (max-width:1180px){
+  .sfoot .lg:not(.all){display:none}
+}
+@media (max-width:900px){
+  .spg .sfoot{flex-wrap:wrap;height:auto;min-height:44px;padding-top:var(--s2);padding-bottom:var(--s2);row-gap:var(--s2)}
+  .spg .sfoot .lg,.spg .sfoot>.vr{display:none}
+}
+
+/* Phone: the board drops the footer; keep the theme switch and privacy line at the page end. */
+@media (max-width:640px){
+  .spg .sfoot{display:flex;flex-wrap:wrap;height:auto;gap:var(--s3) var(--s4);padding:var(--s4) var(--s4) calc(var(--s4) + env(safe-area-inset-bottom))}
+  .spg .sfoot>.vr,.spg .sfoot>.sp,.spg .sfoot .lg{display:none}
+  .spg .sfoot .lock{order:1;width:100%}
+  .spg .sfoot .lic{order:2;width:100%;margin-top:calc(-1 * var(--s2));white-space:normal}
+}
+
+/* The first file loading: the start screen stays, with the same 2 px meter the editor uses. */
+.dz-load{position:absolute;left:0;right:0;top:22px;height:2px;overflow:hidden;pointer-events:none}
+.dz-load::after{content:"";position:absolute;top:0;bottom:0;left:0;width:25%;background:var(--acc);animation:loadbar 1.2s linear infinite}
+.dz-opening{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+@media (prefers-reduced-motion:reduce){
+  .dz-load::after{animation:none;width:100%;opacity:.5}
+}
+@media (max-width:640px){
+  .dz-load{top:0}
+}

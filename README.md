@@ -35,7 +35,7 @@ npm run test:e2e   # browser tests, run in your installed Chrome
 npm run build      # static site in dist/
 ```
 
-The build is a static site with no server component. Pushes to `main` deploy it to GitHub Pages.
+The build is a static site with no server component, hosted on Vercel.
 
 ## Project structure
 

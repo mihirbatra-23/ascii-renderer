@@ -257,7 +257,7 @@ test('closing returns to the start screen and stops the clip', async ({ page }) 
   });
   expect(element).toBe(true);
   await page.getByRole('button', { name: 'Back to start screen' }).click();
-  await page.getByRole('alertdialog', { name: 'Close testsrc2_4s.mp4?' }).getByRole('button', { name: 'Close file' }).click();
+  await page.getByRole('alertdialog', { name: 'Return to the start screen?' }).getByRole('button', { name: 'Close file' }).click();
   await expect(page.getByRole('region', { name: 'Open a file' })).toBeVisible();
   const after = await page.evaluate(async () => {
     const { runtime } = await __appImport('/src/app/runtime.ts');

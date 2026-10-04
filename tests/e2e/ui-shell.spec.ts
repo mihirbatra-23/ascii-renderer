@@ -250,10 +250,10 @@ test('pasting a link the server will not share explains CORS', async ({ page }) 
 test('Back asks first: Cancel and Esc stay (focus back on Back), Enter or Close file returns to the start screen', async ({ page }) => {
   await openSample(page);
   const back = page.getByRole('button', { name: 'Back to start screen' });
-  const dialog = page.getByRole('alertdialog', { name: 'Close torus.png?' });
+  const dialog = page.getByRole('alertdialog', { name: 'Return to the start screen?' });
   await back.click();
   await expect(dialog).toBeVisible();
-  await expect(dialog).toHaveAccessibleDescription(/^This returns to the start screen\. Your settings stay/);
+  await expect(dialog).toHaveAccessibleDescription(/^Your current settings are saved in this browser/);
   await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused();
   await dialog.getByRole('button', { name: 'Cancel' }).click();
   await expect(dialog).toBeHidden();

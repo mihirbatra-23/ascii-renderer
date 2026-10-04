@@ -60,7 +60,7 @@ export default function LeaveDialog() {
     <Dialog
       open={shown}
       onClose={cancel}
-      title={live ? 'Stop the camera?' : `Close ${info?.name ?? 'file'}?`}
+      title={live ? 'Stop the camera and return to the start screen?' : 'Return to the start screen?'}
       header={false}
       role="alertdialog"
       labelledBy="leave-t"
@@ -76,12 +76,10 @@ export default function LeaveDialog() {
       }
     >
       <h2 id="leave-t" className="dlg-ti" title={live ? undefined : info?.name}>
-        {live ? 'Stop the camera?' : `Close ${info?.name}?`}
+        {live ? 'Stop the camera and return to the start screen?' : 'Return to the start screen?'}
       </h2>
       <p id="leave-d" className="dlg-t">
-        {live
-          ? 'This turns the camera off and returns to the start screen. Your settings stay. Record first to keep this take.'
-          : 'This returns to the start screen. Your settings stay, so the next file opens with them. Export first to keep this render.'}
+        Your current settings are saved in this browser, and the next file you open uses them by default.
       </p>
     </Dialog>
   );

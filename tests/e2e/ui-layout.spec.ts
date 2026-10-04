@@ -240,7 +240,7 @@ test.describe('phone', () => {
     await expect(sheet.getByRole('button', { name: 'Copy settings link' })).toBeVisible();
     // Close file asks first, with the same dialog as Back.
     await sheet.getByRole('button', { name: 'Close file' }).click();
-    const confirm = page.getByRole('alertdialog', { name: 'Close torus.png?' });
+    const confirm = page.getByRole('alertdialog', { name: 'Return to the start screen?' });
     await expect(confirm).toBeVisible();
     await confirm.getByRole('button', { name: 'Close file' }).click();
     await expect.poll(() => store<string>(page, 's.getState().media.status')).toBe('empty');

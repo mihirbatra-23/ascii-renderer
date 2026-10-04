@@ -281,7 +281,7 @@ function Playhead({ duration }: { duration: number }) {
 
 /**
  * Halftone thumbnails, one slot per strip height × source aspect. Redrawn only when the slot
- * count, media or theme (the paper colour is a CSS token) changes; the previous drawing stays,
+ * count or media changes; the previous drawing stays,
  * stretched, until the new snapshots are ready.
  */
 const Filmstrip = memo(function Filmstrip({ media, clip, width }: { media: Media; clip: Clip; width: number }) {

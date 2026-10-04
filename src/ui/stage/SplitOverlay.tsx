@@ -6,8 +6,8 @@
  *   <GridFrame />      the 1 px --line-2 edge of the output frame
  *   <SplitOverlay />   Split compare (spec §4.6): divider, a 32 px round handle (role="slider";
  *                      ← → 1 %, Shift 10 %, Home / End) and the chips naming each side:
- *                      "Original" (or "ASCII · Ramp" when comparing with a Ramp render) and
- *                      "ASCII · Shape" ("+ contours" against Ramp while the edge layer is on).
+ *                      "Source" (or "Ramp" when comparing with a Ramp render) and "Shape"
+ *                      ("+ contour lines" against Ramp while the edge layer is on).
  *                      The engine draws the left side itself (Viewport.compare, compareWith).
  */
 import type { KeyboardEvent, PointerEvent } from 'react';
@@ -17,6 +17,7 @@ import { useTransparentPreview } from '../export/transparency';
 import { hasEdgeLayer } from '../inspector/copy';
 import { Icon } from '../icons';
 import { clamp, MODE_LABELS } from '../kit';
+import { setAdjusting } from '../kit/util';
 import { effectiveCompare } from './compare';
 import { visibleGrid } from './layout';
 
@@ -74,7 +75,10 @@ export function SplitOverlay() {
     if (e.button !== 0) return;
     e.currentTarget.setPointerCapture(e.pointerId);
     e.preventDefault();
+    // The same flag a slider drag sets: the cell probe, its tag and the ruler marks hide.
+    setAdjusting('drag');
   };
+  const endDrag = () => setAdjusting(null);
   const onPointerMove = (e: PointerEvent<HTMLButtonElement>) => {
     const l = getStageLayout();
     const vp = e.currentTarget.closest('.vp');
@@ -103,28 +107,22 @@ export function SplitOverlay() {
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={pct}
-        aria-valuetext={`${pct} percent ${compareWith === 'ramp' ? 'Ramp render' : 'original'}`}
+        aria-valuetext={`${pct} percent ${compareWith === 'ramp' ? 'Ramp' : 'source'}`}
         style={{ transform: `translate(${x}px, ${top + vis.height / 2}px)` }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onLostPointerCapture={endDrag}
         onKeyDown={onKeyDown}
       >
         <Icon name="arrows-lr" />
       </button>
       <span className="chip l" style={{ transform: `translate(${left}px, ${top + 12}px)` }}>
-        {compareWith === 'ramp' ? (
-          <>
-            ASCII<em>·</em>
-            {MODE_LABELS.ramp}
-          </>
-        ) : (
-          'Original'
-        )}
+        {compareWith === 'ramp' ? MODE_LABELS.ramp : 'Source'}
       </span>
       <span className="chip r" style={{ right, transform: `translateY(${top + 12}px)` }}>
-        ASCII<em>·</em>
         {MODE_LABELS[mode]}
-        {contours && compareWith === 'ramp' && ' + contours'}
+        {contours && compareWith === 'ramp' && ' + contour lines'}
       </span>
     </div>
   );

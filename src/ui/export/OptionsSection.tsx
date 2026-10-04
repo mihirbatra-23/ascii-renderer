@@ -10,20 +10,20 @@ import type { ExportFormat } from '../../export/types';
 import type { LoadedMedia, LoadedVideo } from '../../media';
 import { selectIsLive, useStore } from '../../state/store';
 import { Section, Segmented, SwitchRow, TextField, cx, type SegmentedOption } from '../kit';
+import { TipLabel, useTip } from '../kit/Tooltip';
 import { formatTimecode } from '../transport/clip';
 import { exportRange, motionFrameCount, useFrameTimes } from './frameCount';
 import { ALPHA_FORMATS, isMotion, isRaster, isVideo, nearestScale, SCALE_STEPS, type ExportPlan } from './sizing';
 
 /** Why a format cannot be transparent (undefined: the option does not apply to it). */
 const NO_ALPHA: Partial<Record<ExportFormat, string>> = {
-  gif: 'GIF has no soft transparency, so the paper colour fills it.',
-  mp4: 'MP4 has no alpha channel. Use WebM.',
+  gif: 'GIF has no soft transparency. The paper color is kept.',
+  mp4: 'MP4 can’t be transparent. Use WebM.',
 };
 
-const TRANSPARENT_SUB: Partial<Record<ExportFormat, string>> = {
-  png: 'Drops the paper; glyphs keep their ink',
-  svg: 'Drops the paper; glyphs keep their ink',
-  webm: 'VP9 with alpha, where this browser can encode it',
+/** The label says what the switch does; only WebM needs a caveat. */
+const TRANSPARENT_TIP: Partial<Record<ExportFormat, string>> = {
+  webm: 'Not every browser can export transparent WebM.',
 };
 
 export default function OptionsSection({ plan }: { plan: ExportPlan | null }) {
@@ -59,7 +59,7 @@ function TrimRow() {
   return (
     <SwitchRow
       label="Trimmed range only"
-      sub={`${formatTimecode(inPoint)} – ${formatTimecode(outPoint)} · ${inTrim.approx ? '≈ ' : ''}${inTrim.count} of ${total.count} frames`}
+      sub={`${formatTimecode(inPoint)} to ${formatTimecode(outPoint)} · ${inTrim.approx ? '≈ ' : ''}${inTrim.count} of ${total.count} frames`}
       checked={trimOnly}
       onChange={(v) => setExportUi({ trimOnly: v })}
     />
@@ -73,12 +73,13 @@ function TransparentRow({ format }: { format: ExportFormat }) {
   const setExportUi = useStore((s) => s.setExportUi);
   const reason =
     NO_ALPHA[format] ??
-    (recorded ? 'Recordings keep the paper: browsers can’t reliably record transparency.' : undefined) ??
-    (blocksInSource ? 'Blocks in Source colour paints both colours of every cell, so there is no paper to drop.' : undefined);
+    (recorded ? 'Camera recordings can’t be transparent.' : undefined) ??
+    (blocksInSource ? 'Blocks with Source color has no paper to remove.' : undefined);
   return (
     <SwitchRow
       label="Transparent background"
-      sub={reason ?? TRANSPARENT_SUB[format]}
+      sub={reason}
+      tooltip={reason ? undefined : TRANSPARENT_TIP[format]}
       checked={transparent && !reason}
       disabled={!!reason}
       onChange={(v) => setExportUi({ transparent: v })}
@@ -95,19 +96,14 @@ function PixelSnapRow({ plan }: { plan: ExportPlan }) {
   const setExportUi = useStore((s) => s.setExportUi);
   const motion = isMotion(plan.format);
   const resampled = plan.targetWidth !== undefined;
-  const snap = () => {
-    const near = nearestScale(plan);
-    setExportUi(motion ? { motionScale: near } : { scale: near });
-  };
+  const near = nearestScale(plan);
+  const snap = () => setExportUi(motion ? { motionScale: near } : { scale: near });
   return (
     <SwitchRow
       className={cx(!resampled && 'locked')}
       label="Pixel-snap glyphs"
-      sub={
-        resampled
-          ? 'Off for this width: cells are resampled. Turn on for the nearest whole scale.'
-          : `Always on at ${SCALE_STEPS.map((s) => `${s}×`).join(', ').replace(/, ([^,]*)$/, ' and $1')}: whole-pixel cells. Choose Custom to resample.`
-      }
+      sub={resampled ? `Off at this width. Turn on to use ${near}×.` : `Always on at ${SCALE_STEPS.map((s) => `${s}×`).join(', ').replace(/, ([^,]*)$/, ' and $1')}.`}
+      tooltip="Keeps every cell a whole number of pixels for sharp edges."
       checked={!resampled}
       disabled={!resampled}
       onChange={(on) => on && snap()}
@@ -140,9 +136,9 @@ function SvgTextRow() {
       <p className="hint">
         {glyphMode
           ? svgText === 'outlines'
-            ? 'Paths: pastes cleanly into Figma and needs no font.'
+            ? 'Paths. No font needed. Use this for Figma.'
             : 'Selectable text with the font embedded.'
-          : 'Braille, halftone and blocks are drawn as shapes.'}
+          : 'Braille, Halftone and Blocks are always shapes.'}
       </p>
     </>
   );
@@ -152,6 +148,7 @@ function FpsRow({ format, sourceFps }: { format: ExportFormat; sourceFps: number
   const fps = useStore((s) => s.exportUi.fps);
   const setExportUi = useStore((s) => s.setExportUi);
   const labelId = useId();
+  const tip = useTip({ body: 'Frame rate of the exported file. Src uses the source’s rate, up to 25 fps for GIF.' }, { tap: true });
   // GIF's "source" rate is capped at 25 fps by the encoder.
   const src = Math.round(format === 'gif' ? gifFps(sourceFps) : sourceFps);
   const options: SegmentedOption<number | 'source'>[] = [
@@ -162,8 +159,13 @@ function FpsRow({ format, sourceFps }: { format: ExportFormat; sourceFps: number
   ];
   return (
     <div className="segrow">
-      <span id={labelId}>Output fps</span>
-      <Segmented full variant="mono" labelledBy={labelId} options={options} value={fps} onChange={(v) => setExportUi({ fps: v })} />
+      <span id={labelId}>
+        <TipLabel tip={tip}>Output fps</TipLabel>
+      </span>
+      <div className="segw" aria-describedby={tip.focus['aria-describedby']} onFocus={tip.focus.onFocus} onBlur={tip.focus.onBlur}>
+        <Segmented full variant="mono" labelledBy={labelId} options={options} value={fps} onChange={(v) => setExportUi({ fps: v })} />
+      </div>
+      {tip.node}
     </div>
   );
 }
@@ -187,14 +189,14 @@ function useAudioPlan(video: LoadedVideo, format: 'mp4' | 'webm'): AudioPlan | n
 }
 
 function audioSub(plan: AudioPlan | null): string {
-  if (!plan) return 'The source track, copied or converted to suit the format';
+  if (!plan) return 'Copied or converted from the source';
   switch (plan.action) {
     case 'copy':
-      return `Copied from the source track (${plan.from})`;
+      return `Copied from the source (${plan.from})`;
     case 'transcode':
-      return `Converted from ${plan.from} to ${plan.to} for this format`;
+      return `Converted from ${plan.from} to ${plan.to}`;
     case 'none':
-      return plan.note ?? 'This file has no audio this browser can include';
+      return plan.note ?? 'This browser can’t include this file’s audio';
   }
 }
 

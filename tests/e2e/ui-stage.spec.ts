@@ -63,7 +63,8 @@ test('Render is measured on real frames and stays meaningful after an edit', asy
 test('closing frees the engine’s copy of the source', async ({ page }) => {
   await openTorus(page);
   const releases = await countCalls(page, 'releaseSource');
-  await page.getByRole('button', { name: 'Close torus.png' }).click();
+  await page.getByRole('button', { name: 'Back to start screen' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Close file' }).click();
   await expect(page.getByRole('region', { name: 'Open a file' })).toBeVisible();
   expect(await releases()).toBe(1);
   const grid = await page.evaluate(async () => (await __appImport('/src/app/runtime.ts')).runtime.get().engine.getGrid());

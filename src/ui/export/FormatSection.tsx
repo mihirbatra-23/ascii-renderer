@@ -73,13 +73,13 @@ export default function FormatSection() {
     setExportUi({ format: value });
   };
   return (
-    <Section title="Format" aux={FORMAT_LABEL[format]}>
+    <Section title="Format">
       <p className="sublbl">Still</p>
       <FormatRow label="Still formats" items={STILL} value={format} animated={animated} onChange={choose} />
       <p className="sublbl">Motion</p>
       <FormatRow label="Motion formats" items={live ? LIVE_MOTION : MOTION} value={format} animated={animated} disabled={!animated} onChange={choose} />
-      {!animated && <p className="hint">Motion formats unlock when the source is a GIF or video.</p>}
-      {live && <p className="hint">A camera records in real time, as MP4 or WebM, until you stop it.</p>}
+      {!animated && <p className="hint">Needs a GIF or video source.</p>}
+      {live && <p className="hint">A camera records MP4 or WebM until you stop it.</p>}
     </Section>
   );
 }

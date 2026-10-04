@@ -1,6 +1,6 @@
 /**
- * Rulers in grid units (spec §5 "Rulers"): one 2D canvas per axis, redrawn only when the layout,
- * theme or fonts change. Ticks: 7 px every 10 units (--tick-on), 4 px every 5 (--tick); numerals
+ * Rulers in grid units (spec §5 "Rulers"): one 2D canvas per axis, redrawn only when the layout
+ * or fonts change. Ticks: 7 px every 10 units (--tick-on), 4 px every 5 (--tick); numerals
  * 10 px mono --tx-3, thinned to 10 / 20 / 50 / 100… so they stay ≥ 40 px apart. The rulers hug the
  * frame and pin to the viewport edge when the grid is zoomed past it. The accent cursor ticks are
  * separate one-cell elements moved by transform.

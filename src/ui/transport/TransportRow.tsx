@@ -10,6 +10,7 @@ import { useRef, useState, type KeyboardEvent } from 'react';
 import { useStore } from '../../state/store';
 import { Icon } from '../icons';
 import { Button, IconButton, MenuButton, Segmented, Tooltip, type SegmentedOption } from '../kit';
+import { useTip } from '../kit/Tooltip';
 import { dims, formatFps } from '../stage/format';
 import { formatTimecode, padFrame, parseTimecode } from './clip';
 import { currentClip, setInPoint, setLoop, setOutPoint, setRate, step, togglePlay } from './playback';
@@ -48,7 +49,7 @@ export function LiveRow() {
 
 function PlayButton({ live }: { live?: boolean }) {
   const playing = useStore((s) => s.playback.playing);
-  const label = playing ? (live ? 'Pause (freeze the frame)' : 'Pause') : live ? 'Resume the camera' : 'Play';
+  const label = playing ? (live ? 'Freeze frame' : 'Pause') : live ? 'Resume camera' : 'Play';
   return (
     <Tooltip label={label} shortcut="Space">
       <button type="button" className="play" aria-label={label} onClick={togglePlay}>
@@ -93,8 +94,8 @@ function TrimFields() {
   };
   return (
     <>
-      <TimeField label="In" value={inPoint} onCommit={setInPoint} onNudge={(n) => nudge('in', n)} />
-      <TimeField label="Out" value={outPoint} onCommit={setOutPoint} onNudge={(n) => nudge('out', n)} />
+      <TimeField label="In" tip={IN_TIP} value={inPoint} onCommit={setInPoint} onNudge={(n) => nudge('in', n)} />
+      <TimeField label="Out" tip={OUT_TIP} value={outPoint} onCommit={setOutPoint} onNudge={(n) => nudge('out', n)} />
       <div className="kv opt desk-only dur">
         <span className="k">Dur</span>
         {(outPoint - inPoint).toFixed(2)} s
@@ -103,8 +104,13 @@ function TrimFields() {
   );
 }
 
+const IN_TIP = 'Trim start. ↑ ↓ steps one frame. ⇧I sets it at the playhead.';
+const OUT_TIP = 'Trim end. ↑ ↓ steps one frame. ⇧O sets it at the playhead.';
+
 interface TimeFieldProps {
   label: string;
+  /** What the field does and its keys (the only place ↑ ↓ and ⇧I / ⇧O are discoverable). */
+  tip: string;
   value: number;
   onCommit(sec: number): void;
   /** ↑ ↓: ±1 frame (Shift: 10). */
@@ -112,7 +118,7 @@ interface TimeFieldProps {
 }
 
 /** Boxed mono timecode: type a time and press Enter (or leave the field); Esc reverts. */
-function TimeField({ label, value, onCommit, onNudge }: TimeFieldProps) {
+function TimeField({ label, tip, value, onCommit, onNudge }: TimeFieldProps) {
   // null while not editing: the field then follows the player.
   const [draft, setDraft] = useState<string | null>(null);
   // Escape blurs synchronously, before React applies setDraft(null); the blur must not commit.
@@ -136,30 +142,44 @@ function TimeField({ label, value, onCommit, onNudge }: TimeFieldProps) {
     } else return;
     e.preventDefault();
   };
+  // A note tip on the whole field (no dotted indicator: the field is the control), linked to the input.
+  const tipCtl = useTip({ body: tip }, { align: 'start' });
   return (
-    <label className="tfield opt desk-only">
-      <span className="k">{label}</span>
-      <input
-        value={draft ?? formatTimecode(value)}
-        aria-label={`${label} point`}
-        inputMode="decimal"
-        spellCheck={false}
-        autoComplete="off"
-        onFocus={(e) => e.currentTarget.select()}
-        onChange={(e) => setDraft(e.currentTarget.value)}
-        onKeyDown={onKeyDown}
-        onBlur={commit}
-      />
-    </label>
+    <>
+      <label ref={tipCtl.anchorRef} className="tfield opt desk-only" {...tipCtl.hover}>
+        <span className="k">{label}</span>
+        <input
+          value={draft ?? formatTimecode(value)}
+          aria-label={`${label} point`}
+          aria-describedby={tipCtl.focus['aria-describedby']}
+          inputMode="decimal"
+          spellCheck={false}
+          autoComplete="off"
+          onFocus={(e) => {
+            e.currentTarget.select();
+            tipCtl.focus.onFocus(e);
+          }}
+          onChange={(e) => setDraft(e.currentTarget.value)}
+          onKeyDown={onKeyDown}
+          onBlur={(e) => {
+            commit();
+            tipCtl.focus.onBlur(e);
+          }}
+        />
+      </label>
+      {tipCtl.node}
+    </>
   );
 }
 
 function LoopButton() {
   const loop = useStore((s) => s.playback.loop);
   return (
-    <Button icon="loop" kbd="L" aria-pressed={loop} aria-label="Loop" onClick={() => setLoop(!loop)}>
-      <span className="lbl-opt">Loop</span>
-    </Button>
+    <Tooltip label="Loop" shortcut="L">
+      <Button variant="secondary" icon="loop" aria-pressed={loop} aria-label="Loop" onClick={() => setLoop(!loop)}>
+        <span className="lbl-opt">Loop</span>
+      </Button>
+    </Tooltip>
   );
 }
 

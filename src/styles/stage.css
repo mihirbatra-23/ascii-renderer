@@ -33,6 +33,8 @@
 .probe,.tag{animation:fade-in var(--t-fast) linear 80ms both}
 /* the probe hides while any slider is dragged or value scrubbed (kit sets html[data-adjusting]) */
 html[data-adjusting] .probe,html[data-adjusting] .tag,html[data-adjusting] .ruler .mk{visibility:hidden}
+/* ...and while the pointer is on the split handle or a drag pans the stage */
+.vp:has(.knob:hover) .probe,.vp:has(.knob:hover) .tag,.vp.is-panning .probe,.vp.is-panning .tag{visibility:hidden}
 
 /* caption under the frame */
 .cap{position:absolute;left:0;top:0;display:flex;gap:16px;margin:0;font:var(--fs-11)/16px var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-3);white-space:nowrap;overflow:hidden;pointer-events:none}

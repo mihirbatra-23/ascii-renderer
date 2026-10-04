@@ -32,10 +32,10 @@ test('the camera opens live from the start screen, plays and pauses, and stops o
   await page.getByRole('region', { name: 'Open a file' }).getByRole('button', { name: 'Camera' }).click();
   await ready(page);
   await expect(page.locator('.src .live-badge')).toHaveText('Live');
-  await expect(page.getByRole('contentinfo', { name: 'Status' })).toContainText('Camera');
+  await expect(page.getByRole('contentinfo', { name: 'Status' })).toContainText('Live');
   // Only play / pause: no timeline, trim or speed for a live source.
   const transport = page.getByRole('group', { name: 'Camera' });
-  await expect(transport.getByRole('button', { name: /Pause/ })).toBeVisible();
+  await expect(transport.getByRole('button', { name: 'Freeze frame' })).toBeVisible();
   await expect(page.getByRole('slider', { name: 'Timeline' })).toHaveCount(0);
   expect(await store<boolean>(page, 's.getState().media.info.live')).toBe(true);
   const frames = await page.evaluate(
@@ -52,7 +52,7 @@ test('the camera opens live from the start screen, plays and pauses, and stops o
       }),
   );
   expect(frames).toBeGreaterThan(5);
-  await transport.getByRole('button', { name: /Pause/ }).click();
+  await transport.getByRole('button', { name: 'Freeze frame' }).click();
   await expect(page.getByRole('contentinfo', { name: 'Status' })).toContainText('Paused');
   const track = await page.evaluate(async () => {
     const { runtime } = await __appImport('/src/app/runtime.ts');
@@ -61,7 +61,8 @@ test('the camera opens live from the start screen, plays and pauses, and stops o
     return true;
   });
   expect(track).toBe(true);
-  await page.getByRole('button', { name: 'Stop the camera' }).click();
+  await page.getByRole('button', { name: 'Back to start screen' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Stop camera' }).click();
   await expect(page.getByRole('region', { name: 'Open a file' })).toBeVisible();
   const states = await page.evaluate(() => (window as unknown as { __stream: MediaStream }).__stream.getTracks().map((t) => t.readyState));
   expect(states).toEqual(['ended']);

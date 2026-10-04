@@ -242,7 +242,7 @@ test.describe('export panel', () => {
     const downloading = page.waitForEvent('download', { timeout: 110_000 });
     await dock.getByRole('button', { name: /^Download GIF/ }).click();
     await expect(dock.getByRole('progressbar', { name: 'Encoding progress' })).toBeVisible();
-    await expect(dock.getByText('Encoding in a worker. Keep editing.')).toBeVisible();
+    await expect(dock.getByText('Encoding. You can keep editing.')).toBeVisible();
     const download = await downloading;
     expect(download.suggestedFilename()).toMatch(/\.gif$/);
     const bytes = readFileSync(await download.path());
@@ -323,9 +323,9 @@ test.describe('export panel behaviour', () => {
     await openMedia(page, '/tests/fixtures/waves_600x400.png', 'waves_600x400.png');
     await page.keyboard.press('ControlOrMeta+e');
     const dock = page.getByRole('complementary', { name: 'Export' });
-    await expect(dock.getByText(/^Rows round to 53, so the aspect is 1\.509/)).toBeVisible();
+    await expect(dock.getByText(/^Rows round to 53\. The aspect is off by \+0\.\d+%/)).toBeVisible();
     await dock.getByRole('button', { name: 'Use 159 columns' }).click();
-    await expect(dock.getByText('Same 3:2 aspect as the source 600 × 400: no crop, no squash.')).toBeVisible();
+    await expect(dock.getByText('Same 3:2 aspect as the 600 × 400 source.')).toBeVisible();
   });
 
   test('a custom width is exactly that wide, and ⌘↵ in the width field downloads it', async ({ page }) => {
@@ -341,7 +341,7 @@ test.describe('export panel behaviour', () => {
     const [download] = await Promise.all([page.waitForEvent('download'), width.press('ControlOrMeta+Enter')]);
     await expect(width).toHaveValue('1920');
     await expect(dock.getByRole('img', { name: 'Output 1920 by 1080 pixels' })).toBeVisible();
-    await expect(dock.getByText(/^Resampled from 2×/)).toBeVisible();
+    await expect(dock.getByText(/^Cells are .* px, resampled from 2×/)).toBeVisible();
     expect(await pngSize(page, await download.path())).toEqual([1920, 1080]);
   });
 
@@ -378,7 +378,7 @@ test.describe('export panel behaviour', () => {
     const dock = page.getByRole('complementary', { name: 'Export' });
     const checked = dock.getByRole('radiogroup', { name: 'Scale' }).getByRole('radio', { checked: true });
     await expect(checked).toBeEnabled();
-    await expect(dock.getByText(/^4× would be .* more than this device can draw, so/)).toBeVisible();
+    await expect(dock.getByText(/^4× \(.* px\) is too large for this device\. Using/)).toBeVisible();
     const readout = await dock.getByRole('img', { name: /^Output \d+ by \d+ pixels$/ }).getAttribute('aria-label');
     expect(readout).toContain(`Output ${(await checked.textContent())!.replace(/^\d×/, '').replace(/\s/g, '').replace('×', ' by ')} pixels`);
   });
@@ -417,7 +417,7 @@ test.describe('export panel behaviour', () => {
     await expect.poll(() => store<boolean>(page, '(s) => s.playback.playing')).toBe(true);
   });
 
-  test('Blocks in Source colour cannot be transparent, and the switch says why', async ({ page }) => {
+  test('Blocks with Source color cannot be transparent, and the switch says why', async ({ page }) => {
     await boot(page);
     await openMedia(page, '/samples/torus.png', 'torus.png');
     await store(page, "(s) => { s.setParams({ mode: 'blocks', colorMode: 'source' }); s.setExportUi({ transparent: true }); }");
@@ -426,7 +426,7 @@ test.describe('export panel behaviour', () => {
     const sw = dock.getByRole('switch', { name: /Transparent background/ });
     await expect(sw).toBeDisabled();
     await expect(sw).not.toBeChecked();
-    await expect(dock.getByText(/paints both colours of every cell/)).toBeVisible();
+    await expect(dock.getByText('Blocks with Source color has no paper to remove.')).toBeVisible();
   });
 
   test('Copy PNG puts the image on the clipboard', async ({ page, context }) => {
@@ -509,7 +509,7 @@ test.describe('screenshots', () => {
         await shot(page, `${tag}-export-video-${w}`);
         if (w === 1440) {
           await page.getByRole('button', { name: /^Download MP4/ }).click();
-          await page.getByText('Encoding in a worker. Keep editing.').waitFor();
+          await page.getByText('Encoding. You can keep editing.').waitFor();
           await page.waitForTimeout(1200);
           await shot(page, `${tag}-export-video-encoding-${w}`);
           await page.getByRole('button', { name: 'Cancel' }).click();

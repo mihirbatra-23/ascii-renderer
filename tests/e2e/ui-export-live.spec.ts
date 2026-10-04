@@ -35,7 +35,7 @@ test('a camera records MP4 until stopped, with the elapsed time, and saves it', 
   const mp4 = motion.getByRole('radio', { name: /^MP4/ });
   await expect(mp4).toHaveAttribute('aria-checked', 'true');
   await expect(mp4).toContainText('Record');
-  await expect(dock.getByText('A camera records in real time, as MP4 or WebM, until you stop it.')).toBeVisible();
+  await expect(dock.getByText('A camera records MP4 or WebM until you stop it.')).toBeVisible();
 
   await dock.getByRole('button', { name: /^Record MP4/ }).click();
   const stop = dock.getByRole('button', { name: /^Stop and save MP4/ });

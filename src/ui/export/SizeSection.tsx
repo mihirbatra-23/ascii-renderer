@@ -32,21 +32,15 @@ export default function SizeSection({ plan, estimate }: { plan: ExportPlan | nul
   if (!plan) {
     return (
       <Section title="Size">
-        <p className="hint">Sizes appear once the first frame has rendered.</p>
+        <p className="hint">Sizes appear after the first frame renders.</p>
       </Section>
     );
   }
   const raster = isRaster(plan.format);
   // The large-file warning follows what the file may reach: the upper bound when there is a range.
   const most = estimate.range?.[1] ?? estimate.bytes;
-  const aux =
-    plan.format === 'txt' ? undefined : (
-      <>
-        <em>cell</em> {px(plan.cell.width)} × {px(plan.cell.height)} px
-      </>
-    );
   return (
-    <Section title="Size" aux={aux}>
+    <Section title="Size">
       {raster && <ScalePicker plan={plan} />}
       <OutputCard plan={plan} estimate={estimate} />
       {most !== null && most > LARGE_FILE_BYTES && <LargeFileHint plan={plan} bytes={most} upTo={estimate.range !== null} />}
@@ -82,8 +76,7 @@ function ScalePicker({ plan }: { plan: ExportPlan }) {
       <Segmented variant="two" full label="Scale" options={options} value={shown} onChange={choose} />
       {tooLarge && (
         <p className="hint">
-          {tooLarge.scale}× would be {dims(tooLarge.width, tooLarge.height)} px, more than this device can draw, so{' '}
-          <b>{plan.renderScale}×</b> is used.
+          {tooLarge.scale}× ({dims(tooLarge.width, tooLarge.height)} px) is too large for this device. Using <b>{plan.renderScale}×</b>.
         </p>
       )}
       {setting === 'custom' && (
@@ -111,16 +104,16 @@ function ScalePicker({ plan }: { plan: ExportPlan }) {
 /** Whole-pixel cells or a resample, and the nearest whole scale as a one-click alternative. */
 function CustomHint({ plan, onUseScale }: { plan: ExportPlan; onUseScale(scale: ExportScale): void }) {
   if (plan.targetWidth === undefined) {
-    return <p className="hint">A whole multiple of the grid: every cell stays whole pixels.</p>;
+    return <p className="hint">Every cell is a whole number of pixels.</p>;
   }
   const near = nearestScale(plan);
   return (
     <p className="hint">
-      Resampled from {plan.renderScale}×, so cells are {px(plan.cell.width)} × {px(plan.cell.height)} px and edges soften slightly.{' '}
+      Cells are {px(plan.cell.width)} × {px(plan.cell.height)} px, resampled from {plan.renderScale}×. Edges soften slightly.{' '}
       <button type="button" className="lnk" onClick={() => onUseScale(near)}>
         Use {near}×
       </button>{' '}
-      ({dims(plan.base.width * near, plan.base.height * near)}) for crisp cells.
+      ({dims(plan.base.width * near, plan.base.height * near)}) for sharp edges.
     </p>
   );
 }
@@ -133,7 +126,7 @@ function OutputCard({ plan, estimate }: { plan: ExportPlan; estimate: PanelEstim
   const live = useStore(selectIsLive);
   const size =
     estimate.bytes === null ? '–' : `${estimate.approx ? '≈ ' : ''}${estimate.range ? formatByteRange(...estimate.range) : formatBytes(estimate.bytes)}`;
-  const unknownWhy = live && motion ? 'Grows while you record' : 'Measured once the settings settle';
+  const unknownWhy = live && motion ? 'Grows while you record' : 'Measured when settings stop changing';
   return (
     <div className="outcard">
       <div className="top3">
@@ -150,8 +143,8 @@ function OutputCard({ plan, estimate }: { plan: ExportPlan; estimate: PanelEstim
         <p className="check">
           <Icon name="info" />
           <span>
-            {FORMAT_LABEL[plan.format]} needs even sizes, so it is padded to <b>{plan.width} × {plan.height}</b> with paper on the right
-            and bottom. Nothing is scaled.
+            {FORMAT_LABEL[plan.format]} needs even dimensions. Padded to <b>{plan.width} × {plan.height}</b> with the paper color on the
+            right and bottom.
           </span>
         </p>
       )}
@@ -188,14 +181,17 @@ function OutputCard({ plan, estimate }: { plan: ExportPlan; estimate: PanelEstim
 
 /** Large files: say so before the encode (on the estimate's upper bound), with the levers that shrink them. */
 function LargeFileHint({ plan, bytes, upTo }: { plan: ExportPlan; bytes: number; upTo: boolean }) {
-  const levers = isMotion(plan.format)
-    ? `A smaller scale, fewer columns${plan.format === 'gif' ? ', MP4 instead of GIF' : ''} or a trimmed range make it smaller.`
-    : 'A smaller scale or fewer columns make it smaller.';
+  const levers =
+    plan.format === 'gif'
+      ? 'Lower the scale or columns, turn on Trimmed range only, or use MP4.'
+      : isMotion(plan.format)
+        ? 'Lower the scale or columns, or turn on Trimmed range only.'
+        : 'Lower the scale or columns.';
   return (
     <p className="check warn note">
       <Icon name="alert" />
       <span>
-        {upTo ? 'Up to about' : 'About'} <b>{formatBytes(bytes)}</b>: larger than many sites and chat apps accept (often 10–25 MB). {levers}
+        {upTo ? 'Up to about' : 'About'} <b>{formatBytes(bytes)}</b>. Many sites and chat apps cap files at 10 to 25 MB. {levers}
       </span>
     </p>
   );
@@ -208,7 +204,7 @@ function AspectGlyph({ plan }: { plan: ExportPlan }) {
   const k = Math.min(64 / Math.max(out.width, src?.width ?? 0), 40 / Math.max(out.height, src?.height ?? 0));
   const box = (w: number, h: number) => ({ width: Math.max(2, Math.round(w * k)), height: Math.max(2, Math.round(h * k)) });
   return (
-    <span className="aspect" title="Output (solid) against the source size (dashed)" aria-hidden="true">
+    <span className="aspect" title="Solid: output. Dashed: source." aria-hidden="true">
       <span className="o" style={box(out.width, out.height)} />
       {src && <span className="s" style={box(src.width, src.height)} />}
     </span>

@@ -186,13 +186,13 @@ test('desktop: start → torus → modes, colours, live slider → split, zoom, 
 
   // Split compare: chips, keyboard handle, caption.
   await page.getByRole('button', { name: 'Split' }).click();
-  await expect(page.locator('.split .chip.l')).toHaveText('Original');
-  await expect(page.locator('.chip.r')).toHaveText(/^ASCII\s*·\s*Shape$/);
+  await expect(page.locator('.split .chip.l')).toHaveText('Source');
+  await expect(page.locator('.chip.r')).toHaveText('Shape');
   const handle = page.getByRole('slider', { name: 'Split position' });
   await handle.focus();
   await page.keyboard.press('Shift+ArrowRight');
   await expect(handle).toHaveAttribute('aria-valuenow', '60');
-  await expect(page.locator('.cap')).toContainText('Split 60%');
+  await expect(page.getByRole('contentinfo', { name: 'Status' })).toContainText('Split 60%');
   await keep(page, 'compare');
   await page.getByRole('button', { name: 'Output' }).click();
 
@@ -244,7 +244,8 @@ test('desktop: start → torus → modes, colours, live slider → split, zoom, 
   await expect(page.getByRole('complementary', { name: 'Adjust' })).toBeVisible();
 
   // Close returns to the start screen.
-  await page.getByRole('button', { name: 'Close torus.png' }).click();
+  await page.getByRole('button', { name: 'Back to start screen' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Close file' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -309,7 +310,8 @@ test('desktop: GIF and video fixtures → transport → GIF and MP4 export → c
   expect(mp4.bytes.subarray(4, 8).toString('latin1')).toBe('ftyp');
   await page.keyboard.press('Escape');
 
-  await page.getByRole('button', { name: 'Close testsrc2_4s.mp4' }).click();
+  await page.getByRole('button', { name: 'Back to start screen' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Close file' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -335,19 +337,5 @@ test('phone: sample → mode strip → sheet tabs → export sheet → back, no 
   await page.keyboard.press('Escape');
   await expect(page.getByRole('complementary', { name: 'Adjust' })).toBeVisible();
   expect(await page.evaluate(() => document.scrollingElement!.scrollWidth)).toBeLessThanOrEqual(390);
-  expect(errors).toEqual([]);
-});
-
-test('variant B: the theme switch re-tints the chrome and the render colours', async ({ page }) => {
-  const errors = watchErrors(page);
-  await boot(page);
-  await page.getByRole('radio', { name: 'Carbon' }).click();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'b');
-  await page.getByRole('button', { name: /torus\.png/ }).click();
-  await waitReady(page, 'torus.png');
-  const accent = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--acc').trim().toUpperCase());
-  expect(accent).toBe('#C9F04F');
-  expect(await read<string>(page, 's.params.ink')).toBe('#e4e7e8');
-  await keep(page, 'b-editor');
   expect(errors).toEqual([]);
 });

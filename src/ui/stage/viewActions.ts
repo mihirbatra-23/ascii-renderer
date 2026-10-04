@@ -82,7 +82,7 @@ function setFit(): void {
 
 export function fitView(): void {
   setFit();
-  useStore.getState().announce('Fit to stage');
+  useStore.getState().announce('Zoom to fit');
 }
 
 export function actualSize(): void {

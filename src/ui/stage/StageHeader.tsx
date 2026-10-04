@@ -20,23 +20,34 @@ import { exportPreview } from './exportSize';
 import { formatScale } from './format';
 import { fitView, formatZoom, zoomLimits, zoomStep } from './viewActions';
 
-/** The icon shows only on a narrow stage, except Split's, which the board always draws. */
-function ViewLabel({ icon, text, iconAlways }: { icon: IconName; text: string; iconAlways?: boolean }) {
+/** Text only; on a narrow stage all three segments switch to their icons together (stage.css). */
+function ViewLabel({ icon, text }: { icon: IconName; text: string }) {
   return (
     <>
-      <Icon name={icon} className={iconAlways ? undefined : 'vw-i'} />
+      <Icon name={icon} className="vw-i" />
       <span className="vw-l">{text}</span>
     </>
   );
 }
 
+/** Split says what it does in a tooltip; the anchor fills the segment (stage.css .vw-t). */
+function SplitLabel() {
+  return (
+    <Tooltip label="Compare with a slider" shortcut="S">
+      <span className="vw-t">
+        <ViewLabel icon="split" text="Split" />
+      </span>
+    </Tooltip>
+  );
+}
+
 const VIEWS: readonly SegmentedOption<ViewMode>[] = [
   { value: 'output', label: <ViewLabel icon="type" text="Output" />, ariaLabel: 'Output' },
-  { value: 'split', label: <ViewLabel icon="split" text="Split" iconAlways />, ariaLabel: 'Split' },
+  { value: 'split', label: <SplitLabel />, ariaLabel: 'Split' },
   { value: 'source', label: <ViewLabel icon="image" text="Source" />, ariaLabel: 'Source' },
 ];
 
-const COMPARE_LABELS: Record<CompareWith, string> = { source: 'Original', ramp: 'Ramp' };
+const COMPARE_LABELS: Record<CompareWith, string> = { source: 'Source', ramp: 'Ramp' };
 
 export default function StageHeader() {
   const mode = useStore((s) => s.view.mode);
@@ -50,8 +61,8 @@ export default function StageHeader() {
       <span className="sp" />
       <RulersToggle />
       <ZoomGroup />
-      <Tooltip label="Fit to stage" shortcut={shortcutLabel('view.fit')}>
-        <Button variant="ghost" icon="fit" className="fit-b" aria-label="Fit to stage" onClick={fitView}>
+      <Tooltip label="Zoom to fit" shortcut={shortcutLabel('view.fit')}>
+        <Button variant="secondary" icon="fit" className="fit-b" aria-label="Zoom to fit" onClick={fitView}>
           <span className="fit-l">Fit</span>
         </Button>
       </Tooltip>
@@ -62,9 +73,9 @@ export default function StageHeader() {
 /**
  * What the left of the Split shows: the untouched source (default) or a plain Ramp render of it,
  * which shows what the current mode adds over the classic density ramp. When the output is itself
- * a plain Ramp render the option is disabled with the reason, and the split shows the original.
+ * a plain Ramp render the option is disabled with the reason, and the split shows the source.
  *
- * The trigger's accessible name starts with its visible text ("vs Original", WCAG 2.5.3); on a
+ * The trigger's accessible name starts with its visible text ("vs Source", WCAG 2.5.3); on a
  * narrow stage only "vs" shows (stage.css), which the name still starts with.
  */
 function CompareMenu() {
@@ -74,26 +85,28 @@ function CompareMenu() {
   const blocked = rampCompareBlocked(params);
   const choose = (c: CompareWith) => {
     useStore.getState().setView({ compareWith: c });
-    useStore.getState().announce(`Split compares ${MODE_LABELS[params.mode]} with ${c === 'ramp' ? 'a Ramp render' : 'the original'}`);
+    useStore.getState().announce(`Split compares ${MODE_LABELS[params.mode]} with ${c === 'ramp' ? 'Ramp' : 'the source'}`);
   };
   return (
     <MenuButton
       label={
         <span className="cmp-l">
-          vs <span className="cmp-w">{COMPARE_LABELS[compareWith]}</span>
-          <span className="sr">(what Split compares with)</span>
+          <span className="cmp-k">vs</span>{' '}
+          <span className="cmp-w">{COMPARE_LABELS[compareWith]}</span>
+          <span className="sr">(left side of Split)</span>
         </span>
       }
+      variant="secondary"
+      size="md"
       align="start"
       width={240}
       className="cmp-b"
       items={[
-        { heading: 'Left of the split' },
-        { id: 'source', label: 'Original', aux: 'source', checked: compareWith === 'source', onSelect: () => choose('source') },
+        { heading: 'Compare with' },
+        { id: 'source', label: 'Source', checked: compareWith === 'source', onSelect: () => choose('source') },
         {
           id: 'ramp',
-          label: 'Ramp render',
-          aux: 'density only',
+          label: 'Ramp',
           checked: compareWith === 'ramp',
           disabled: blocked !== null,
           note: blocked ?? undefined,
@@ -127,7 +140,8 @@ function RulersToggle() {
   return (
     <IconButton
       icon="grid"
-      label={exporting ? `Rulers: ${rulers ? 'on' : 'off'} after export` : 'Rulers'}
+      variant="secondary"
+      label={exporting ? `Rulers (${rulers ? 'on' : 'off'} after export)` : 'Rulers'}
       shortcut={shortcutLabel('view.rulers')}
       pressed={rulers && !exporting}
       onClick={toggle}

@@ -41,12 +41,15 @@
 
 /* stage header pieces */
 .sbar{min-width:0}
-.sbar>:not(.sp){flex:none}
+.sbar>:not(.sp),.sbar .btn{flex:none}
 .sbar .lbl{white-space:nowrap}
 .views .vw-i{display:none}
 .zoom .zoom-v{min-width:56px;height:100%;border-left:1px solid var(--line-2);border-right:1px solid var(--line-2);display:grid;place-items:center;font:var(--fs-12)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-1)}
 .zoom button{flex:none}
-.cmp-b .cmp-l{font:var(--fs-12)/1 var(--mono);color:var(--tx-2)}
+.cmp-b .cmp-l{font:inherit;color:inherit}
+.cmp-b .cmp-l .cmp-k{color:var(--tx-3)}
+/* Split's tooltip anchor inside its segment lays the label out like the bare segment content */
+.views .vw-t{display:inline-flex;align-items:center;gap:6px;align-self:stretch;margin:0 calc(-1 * var(--s3));padding:0 var(--s3)}
 
 @container stage (max-width:720px){
   .sbar .lbl{display:none}
@@ -73,9 +76,14 @@
 }
 @container stage (max-width:440px){
   .cmp-b .cmp-w{display:none}
+  /* the 32 px secondary trigger and the icon segments tighten so Fit still fits beside them */
+  .sbar .cmp-b{gap:2px;padding:0 4px 0 8px}
+  .sbar:has(.cmp-b) .views button{padding:0 6px}
+  .sbar:has(.cmp-b) .zoom .zoom-v{min-width:40px}
+  .sbar:has(.cmp-b) .zoom button{width:24px}
 }
 @container stage (max-width:600px){
-  .cap .cap-src,.cap .cap-hint{display:none}
+  .cap .cap-src{display:none}
 }
 @container stage (max-width:420px){
   .cap .cap-out{display:none}

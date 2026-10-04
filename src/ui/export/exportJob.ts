@@ -254,7 +254,7 @@ function failed(error: unknown, label: string): void {
   const message = error instanceof Error ? error.message : String(error);
   store().setJob({ ...IDLE_JOB, status: 'error', error: message });
   // The panel shows failures inline (an alert); when it is closed (the file was closed meanwhile) a toast says it.
-  if (!store().exportUi.open) toast({ kind: 'error', title: `Export failed: ${label}`, body: message });
+  if (!store().exportUi.open) toast({ kind: 'error', title: `${label} export failed`, body: message });
 }
 
 /**
@@ -357,7 +357,7 @@ export async function runExport(): Promise<void> {
   } catch (error) {
     if (isAbortError(error)) {
       store().setJob(IDLE_JOB);
-      store().announce('Export cancelled');
+      store().announce('Export canceled');
       return;
     }
     failed(error, label);
@@ -391,18 +391,18 @@ export async function copyExport(kind: 'text' | 'svg' | 'png'): Promise<void> {
       const png = exportPng(engine, pngOptions(plan, exportUi));
       await copyPng(png.then((r) => r.blob));
       const { width, height } = await png;
-      copied('Copied PNG', `${width} × ${height} px. Paste into any app that takes images.`);
+      copied('Copied PNG', `${width} × ${height} px.`);
       return;
     }
     const snapshot = engine.snapshot();
     if (kind === 'text') {
       await copyText(snapshotToText(snapshot, '\n'));
-      copied(`Copied ${snapshot.rows} lines of text`, `${snapshot.cols} columns. Paste into any monospace editor.`);
+      copied(`Copied ${snapshot.rows} lines of text`, `${snapshot.cols} characters per line. Paste it into a monospace editor.`);
     } else {
       const transparentBackground = exportUi.transparent && canBeTransparent('svg', snapshot.params);
       const svg = await exportSvg(snapshot, { margin: exportUi.margin, transparentBackground, svgText: exportUi.svgText });
       await copySvg(await svg.blob.text());
-      copied('Copied SVG', `${svg.width} × ${svg.height} px. Paste into Figma or a code editor.`);
+      copied('Copied SVG', `${svg.width} × ${svg.height} px.`);
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

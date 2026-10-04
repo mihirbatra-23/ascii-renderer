@@ -26,7 +26,7 @@
 .strip:focus-visible{outline-offset:2px}
 .strip .out{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--g0) 72%,transparent)}
 .strip .rng{position:absolute;top:-1px;bottom:-1px;border-top:2px solid var(--tx-1);border-bottom:2px solid var(--tx-1)}
-.strip .hd{position:absolute;top:-1px;bottom:-1px;width:10px;background:var(--tx-1);display:grid;place-items:center;cursor:ew-resize}
+.strip .hd{position:absolute;top:-2px;bottom:-2px;width:10px;background:var(--tx-1);display:grid;place-items:center;cursor:ew-resize}
 .strip .hd::after{content:"";width:2px;height:12px;border-left:1px solid var(--g1);border-right:1px solid var(--g1)}
 .strip .hd:hover::after{border-color:var(--g3)}
 .strip .hd.in{left:-10px;border-radius:3px 0 0 3px}

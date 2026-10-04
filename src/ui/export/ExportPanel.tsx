@@ -1,6 +1,6 @@
 /**
  * The Export panel (spec §4.4–4.5): replaces the Adjust dock while open (App cross-fades the
- * swap). Header with back and Esc, Format / Size / Options in the scrolling body, and the sticky
+ * swap). Header with back (Esc), Format / Size / Options in the scrolling body, and the sticky
  * footer with Download ⌘↵. Sizes come from the engine's real geometry (./sizing).
  */
 import { useEffect, useRef, type RefObject } from 'react';
@@ -75,12 +75,9 @@ function ExportHeader() {
   const close = () => setExportUi({ open: false });
   return (
     <div className="dh">
-      <IconButton icon="arrow-l" size="sm" label="Back to Adjust" shortcut="Esc" onClick={close} />
+      <IconButton icon="arrow-l" label="Back to Adjust" shortcut="Esc" onClick={close} />
       <h2>Export</h2>
-      <kbd className="desk-only" aria-hidden="true">
-        Esc
-      </kbd>
-      <IconButton icon="x" size="sm" label="Close export" className="phone-only" onClick={close} />
+      <IconButton icon="x" label="Close export" className="phone-only" onClick={close} />
     </div>
   );
 }

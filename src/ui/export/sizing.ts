@@ -217,18 +217,18 @@ function checkOf(format: ExportFormat, out: PixelSize, grid: GridSize, geometry:
     const lineHeight = Number((geometry.cellH / geometry.fontSize).toFixed(2));
     return {
       kind: 'text',
-      text: `One line per row, ${grid.cols} characters each. In a monospace editor, line height ${lineHeight} keeps this aspect.`,
+      text: `${grid.cols} characters per line. Set line height to ${lineHeight} in your editor to keep the aspect.`,
     };
   }
-  if (!src) return { kind: 'aspect', text: 'No crop, no squash: the grid’s own aspect, every cell the same size.' };
+  if (!src) return { kind: 'aspect', text: 'Uses the grid’s own aspect.' };
   const ratio = ratioLabel(src.width, src.height);
   const sameAspect = out.width * src.height === out.height * src.width;
   // A whole multiple of the source: every source pixel maps to a whole block of output pixels.
   if (sameAspect && out.width % src.width === 0) {
-    return { kind: 'exact', text: `Matches source ${src.width} × ${src.height} exactly: ${ratio}, no crop, no squash.` };
+    return { kind: 'exact', text: `Exactly matches the ${src.width} × ${src.height} source (${ratio}).` };
   }
   if (sameAspect) {
-    return { kind: 'aspect', text: `Same ${ratio} aspect as the source ${src.width} × ${src.height}: no crop, no squash.` };
+    return { kind: 'aspect', text: `Same ${ratio} aspect as the ${src.width} × ${src.height} source.` };
   }
   const outAR = out.width / out.height;
   const srcAR = src.width / src.height;
@@ -237,7 +237,7 @@ function checkOf(format: ExportFormat, out: PixelSize, grid: GridSize, geometry:
   return {
     kind: 'warn',
     // Two decimals, like the stage caption, so both show the same delta.
-    text: `Rows round to ${grid.rows}, so the aspect is ${outAR.toFixed(3)} against the source’s ${srcAR.toFixed(3)} (${sign}${Math.abs(d).toFixed(2)}%).`,
+    text: `Rows round to ${grid.rows}. The aspect is off by ${sign}${Math.abs(d).toFixed(2)}%.`,
     fixColumns: exactColumns(src, grid.cols, geometry),
   };
 }

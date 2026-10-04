@@ -4,8 +4,8 @@
  *
  *   editing  "Source 1280 × 720 · Output 1280 × 720 px at 1× · 🔒 Aspect locked 16:9"
  *            (⚠ and the delta when rounding the rows bends the aspect)
- *   split    "Split 50% · Drag the handle, or focus it and use ← → · Press S to toggle"
- *   export   "Source … · Output 2560 × 1440 px at 2× · ✓ No crop, no squash"
+ *            (Split view keeps this line; the status bar shows the split position)
+ *   export   "Source … · Output 2560 × 1440 px at 2× · ✓ Aspect matches source"
  *
  * <ExportDims /> replaces the rulers while Export is open: neutral technical-drawing lines with
  * the output size ("2560 px", "1440 px").
@@ -28,7 +28,6 @@ const CAPTION_MIN_W = 560;
 export function Caption() {
   const layout = useStageLayout();
   const info = useStore((s) => s.media.info);
-  const split = useStore((s) => (s.view.mode === 'split' ? s.view.split : null));
   const exportUi = useStore((s) => (s.exportUi.open ? s.exportUi : null));
   if (!layout || !info) return null;
 
@@ -38,22 +37,6 @@ export function Caption() {
   // A narrow frame (tall source) lends the caption the room to its right rather than clipping it.
   const width = Math.max(vis.width, Math.min(CAPTION_MIN_W, box.width - vis.x - CAPTION_GAP));
   const style = { transform: `translate(${vis.x}px, ${top}px)`, width };
-
-  if (split !== null && !exportUi) {
-    return (
-      <p className="cap" style={style}>
-        <span>
-          Split <b>{Math.round(split * 100)}%</b>
-        </span>
-        <span className="cap-hint">
-          Drag the handle, or focus it and use <b>← →</b>
-        </span>
-        <span className="r">
-          Press <b>S</b> to toggle
-        </span>
-      </p>
-    );
-  }
 
   const source = (
     <span className="cap-src">
@@ -87,7 +70,7 @@ export function Caption() {
         ) : (
           <span className="ok">
             <Icon name="check" size={12} />
-            {videoNote(exportUi.format, !!out.padded) ?? 'No crop, no squash'}
+            {videoNote(exportUi.format, !!out.padded) ?? 'Aspect matches source'}
           </span>
         )}
       </p>
@@ -113,18 +96,16 @@ export function Caption() {
   );
 }
 
-/** Video codecs need even sizes; say whether this one is already even or padded with paper. */
+/** Video codecs need even sizes: a padded video says so (the Export card gives the detail). */
 function videoNote(format: ExportFormat, padded: boolean): string | null {
-  const codec = format === 'mp4' ? 'H.264' : format === 'webm' ? 'VP9' : null;
-  if (!codec) return null;
-  return padded ? `Padded to even size, ${codec}-safe` : `Even dimensions, ${codec}-safe`;
+  return (format === 'mp4' || format === 'webm') && padded ? 'Padded to even size' : null;
 }
 
 function AspectWarning({ delta, rows }: { delta: number; rows: number }) {
   return (
-    <span className="ok warn" title={`The source does not divide into whole rows; ${rows} rows bend the aspect slightly.`}>
+    <span className="ok warn" title="Row counts are rounded, which shifts the aspect slightly. A nearby Columns value may fit exactly.">
       <Icon name="alert" size={12} />
-      Aspect <b>{formatDelta(delta)}</b> · rows round to <b>{rows}</b>
+      Aspect <b>{formatDelta(delta)}</b> · Rows round to <b>{rows}</b>
     </span>
   );
 }

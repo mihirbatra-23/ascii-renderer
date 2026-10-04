@@ -13,14 +13,13 @@
 import { useEffect, useLayoutEffect, useRef, type Ref } from 'react';
 import { useRuntime } from '../../app/runtime';
 import { shortcutLabel } from '../../app/shortcuts';
-import { hasWebCodecs } from '../../export';
 import type { ExportFormat } from '../../export/types';
 import { IDLE_JOB, selectIsLive, useStore } from '../../state/store';
 import { Icon } from '../icons';
 import { Button, IconButton, TickMeter } from '../kit';
 import type { PanelEstimate } from './estimate';
 import { activeRecording, cancelExport, copyExport, COPY_PNG_MAX_PIXELS, jobFormat, lastJobMedia, runExport, stopRecording } from './exportJob';
-import { FORMAT_LABEL, isMotion, VIDEO_CODEC, type ExportPlan } from './sizing';
+import { FORMAT_LABEL, isMotion, type ExportPlan } from './sizing';
 
 /** Whether focus is nowhere useful (the focused control was removed or disabled). */
 const focusLost = () => !document.activeElement || document.activeElement === document.body;
@@ -62,7 +61,7 @@ function CopyButton({ plan }: { plan: ExportPlan | null }) {
       <Button
         icon="copy"
         disabled={!plan || tooLarge}
-        title={tooLarge ? 'Too large to copy at this size; download it instead' : undefined}
+        title={tooLarge ? 'Too large to copy. Download it instead.' : undefined}
         onClick={() => void copyExport('png')}
       >
         Copy PNG
@@ -107,12 +106,6 @@ function DownloadButton({ ref, plan, estimate, running }: DownloadButtonProps) {
   );
 }
 
-function encoderLabel(format: ExportFormat): string {
-  if (format === 'gif') return 'Worker · GIF';
-  if (!hasWebCodecs()) return 'MediaRecorder';
-  return `WebCodecs · ${VIDEO_CODEC[format]}`;
-}
-
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
 function EncodingFooter({ format }: { format: ExportFormat }) {
@@ -133,7 +126,7 @@ function EncodingFooter({ format }: { format: ExportFormat }) {
     <div className="df enc">
       <div className="prog">
         <div className="ln">
-          <span>Encoding in a worker. Keep editing.</span>
+          <span>Encoding. You can keep editing.</span>
           <span className="pc">{pct === null ? '–' : `${pct}%`}</span>
         </div>
         <TickMeter value={progress} label="Encoding progress" />
@@ -143,7 +136,6 @@ function EncodingFooter({ format }: { format: ExportFormat }) {
             {label.replace(/^Encoding frame/, 'Frame')}
             {left}
           </span>
-          <span className="meta">{encoderLabel(format)}</span>
         </div>
         <div className="ln acts">
           <Button ref={cancelRef} onClick={cancelExport}>
@@ -176,7 +168,7 @@ function RecordingFooter({ format }: { format: ExportFormat }) {
     <div className="df enc">
       <div className="prog">
         <div className="ln">
-          <span>Recording the preview, edits included.</span>
+          <span>Recording the preview. Edits are recorded too.</span>
           <span className="pc" role="timer" aria-label={`Recorded ${sec} seconds`}>
             {pad2(Math.floor(sec / 60))}:{pad2(sec % 60)}
           </span>
@@ -186,7 +178,7 @@ function RecordingFooter({ format }: { format: ExportFormat }) {
           <span className="meta">
             Frame {progress.frames} · {live.width} × {live.height}
           </span>
-          <span className="meta">MediaRecorder · {FORMAT_LABEL[progress.container]}</span>
+          <span className="meta">{FORMAT_LABEL[progress.container]}</span>
         </div>
         <div className="ln acts">
           <Button onClick={cancelExport}>Discard</Button>

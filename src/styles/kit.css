@@ -13,9 +13,17 @@
 .btn.icon{width:var(--h-ctl);padding:0}
 .btn.sm{height:28px;padding:0 var(--s2);font-size:var(--fs-12)}
 .btn.icon.sm{width:28px;padding:0}
-.btn[aria-pressed="true"]{background:var(--g3);border-color:var(--line-3);color:var(--tx-1)}
+/* toggles (Loop, Rulers): off is dimmer (never disabled-looking), on takes the kit's selected bar */
+.btn[aria-pressed="false"]{color:var(--tx-3)}
+.btn[aria-pressed="false"]:hover{color:var(--tx-1)}
+.btn[aria-pressed="true"]{background:var(--g3);border-color:var(--line-3);border-bottom-color:var(--acc);color:var(--tx-1);box-shadow:inset 0 -1px 0 var(--acc)}
 .btn:disabled,.btn[aria-disabled="true"]{background:var(--g1);border-color:var(--line);color:var(--tx-4);cursor:not-allowed;filter:none}
 .btn.primary:disabled,.btn.primary[aria-disabled="true"]{background:var(--g3);border-color:var(--line-2);color:var(--tx-3)}
+/* a disabled ghost button only dims (Undo, Redo, Reset all) */
+.btn.ghost:disabled,.btn.ghost[aria-disabled="true"]{background:transparent;border-color:transparent;color:var(--tx-4)}
+.btn[aria-pressed]:disabled{color:var(--tx-4);box-shadow:none;border-bottom-color:var(--line)}
+/* a dropdown trigger's chevron is tx-3, like the .select chevron */
+.btn[aria-haspopup="menu"]:not(.primary):not(.open-more)>.i:last-child{color:var(--tx-3)}
 .btn.primary[aria-expanded="true"]{box-shadow:0 0 0 1px var(--g1),0 0 0 3px var(--acc-line)}
 .btn.wide{width:100%}
 .btn.grow{flex:1}
@@ -23,15 +31,19 @@
 /* ---------- kbd ---------- */
 kbd{display:inline-block;font:500 var(--fs-11)/16px var(--mono);color:var(--tx-3);padding:0 4px;min-width:18px;text-align:center;border:1px solid var(--line-2);border-radius:var(--r-sm);background:var(--g1)}
 .btn kbd{margin-right:-4px}
-.btn.primary kbd{color:var(--acc-ink);border-color:color-mix(in srgb,var(--acc-ink) 32%,transparent);background:transparent}
-.btn.ghost kbd{background:transparent}
+/* a chip is one step darker than the surface it sits on: secondary g2 -> g1 (base), ghost -> g0,
+   primary -> acc-ink 12%, tooltip g2 -> g1 (base) */
+.btn.primary kbd{color:var(--acc-ink);background:color-mix(in srgb,var(--acc-ink) 12%,transparent);border-color:color-mix(in srgb,var(--acc-ink) 28%,transparent)}
+.btn.ghost kbd{background:var(--g0)}
 .btn:disabled kbd{color:inherit;border-color:var(--line)}
+.btn.primary:disabled kbd,.btn.primary[aria-disabled="true"] kbd{background:var(--g2);border-color:var(--line-2);color:var(--tx-4)}
 
 /* ---------- segmented ---------- */
 .seg{display:inline-grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);height:var(--h-ctl);border:1px solid var(--line-2);border-radius:var(--r-md);background:var(--g1);overflow:hidden}
 .seg.full{display:grid;width:100%}
 .seg button{display:flex;align-items:center;justify-content:center;gap:6px;height:100%;padding:0 var(--s3);border:0;border-left:1px solid var(--line-2);background:transparent;color:var(--tx-2);font-size:var(--fs-13);font-weight:500;white-space:nowrap;transition:background var(--t-fast),color var(--t-fast),box-shadow var(--t-base) var(--ease-out)}
 .seg button:first-child{border-left:0}
+.seg.icons button{padding:0 10px}
 .seg button:hover{color:var(--tx-1);background:var(--g2)}
 .seg button[aria-pressed="true"],.seg button[aria-checked="true"]{background:var(--g3);color:var(--tx-1);box-shadow:inset 0 -2px 0 var(--acc)}
 .seg button:focus-visible{outline-offset:-2px}
@@ -171,10 +183,10 @@ html[data-adjusting="drag"] *{user-select:none!important}
 .sec:last-child{border-bottom:0}
 .sh{display:flex;align-items:center;justify-content:space-between;gap:var(--s2);height:20px;margin-bottom:var(--s2)}
 .sh h3,.disc .t{margin:0;font:500 var(--fs-11)/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--tx-3)}
-.sh .aux{display:flex;align-items:center;gap:6px;font:var(--fs-12)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-2)}
+.sh .aux{display:flex;align-items:center;gap:6px;font:var(--fs-11)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-2)}
 .sh .aux em{font-style:normal;color:var(--tx-3)}
 .kbd-hint{display:inline-flex;align-items:center;gap:6px}
-.sh .btn.icon{margin-right:-8px}
+.sh .btn.icon{margin-right:-6px}
 .hint{margin:var(--s2) 0 0;font-size:var(--fs-12);line-height:18px;color:var(--tx-3)}
 .hint b{font-weight:500;color:var(--tx-2)}
 /* a one-click fix inside a hint or check line ("Use 168 columns", "Invert") */
@@ -187,7 +199,7 @@ html[data-adjusting="drag"] *{user-select:none!important}
 .disc:focus-visible{outline-offset:0}
 .disc .aux{flex:1;display:flex;align-items:center;justify-content:flex-end;gap:var(--s2);font:var(--fs-12)/1 var(--sans);color:var(--tx-2);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .disc .aux.m{font-family:var(--mono)}
-.disc>.i{color:var(--tx-3);transition:transform var(--t-base) var(--ease-out)}
+.disc>.i{margin-left:auto;color:var(--tx-3);transition:transform var(--t-base) var(--ease-out)}
 .disc[aria-expanded="true"]>.i{transform:rotate(90deg)}
 .disc .swd{width:10px;height:10px;border-radius:2px;box-shadow:0 0 0 1px var(--line-3)}
 .disc-body{padding:var(--s1) var(--s2) var(--s2) 0}
@@ -229,17 +241,37 @@ html[data-adjusting="drag"] *{user-select:none!important}
 .toast .acts{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s2)}
 .toast>.btn .i{margin:0;color:inherit}
 
-/* ---------- tooltip ---------- */
-.tip{position:fixed;z-index:60;display:flex;align-items:center;gap:var(--s2);height:24px;padding:0 var(--s2);font:var(--fs-12)/1 var(--sans);color:var(--tx-1);background:var(--g1);border:1px solid var(--line-2);border-radius:var(--r-sm);box-shadow:var(--shadow-pop);white-space:nowrap;pointer-events:none;animation:fade-in var(--t-base) var(--ease-out)}
-.tip kbd{background:transparent;margin-right:-4px}
+/* ---------- tooltip: one g2 surface, a label tip and a note tip (up to 240px) ---------- */
+.tip{position:fixed;z-index:60;display:flex;align-items:center;gap:var(--s2);height:24px;padding:0 var(--s2);font:var(--fs-12)/1 var(--sans);color:var(--tx-1);background:var(--g2);border:1px solid var(--line-2);border-radius:var(--r-md);box-shadow:var(--shadow-pop);white-space:nowrap;pointer-events:none;animation:fade-in var(--t-base) var(--ease-out)}
+.tip kbd{margin-right:-4px}
+.tip kbd+kbd{margin-left:-4px}
+.tip.note{display:block;height:auto;width:max-content;max-width:240px;padding:7px 10px 8px;white-space:normal;font:var(--fs-12)/18px var(--sans);color:var(--tx-2)}
+.tip.note p{margin:0;text-wrap:balance}
+.tip.note code{font:var(--fs-12)/1 var(--mono);color:var(--tx-1);letter-spacing:.06em}
+.tip.note .tm{display:flex;align-items:center;gap:6px;margin-top:6px;font:var(--fs-11)/16px var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-3)}
+.tip.note .tm b{font-weight:400;color:var(--tx-2)}
+.tip.note .tm .sp{flex:1;min-width:8px}
+.tip.note .tm kbd{margin:0}
+/* indicator: a dotted rule under a label that has a tip (1px dots on a 3px pitch); it brightens with
+   the label on hover, while the tip is open, or while the row's control has keyboard focus */
+.has-tip{--tl-c:var(--tx-4);padding-bottom:1px;background:linear-gradient(90deg,var(--tl-c) 1px,transparent 1px) 0 100%/3px 1px repeat-x;transition:color var(--t-fast)}
+.has-tip:hover,.has-tip.on,.row:has(input:focus-visible) .has-tip,.swrow:has(input:focus-visible) .has-tip,.segrow:has(:focus-visible) .has-tip,.slider-hero:has(.trk input:focus-visible) .has-tip{--tl-c:var(--tx-3);color:var(--tx-1)}
+.row.off .has-tip:hover,.row.off .has-tip.on{color:var(--tx-3)}
 
-/* ---------- dialog (shortcuts sheet; a bottom sheet on phone) ---------- */
+/* ---------- dialog (shortcuts sheet, presets, confirm; a bottom sheet on phone) ---------- */
 .dialog{padding:0;width:min(600px,calc(100vw - 32px));max-height:min(680px,calc(100vh - 64px));border:1px solid var(--line-2);border-radius:var(--r-lg);background:var(--g1);color:var(--tx-1);box-shadow:var(--shadow-pop);overflow:hidden}
 .dialog[open]{display:flex;flex-direction:column;animation:rise-in var(--t-base) var(--ease-out)}
 .dialog::backdrop{background:rgba(0,0,0,.55)}
 .dlg-h{flex:none;display:flex;align-items:center;gap:var(--s2);height:var(--h-bar);padding:0 var(--s2) 0 var(--s4);border-bottom:1px solid var(--line)}
 .dlg-h h2{margin:0;flex:1;font-size:var(--fs-13);font-weight:600;letter-spacing:-.005em}
 .dlg-b{flex:1;min-height:0;overflow:auto;padding:var(--s3) var(--s4) var(--s4)}
+/* footer slot: actions on the right, a hairline above */
+.dlg-f{flex:none;display:flex;align-items:center;justify-content:flex-end;gap:var(--s2);min-height:var(--h-bar);padding:var(--s2) var(--s2) var(--s2) var(--s4);border-top:1px solid var(--line)}
+/* confirm (alertdialog, no header): title and one line, then the footer */
+.dialog.confirm-dlg{width:min(400px,calc(100vw - 32px))}
+.confirm-dlg .dlg-b{padding:var(--s4)}
+.confirm-dlg .dlg-ti{margin:0 0 6px;font:600 var(--fs-14)/20px var(--sans);letter-spacing:-.005em;color:var(--tx-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.confirm-dlg .dlg-t{margin:0;font-size:var(--fs-13);line-height:20px;color:var(--tx-2)}
 
 /* ---------- bottom-sheet grabber (phone dock) ---------- */
 .grab{display:none}
@@ -257,7 +289,7 @@ html[data-adjusting="drag"] *{user-select:none!important}
 /* A key and the words that go with it ("M to cycle", "press 1–3") sit in one .kbd-hint, so a touch
    screen without a keyboard drops both rather than leaving the words orphaned. */
 @media (hover:none) and (pointer:coarse){
-  .sh .aux kbd,.swrow>kbd,.btn kbd,.dh>kbd,.tile-f kbd,.kbd-hint{display:none}
+  .sh .aux kbd,.swrow>kbd,.btn kbd,.dh>kbd,.tile-f kbd,.kbd-hint,.tip kbd{display:none}
 }
 
 /* ---------- shared motion ---------- */
@@ -277,6 +309,9 @@ html[data-adjusting="drag"] *{user-select:none!important}
   .app:has(.dock[data-detent="full"]) .toasts{position:fixed;top:calc(var(--h-top) + var(--s2));bottom:auto;justify-content:flex-start}
   .toast{width:auto}
   .dialog{width:100%;max-width:100%;max-height:88%;margin:auto 0 0;border-width:1px 0 0;border-radius:var(--r-sheet) var(--r-sheet) 0 0;box-shadow:0 -12px 32px rgba(0,0,0,.5)}
+  .dialog.confirm-dlg,.dialog.preset-dlg{width:100%}
+  .dlg-f{padding:var(--s3) var(--s4) calc(var(--s3) + env(safe-area-inset-bottom))}
+  .dlg-f>.btn{flex:1}
 }
 @media (prefers-reduced-motion:reduce){
   .meter.ind::after{animation:none;opacity:0}

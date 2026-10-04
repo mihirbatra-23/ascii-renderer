@@ -47,7 +47,7 @@ describe('planExport', () => {
 
   it('tells TXT users the line height that keeps the aspect', () => {
     const geo: EngineGeometry = { ...torus, geometry: { ...geometry, cellH: 16, fontSize: 13.333 } };
-    expect(planExport(input({ format: 'txt' }), geo, source).check.text).toContain('line height 1.2 keeps this aspect');
+    expect(planExport(input({ format: 'txt' }), geo, source).check.text).toContain('Set line height to 1.2 in your editor');
   });
 
   it('checks the aspect from integers', () => {

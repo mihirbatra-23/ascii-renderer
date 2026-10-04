@@ -1,6 +1,7 @@
 /**
- * Grid: the Columns hero slider. The head derives rows and the cell from the same geometry the
- * engine uses (rows = round(cols · H/W · cellW/cellH), ALGORITHM §1).
+ * Grid: the Columns hero slider. The head shows the rows, derived with the same geometry the
+ * engine uses (rows = round(cols · H/W · cellW/cellH), ALGORITHM §1); the cell is in Advanced.
+ * [ and ] step the columns (Shortcuts sheet, and the Columns tooltip).
  */
 import { GRID_LIMITS, gridSize } from '../../engine/geometry';
 import { DEFAULT_PARAMS } from '../../engine/types';
@@ -8,6 +9,7 @@ import { NUMERIC_SPECS } from '../../state/params';
 import { useStore } from '../../state/store';
 import { HeroSlider, Section } from '../kit';
 import { commitLive, setLive } from './controls';
+import { TIPS } from './copy';
 import { capReason } from './gridCap';
 import { useCellGeometry } from './glyphInfo';
 
@@ -26,12 +28,13 @@ export function GridSection() {
       tab="adjust"
       aux={
         <>
-          <em>rows</em> {grid ? grid.rows : '–'} <em>auto · cell</em> {cell.cellW} × {cell.cellH}
+          {grid ? grid.rows : '–'} <em>rows</em>
         </>
       }
     >
       <HeroSlider
         label="Columns"
+        tooltip={{ body: TIPS.columns, shortcut: ['[', ']'] }}
         unit="col"
         value={columns}
         min={min}
@@ -46,10 +49,10 @@ export function GridSection() {
       />
       {grid && grid.cols < columns && (
         <p className="hint">
-          Capped at <b>{grid.cols}</b> columns:{' '}
+          Limited to <b>{grid.cols}</b> columns.{' '}
           {capReason(grid, srcW, srcH, cell) === 'rows'
-            ? `a grid holds at most ${GRID_LIMITS.maxRows} rows.`
-            : `a grid holds at most ${GRID_LIMITS.maxCells.toLocaleString('en-US')} cells.`}
+            ? `A grid has at most ${GRID_LIMITS.maxRows} rows.`
+            : `A grid has at most ${GRID_LIMITS.maxCells.toLocaleString('en-US')} cells.`}
         </p>
       )}
     </Section>

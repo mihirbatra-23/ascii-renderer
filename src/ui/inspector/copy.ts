@@ -1,47 +1,33 @@
-/** Dock wording that depends on the render mode, charset or colour mode (design spec §4.2, §11). */
+/** Dock wording that depends on the render mode, glyph set or color mode, and the dock's tooltips. */
 import type { CharsetPreset, ColorMode, DitherPattern, HalftoneShape, RenderMode } from '../../engine/types';
 
 /** One line under the mode tiles: what the selected mode does. */
 export const MODE_HINTS: Record<RenderMode, string> = {
-  shape: 'Matches each cell’s shape, so edges read as lines.',
-  ramp: 'Picks glyphs by density alone. The classic look.',
-  braille: '2 × 4 dots per cell. Fine detail at small sizes.',
-  halftone: 'Dots sized by tone on an angled screen, like print.',
-  blocks: '2 × 2 quadrant blocks per cell. Bold and graphic.',
+  shape: 'Picks glyphs by each cell’s shape and brightness.',
+  ramp: 'Picks glyphs by brightness only.',
+  braille: 'Draws each cell as 2 × 4 braille dots.',
+  halftone: 'Draws a grid of dots sized by brightness.',
+  blocks: 'Draws each cell as 2 × 2 quarter blocks.',
 };
 
-/** Shape and Ramp can add the edge layer; the mode hint says so while it is on. */
+/** Shape and Ramp can add the edge layer (contour strokes over the fill). */
 export function hasEdgeLayer(mode: RenderMode): boolean {
   return mode === 'shape' || mode === 'ramp';
 }
 
-export const MODE_HINTS_WITH_EDGES: Partial<Record<RenderMode, string>> = {
-  shape: 'Matches each cell’s shape; strong edges also get contour strokes.',
-  ramp: 'Picks glyphs by density, with contour strokes on strong edges.',
+/** Modes that draw their own marks instead of matching glyphs from a glyph set. */
+export const PROCEDURAL: Partial<Record<RenderMode, { note: string }>> = {
+  braille: { note: 'Braille draws its own dot patterns.' },
+  blocks: { note: 'Blocks draws its own block shapes.' },
+  halftone: { note: 'Halftone draws dots.' },
 };
 
-/** The collapsed Advanced row lists what it holds for the current mode. */
-export const ADVANCED_SUMMARY: Record<RenderMode, string> = {
-  shape: 'Dither, font, cell, line height',
-  ramp: 'Font, cell, line height',
-  braille: 'Cell, line height, levels',
-  halftone: 'Dot shape, angle, cell, line height',
-  blocks: 'Cell, line height, levels',
-};
-
-/** Modes that draw their own marks instead of matching glyphs from a character set. */
-export const PROCEDURAL: Partial<Record<RenderMode, { aux: string; line: string; note: string }>> = {
-  braille: { aux: '256 patterns', line: 'Dot patterns · 256', note: 'Braille draws its own 2 × 4 dot patterns.' },
-  blocks: { aux: '16 blocks', line: 'Quadrant blocks · 16', note: 'Blocks draws its own 2 × 2 quadrant shapes.' },
-  halftone: { aux: 'no glyphs', line: 'Dots, no glyphs', note: 'Halftone draws dots, not glyphs.' },
-};
-
-export const CHARSETS: Record<CharsetPreset, { label: string; aux: string }> = {
-  ascii: { label: 'Full ASCII', aux: 'printable' },
-  minimal: { label: 'Minimal', aux: 'tonal ramp' },
-  dense: { label: 'Dense', aux: 'ASCII + Latin-1' },
-  lines: { label: 'Lines', aux: 'strokes' },
-  custom: { label: 'Custom', aux: 'your glyphs' },
+export const CHARSETS: Record<CharsetPreset, { label: string }> = {
+  ascii: { label: 'Full ASCII' },
+  minimal: { label: 'Minimal' },
+  dense: { label: 'Extended' },
+  lines: { label: 'Lines' },
+  custom: { label: 'Custom' },
 };
 
 export const COLOR_LABELS: Record<ColorMode, string> = { mono: 'Mono', source: 'Source', duotone: 'Duotone' };
@@ -54,3 +40,28 @@ export const DOT_SHAPE_LABELS: Record<HalftoneShape, string> = {
   diamond: 'Diamond',
   line: 'Line',
 };
+
+/**
+ * Tooltips (final copy table). Slider tips get their range line from the control's own min, max and
+ * step; numbers are glued to their word with a no-break space ("below 1").
+ */
+export const TIPS = {
+  columns: 'Cells across the image.',
+  brightness: 'Lightens or darkens the image.',
+  contrast: 'Spreads light and dark apart above 1, pulls them together below 1.',
+  gamma: 'Lightens midtones below 1, darkens them above 1.',
+  edgeSharpness: 'Sharpens edges between neighboring cells.',
+  dither: 'Adds fine grain to break up banding.',
+  ditherPattern: 'How midtones become dots. Ordered is a regular pattern, Noise is irregular.',
+  invert: 'Swaps light and dark',
+  stability: 'Reduces flicker between frames.',
+  edgeThreshold: 'Edge strength needed for a contour line. Higher draws fewer lines.',
+  density: 'Glyphs in use, from least to most ink.',
+  shapeSharpness: 'Exaggerates light and dark inside each cell.',
+  halftoneAngle: 'Rotates the dot grid.',
+  lineHeight: 'Cell height relative to the font size. Higher means fewer rows.',
+  autoLevels: 'Stretches the image’s darkest and lightest tones to the full range.',
+  shadowInk: 'Color of the faintest glyphs.',
+  ink: 'Glyph color. In Duotone, the color of the densest glyphs.',
+  paper: 'Background color.',
+} as const;

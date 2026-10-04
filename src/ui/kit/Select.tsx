@@ -3,7 +3,7 @@
  * 240 px listbox opens 4 px below. Keyboard: ↓ ↑ / Enter / Space open; in the list ↓ ↑ Home End
  * move, a letter jumps, Enter / Space choose, Escape closes. Focus returns to the trigger.
  *
- *   <Select label="Character set" value={preset} options={…} onChange={…} aux="printable" />
+ *   <Select label="Glyph set" value={preset} options={…} onChange={…} />
  */
 import { useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Icon } from '../icons';

@@ -7,25 +7,26 @@
 import { useStore } from '../../state/store';
 import { Section } from '../kit';
 import { ParamSlider, ParamSwitch } from './controls';
-import { hasEdgeLayer } from './copy';
+import { hasEdgeLayer, TIPS } from './copy';
+
+// The stroke set matches EDGE_STROKES (engine).
+const CONTOUR_TIP = {
+  body: (
+    <>
+      Adds <code>| / \ - _</code> strokes along strong edges.
+    </>
+  ),
+};
 
 export function EdgesSection() {
   const mode = useStore((s) => s.params.mode);
   const edges = useStore((s) => s.params.edges);
   if (!hasEdgeLayer(mode)) return null;
   return (
-    <Section
-      title="Edges"
-      tab="adjust"
-      aux={
-        <>
-          <em>strokes</em> {'/|\\_'}
-        </>
-      }
-    >
-      <ParamSwitch param="edges" label="Contour lines" sub="Strokes along strong edges, over the fill" />
+    <Section title="Edges" tab="adjust">
+      <ParamSwitch param="edges" label="Contour lines" tooltip={CONTOUR_TIP} />
       <div className="rows">
-        <ParamSlider param="edgeThreshold" label="Threshold" disabled={!edges} />
+        <ParamSlider param="edgeThreshold" label="Threshold" tooltip={TIPS.edgeThreshold} disabled={!edges} />
       </div>
     </Section>
   );

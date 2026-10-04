@@ -8,7 +8,7 @@ import type { FontId, HalftoneShape } from '../../engine/types';
 import { useStore } from '../../state/store';
 import { Disclosure, Select } from '../kit';
 import { LabelledRow, ParamSlider, ParamSwitch, store, useRememberedOpen } from './controls';
-import { ADVANCED_SUMMARY, DOT_SHAPE_LABELS } from './copy';
+import { DOT_SHAPE_LABELS, TIPS } from './copy';
 import { useCellGeometry } from './glyphInfo';
 
 const FONT_IDS: readonly FontId[] = ['jetbrains-mono', 'ibm-plex-mono', 'geist-mono'];
@@ -21,25 +21,25 @@ export function AdvancedSection() {
   const [open, setOpen] = useRememberedOpen('advanced');
   const glyphMode = mode === 'shape' || mode === 'ramp';
   return (
-    <Disclosure title="Advanced" tab="adjust" summary={ADVANCED_SUMMARY[mode]} open={open} onOpenChange={setOpen}>
+    <Disclosure title="Advanced" tab="adjust" open={open} onOpenChange={setOpen}>
       <div className="rows">
         {mode === 'shape' && (
           <>
-            <ParamSlider param="dither" label="Dither" />
-            <ParamSlider param="shapeSharpness" label="Shape contrast" />
+            <ParamSlider param="dither" label="Dither" tooltip={TIPS.dither} />
+            <ParamSlider param="shapeSharpness" label="Shape contrast" tooltip={TIPS.shapeSharpness} />
           </>
         )}
         {mode === 'halftone' && (
           <>
-            <ParamSlider param="halftoneAngle" label="Dot angle" />
+            <ParamSlider param="halftoneAngle" label="Dot angle" tooltip={{ body: TIPS.halftoneAngle, unit: '°' }} />
             <DotShapeRow />
           </>
         )}
         {glyphMode && <FontRow />}
-        <ParamSlider param="lineHeight" label="Line height" />
+        <ParamSlider param="lineHeight" label="Line height" tooltip={TIPS.lineHeight} />
       </div>
       <CellFacts />
-      <ParamSwitch param="autoLevels" label="Auto levels" sub="Stretch the image’s own black and white to full range." />
+      <ParamSwitch param="autoLevels" label="Auto levels" tooltip={TIPS.autoLevels} />
     </Disclosure>
   );
 }

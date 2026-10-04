@@ -1,14 +1,15 @@
 /**
- * Colour swatch (spec §5): a 40 px tile with a 16 px chip, the name and the hex value. It opens the
- * 240 px colour popover (./ColorPicker: saturation / brightness plane, hue strip, hex field), the
+ * Color swatch (spec §5): a 40 px tile with a 16 px chip, the name and the hex value. It opens the
+ * 240 px color popover (./ColorPicker: saturation / brightness plane, hue strip, hex field), the
  * same in every browser. Changes preview live (onChange); each drag, key press or hex entry ends
  * with onCommit, and so does closing the popover.
  *
  *   <SwatchField label="Ink" value={ink} onChange={(v) => setParam('ink', v, { commit: false })} onCommit={commitParams} />
  */
-import { useState, type KeyboardEvent } from 'react';
+import { useCallback, useState, type KeyboardEvent } from 'react';
 import { ColorPicker } from './ColorPicker';
 import { Popover } from './Popover';
+import { useTip } from './Tooltip';
 import { cx } from './util';
 
 export interface SwatchFieldProps {
@@ -18,6 +19,8 @@ export interface SwatchFieldProps {
   onChange(value: string): void;
   onCommit?(): void;
   disabled?: boolean;
+  /** Note tip on the swatch (no indicator), e.g. 'Background color.' */
+  tooltip?: string;
   className?: string;
 }
 
@@ -32,8 +35,17 @@ function cycleFocus(e: KeyboardEvent<HTMLElement>): void {
   next.focus();
 }
 
-export function SwatchField({ label, value, onChange, onCommit, disabled, className }: SwatchFieldProps) {
+export function SwatchField({ label, value, onChange, onCommit, disabled, tooltip, className }: SwatchFieldProps) {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
+  const tip = useTip(tooltip ? { body: tooltip } : null, { align: 'start' });
+  const { anchorRef } = tip;
+  const setRefs = useCallback(
+    (el: HTMLButtonElement | null) => {
+      setAnchor(el);
+      anchorRef(el);
+    },
+    [anchorRef],
+  );
   const [open, setOpen] = useState(false);
   const hex = value.replace('#', '').toUpperCase();
   const close = (focusSwatch: boolean) => {
@@ -44,21 +56,24 @@ export function SwatchField({ label, value, onChange, onCommit, disabled, classN
   return (
     <>
       <button
-        ref={setAnchor}
+        ref={setRefs}
         type="button"
         className={cx('swatch', disabled && 'off', className)}
         disabled={disabled}
         aria-haspopup="dialog"
         aria-expanded={open}
-        aria-label={`${label} colour ${hex}`}
+        aria-label={`${label} color, ${hex}`}
+        {...tip.hover}
+        {...tip.focus}
         onClick={() => (open ? close(false) : setOpen(true))}
       >
         <span className="c" style={{ background: value }} />
         <span className="n">{label}</span>
         <span className="h">{hex}</span>
       </button>
+      {tip.node}
       <Popover anchor={anchor} open={open} onClose={close} closeOnTab={false}>
-        <div className="cpop" role="dialog" aria-label={`${label} colour`} onKeyDown={cycleFocus}>
+        <div className="cpop" role="dialog" aria-label={`${label} color`} onKeyDown={cycleFocus}>
           <ColorPicker label={label} value={value} onChange={onChange} onCommit={onCommit} />
         </div>
       </Popover>

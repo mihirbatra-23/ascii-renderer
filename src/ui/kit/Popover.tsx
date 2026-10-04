@@ -1,5 +1,5 @@
 /**
- * Anchored popover layer used by Select, MenuButton and the colour swatches: rendered in a portal
+ * Anchored popover layer used by Select, MenuButton and the color swatches: rendered in a portal
  * (so the dock's scroll container never clips it), 4 px below its anchor, flipped above when there
  * is no room, kept inside the viewport. Closes on outside pointerdown, Escape, resize and (unless
  * `closeOnTab` is off) Tab.
@@ -19,7 +19,7 @@ export interface PopoverProps {
   align?: 'start' | 'end';
   /**
    * Tab closes it and moves on from the anchor (menus, listboxes: one focus stop). Off for a
-   * popover with several controls, which keeps Tab inside itself (the colour popover).
+   * popover with several controls, which keeps Tab inside itself (the color popover).
    */
   closeOnTab?: boolean;
   className?: string;

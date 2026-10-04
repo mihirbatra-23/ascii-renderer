@@ -1,5 +1,5 @@
 /**
- * The swatch popover's picker (spec §5 "Swatch and colour popover"): a saturation / brightness
+ * The swatch popover's picker (spec §5 "Swatch and color popover"): a saturation / brightness
  * plane, a hue strip and a hex field. Every change previews live (onChange); the end of a drag, a
  * key release or a committed hex value closes the gesture (onCommit), so one pick is one undo
  * entry.
@@ -17,7 +17,7 @@ export interface ColorPickerProps {
   value: string;
   onChange(hex: string): void;
   onCommit?(): void;
-  /** What the colour is for, e.g. 'Ink' (accessible names). */
+  /** What the color is for, e.g. 'Ink' (accessible names). */
   label: string;
 }
 
@@ -59,7 +59,7 @@ export function ColorPicker({ value, onChange, onCommit, label }: ColorPickerPro
   }
 
   // The value as last sent or received. A drag's handlers outlive the render they were made in,
-  // so comparing against `value` there would swallow a move back to the starting colour.
+  // so comparing against `value` there would swallow a move back to the starting color.
   const latest = useRef(value);
   useLayoutEffect(() => {
     latest.current = value;
@@ -136,7 +136,7 @@ export function ColorPicker({ value, onChange, onCommit, label }: ColorPickerPro
   );
 }
 
-/** The hex value as text: applied on Enter or when leaving the field; anything that is not a colour reverts. */
+/** The hex value as text: applied on Enter or when leaving the field; anything that is not a color reverts. */
 function HexField({ value, label, onChange, onCommit }: { value: string; label: string; onChange(hex: string): void; onCommit(): void }) {
   const [draft, setDraft] = useState<string | null>(null);
   const shown = value.slice(1).toUpperCase();

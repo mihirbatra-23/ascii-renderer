@@ -3,7 +3,7 @@
  * src/styles/kit.css). They hold no app state; screens wire them to the store.
  */
 export { Button, IconButton, LinkButton, Kbd, type ButtonProps, type ButtonVariant, type IconButtonProps } from './Button';
-export { Tooltip, type TooltipProps } from './Tooltip';
+export { Tooltip, TipLabel, useTip, formatRange, rowTip, type TooltipProps, type TipContent, type TipOptions, type TipController, type RowTooltip } from './Tooltip';
 export { Popover, type PopoverProps } from './Popover';
 export { Segmented, type SegmentedOption, type SegmentedProps } from './Segmented';
 export { Tile, ModeTiles, MODE_LABELS, type TileProps, type ModeTilesProps } from './Tile';

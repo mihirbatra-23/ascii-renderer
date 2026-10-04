@@ -1,8 +1,8 @@
 /**
- * Menu button (e.g. the dock's Presets menu): a Button with a chevron that opens a role="menu"
+ * Menu button (e.g. the dock's Presets menu): a 32 px secondary Button (by default) with a chevron that opens a role="menu"
  * popover. ↓ ↑ Home End move focus, Enter / Space activate, Escape / Tab close.
  *
- *   <MenuButton label="Presets" items={[{ heading: 'Built-in' }, { id: 'crisp', label: 'Crisp lines', onSelect }, 'separator', …]} />
+ *   <MenuButton label="Presets" items={[{ heading: 'Built-in' }, { id: 'line-art', label: 'Line art', onSelect }, 'separator', …]} />
  */
 import { Fragment, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Icon, type IconName } from '../icons';
@@ -40,7 +40,7 @@ export interface MenuButtonProps {
 
 const ITEM = '[role^="menuitem"]:not([aria-disabled="true"])';
 
-export function MenuButton({ label, items, ariaLabel, icon, variant = 'ghost', size = 'sm', align = 'end', width, className }: MenuButtonProps) {
+export function MenuButton({ label, items, ariaLabel, icon, variant = 'secondary', size = 'md', align = 'end', width, className }: MenuButtonProps) {
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);

@@ -1,5 +1,5 @@
 /**
- * Colour conversions for the swatch popover: `#rrggbb` ↔ HSV. The picker keeps its own HSV while
+ * Color conversions for the swatch popover: `#rrggbb` ↔ HSV. The picker keeps its own HSV while
  * open, so hue survives dragging through grey (saturation 0) or black (value 0), where the hex
  * value alone would lose it.
  */
@@ -13,7 +13,7 @@ export interface Hsv {
   v: number;
 }
 
-/** `#rgb` / `#rrggbb` (the '#' optional, any case) → `#rrggbb`, or null when it is not a colour. */
+/** `#rgb` / `#rrggbb` (the '#' optional, any case) → `#rrggbb`, or null when it is not a color. */
 export function normalizeHex(text: string): string | null {
   const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(text.trim());
   if (!m) return null;

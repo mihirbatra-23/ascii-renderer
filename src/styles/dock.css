@@ -1,6 +1,6 @@
 /* Inspector (Adjust dock) pieces that are not generic kit components. */
 
-/* labelled segmented row (e.g. Output fps): same 96px label column as slider rows */
+/* labelled segmented row (e.g. Dither pattern): same 96px label column as slider rows */
 .segrow{display:grid;grid-template-columns:96px minmax(0,1fr);align-items:center;column-gap:var(--s2);height:var(--h-ctl)}
 .segrow>span,.segrow>label{color:var(--tx-2);font-size:var(--fs-13);white-space:nowrap}
 
@@ -12,3 +12,4 @@
 .glyphs{display:flex;align-items:center;gap:var(--s2);height:18px;margin-top:6px;padding:0 2px;font:var(--fs-12)/1 var(--mono);color:var(--tx-2);white-space:nowrap;overflow:hidden}
 .glyphs .str{flex:1;overflow:hidden;text-overflow:clip;-webkit-mask-image:linear-gradient(90deg,#000 80%,transparent);mask-image:linear-gradient(90deg,#000 80%,transparent);letter-spacing:.02em}
 .glyphs em{font:var(--fs-11)/1 var(--sans);font-style:normal;color:var(--tx-3)}
+.glyphs em .has-tip{cursor:help}

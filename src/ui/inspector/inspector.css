@@ -5,10 +5,10 @@
 /* In the 304 px dock a quarter is narrower than "Src 24": let the columns follow their labels. */
 @media (max-width:1280px){.segrow .seg.mono{grid-auto-columns:auto}}
 
-/* Mono colour mode has two swatches: halves instead of two thirds of a row. */
+/* Mono color mode has two swatches: halves instead of two thirds of a row. */
 .swatches.two{grid-template-columns:repeat(2,minmax(0,1fr))}
 
-/* Custom charset field sits between the select and the density preview. */
+/* Custom glyph set field sits between the select and the density preview. */
 .field.cfield{margin-top:var(--s2)}
 
 /* Auto levels follows the cell facts inside Advanced. */
@@ -20,6 +20,9 @@
 /* ---------- preset dialog ---------- */
 .dialog.preset-dlg{width:min(400px,calc(100vw - 32px))}
 .pform .flabel{margin-top:0}
+.pform .hint{margin-top:var(--s2)}
+/* phones: the kit's full-width bottom sheet */
+@media (max-width:640px){.dialog.preset-dlg{width:100%}}
 .plist{margin:calc(-1 * var(--s1)) 0 0;padding:0;list-style:none}
 .plist li{display:flex;align-items:center;gap:var(--s2);height:36px;border-bottom:1px solid var(--line)}
 .plist li:last-child{border-bottom:0}

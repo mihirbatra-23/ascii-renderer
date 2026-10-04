@@ -130,44 +130,43 @@ function LiveControls() {
   return (
     <div className="spec-row" style={{ alignItems: 'flex-start' }}>
       <div className="dockbox">
-        <Section title="Mode" aux={<><kbd>M</kbd><em>to cycle</em></>}>
+        <Section title="Mode">
           <ModeTiles value={mode} onChange={setMode} />
-          <p className="hint">Matches each cell’s shape, so edges read as lines.</p>
+          <p className="hint">Picks glyphs by each cell’s shape and brightness.</p>
         </Section>
-        <Section title="Grid" aux={<><em>rows</em> 45 <em>auto · cell</em> 8 × 16</>}>
-          <HeroSlider label="Columns" unit="col" value={cols} min={40} max={400} step={1} defaultValue={160} onChange={setCols} majors={[40, 100, 200, 300, 400]} minorStep={10} />
+        <Section title="Grid" aux={<>45 <em>rows</em></>}>
+          <HeroSlider label="Columns" tooltip={{ body: 'Cells across the image.', shortcut: ['[', ']'] }} unit="col" value={cols} min={40} max={400} step={1} defaultValue={160} onChange={setCols} majors={[40, 100, 200, 300, 400]} minorStep={10} />
         </Section>
         <Section title="Tone" action={<IconButton icon="reset" label="Reset tone" size="sm" onClick={() => (setBri(0), setCon(1))} />}>
           <div className="rows">
-            <SliderRow label="Brightness" value={bri} min={-0.5} max={0.5} step={0.01} defaultValue={0} bipolar format={signed} onChange={setBri} />
-            <SliderRow label="Contrast" value={con} min={0.5} max={2} step={0.01} defaultValue={1} format={(v) => v.toFixed(2)} onChange={setCon} />
+            <SliderRow label="Brightness" tooltip="Lightens or darkens the image." value={bri} min={-0.5} max={0.5} step={0.01} defaultValue={0} bipolar format={signed} onChange={setBri} />
+            <SliderRow label="Contrast" tooltip={'Spreads light and dark apart above\u00a01, pulls them together below\u00a01.'} value={con} min={0.5} max={2} step={0.01} defaultValue={1} format={(v) => v.toFixed(2)} onChange={setCon} />
           </div>
-          <SwitchRow label="Invert" kbd="I" checked={inv} onChange={setInv} />
+          <SwitchRow label="Invert" tooltip={{ body: 'Swaps light and dark', shortcut: 'I' }} tooltipOn="switch" checked={inv} onChange={setInv} />
         </Section>
-        <Section title="Glyphs" aux={<>95 <em>glyphs</em></>}>
+        <Section title="Glyphs">
           <Select
-            label="Character set"
+            label="Glyph set"
             value={charset}
-            aux="printable"
             onChange={setCharset}
             options={[
               { value: 'ascii', label: 'Full ASCII', aux: '95' },
               { value: 'minimal', label: 'Minimal', aux: '10' },
-              { value: 'dense', label: 'Dense', aux: '160' },
+              { value: 'dense', label: 'Extended', aux: '145' },
               { value: 'lines', label: 'Lines', aux: '10' },
-              { value: 'custom', label: 'Custom…', aux: 'type your own', separatorBefore: true },
+              { value: 'custom', label: 'Custom', separatorBefore: true },
             ]}
           />
         </Section>
-        <Section title="Color" aux={<><kbd>D</kbd><em>duotone</em></>}>
+        <Section title="Color">
           <Segmented full label="Color mode" value={color} onChange={setColor} options={[{ value: 'mono', label: 'Mono' }, { value: 'source', label: 'Source' }, { value: 'duotone', label: 'Duotone' }]} />
           <div className="swatches">
-            <SwatchField label="Shadow" value="#5c5953" onChange={noop} />
-            <SwatchField label="Ink" value={ink} onChange={setInk} />
-            <SwatchField label="Paper" value="#0b0b0c" onChange={noop} />
+            <SwatchField label="Shadow" tooltip="Color of the faintest glyphs." value="#5c5953" onChange={noop} />
+            <SwatchField label="Ink" tooltip="Glyph color. In Duotone, the color of the densest glyphs." value={ink} onChange={setInk} />
+            <SwatchField label="Paper" tooltip="Background color." value="#0b0b0c" onChange={noop} />
           </div>
         </Section>
-        <Disclosure title="Advanced" summary="Dither, font, cell, line height">
+        <Disclosure title="Advanced">
           <p className="hint" style={{ marginTop: 0 }}>Advanced controls live here.</p>
         </Disclosure>
       </div>
@@ -180,14 +179,14 @@ function LiveControls() {
             label="Presets"
             items={[
               { heading: 'Built-in' },
-              { id: 'crisp', label: 'Crisp lines', onSelect: noop },
+              { id: 'line-art', label: 'Line art', onSelect: noop },
               { id: 'soft', label: 'Soft photo', onSelect: noop },
               { id: 'braille', label: 'Braille dots', onSelect: noop },
               'separator',
-              { id: 'save', label: 'Save current…', onSelect: noop },
+              { id: 'save', label: 'Save as preset…', onSelect: noop },
             ]}
           />
-          <Button variant="ghost" size="sm" icon="reset">
+          <Button variant="ghost" icon="reset">
             Reset all
           </Button>
           <IconButton icon="keyboard" label="Shortcuts" shortcut="?" onClick={() => setDialog(true)} />
@@ -259,6 +258,13 @@ function KitSheet() {
             <S cap="ghost hover"><Button variant="ghost" icon="reset" className="is-hover">Reset all</Button></S>
             <S cap="icon"><IconButton icon="undo" label="Undo" shortcut="⌘Z" /></S>
             <S cap="icon on"><IconButton icon="grid" label="Rulers" shortcut="R" variant="secondary" pressed /></S>
+            <S cap="icon off"><IconButton icon="grid" label="Rulers" shortcut="R" variant="secondary" pressed={false} /></S>
+            <S cap="toggle on"><Button icon="loop" aria-pressed>Loop</Button></S>
+            <S cap="toggle off"><Button icon="loop" aria-pressed={false}>Loop</Button></S>
+            <S cap="toggle disabled"><Button icon="loop" aria-pressed={false} disabled>Loop</Button></S>
+            <S cap="ghost disabled"><Button variant="ghost" icon="reset" disabled>Reset all</Button></S>
+            <S cap="primary disabled"><Button variant="primary" icon="export" kbd="⌘E" disabled>Export</Button></S>
+            <S cap="ghost chip"><Button variant="ghost" icon="folder" kbd="⌘O">Open</Button></S>
             <S cap="icon focus"><IconButton icon="redo" label="Redo" shortcut="⇧⌘Z" className="is-focus" /></S>
           </div>
         </section>
@@ -344,10 +350,10 @@ function KitSheet() {
               <div style={{ display: 'grid', gap: 4 }}>
                 <Sim attr={['aria-expanded', 'true']}>
                   <div style={{ width: 240 }}>
-                    <Select label="Character set" value="ascii" aux="printable" onChange={noop} options={[{ value: 'ascii', label: 'Full ASCII' }]} />
+                    <Select label="Glyph set" value="ascii" onChange={noop} options={[{ value: 'ascii', label: 'Full ASCII' }]} />
                   </div>
                 </Sim>
-                <div className="menu static" role="listbox" aria-label="Character set">
+                <div className="menu static" role="listbox" aria-label="Glyph set">
                   {[
                     ['Full ASCII', '95', true],
                     ['Minimal', '10', false],
@@ -378,7 +384,7 @@ function KitSheet() {
 
         <section className="card">
           <h2>
-            Swatch · colour popover <span>Shadow / Ink / Paper</span>
+            Swatch · color popover <span>Shadow / Ink / Paper</span>
           </h2>
           <div className="spec-row">
             <S cap="swatches">
@@ -389,7 +395,7 @@ function KitSheet() {
               </div>
             </S>
             <S cap="popover · hex field">
-              <div className="pop" role="group" aria-label="Ink colour">
+              <div className="pop" role="group" aria-label="Ink color">
                 <div className="pk" />
                 <div className="hue" />
                 <TextField prefix="#" defaultValue="E6E4DF" aria-label="Hex" suffix="100%" />
@@ -462,8 +468,20 @@ function KitSheet() {
             Tooltip · icons <span>16 px grid, 1.5 px stroke; tooltips show the shortcut</span>
           </h2>
           <div className="spec-row">
-            <S cap="tooltip">
+            <S cap="label tip">
               <div className="tip static">Undo<kbd>⌘Z</kbd></div>
+            </S>
+            <S cap="note tip">
+              <div className="tip note static">
+                <p>Lightens midtones below{'\u00a0'}1, darkens them above{'\u00a0'}1.</p>
+                <div className="tm">
+                  <b>0.40</b> to <b>2.50</b>
+                  <span className="sp" />
+                </div>
+              </div>
+            </S>
+            <S cap="indicator">
+              <span className="has-tip" style={{ color: 'var(--tx-2)' }}>Gamma</span>
             </S>
             <S cap={`${ICON_NAMES.length} icons`} cls="w">
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, color: 'var(--tx-2)' }}>

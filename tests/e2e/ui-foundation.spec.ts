@@ -95,19 +95,19 @@ test.describe('kit', () => {
   });
 
   test('select: opens with the keyboard, arrows + Enter choose, focus returns', async ({ page }) => {
-    const trigger = page.getByRole('region', { name: 'Glyphs' }).getByRole('button', { name: 'Character set: Full ASCII' });
+    const trigger = page.getByRole('region', { name: 'Glyphs' }).getByRole('button', { name: 'Glyph set: Full ASCII' });
     await trigger.focus();
     await page.keyboard.press('ArrowDown');
-    const list = page.locator('.popover').getByRole('listbox', { name: 'Character set' });
+    const list = page.locator('.popover').getByRole('listbox', { name: 'Glyph set' });
     await expect(list).toBeFocused();
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('Enter');
-    await expect(page.getByRole('button', { name: 'Character set: Minimal' })).toBeFocused();
+    await expect(page.getByRole('button', { name: 'Glyph set: Minimal' })).toBeFocused();
   });
 
   test('menu button and dialog', async ({ page }) => {
     await page.getByRole('button', { name: 'Presets' }).click();
-    await expect(page.getByRole('menuitem', { name: 'Crisp lines' })).toBeFocused();
+    await expect(page.getByRole('menuitem', { name: 'Line art' })).toBeFocused();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('menu')).toHaveCount(0);
     await page.getByRole('button', { name: 'Shortcuts' }).click();
@@ -149,11 +149,10 @@ test.describe('store and shortcuts', () => {
     expect(await get('ui.shortcutsOpen')).toBe(true);
   });
 
-  test('params and theme persist across reloads', async ({ page }) => {
-    await store(page, `s.getState().setParam('contrast', 1.4); s.getState().setTheme('b');`);
+  test('params persist across reloads', async ({ page }) => {
+    await store(page, `s.getState().setParam('contrast', 1.4);`);
     await page.waitForTimeout(500);
     await page.reload();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'b');
     expect(await page.evaluate(`${appImport('/src/state/store.ts')}.then(m => m.useStore.getState().params.contrast)`)).toBe(1.4);
   });
 });

@@ -18,9 +18,10 @@
  * Backspace / Delete reset to `defaultValue`. Double-click the label to reset; drag the label or
  * the value field sideways to scrub (Shift = fine).
  */
-import { useId, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react';
+import { useId, useRef, useState, type CSSProperties, type FocusEvent, type KeyboardEvent, type PointerEvent } from 'react';
 import { readIntent, TOUCH_SLOP_PX, waitsForIntent } from './gesture';
 import { NumberField } from './NumberField';
+import { formatRange, rowTip, TipLabel, useTip, type RowTooltip } from './Tooltip';
 import { useScrub } from './useScrub';
 import { clamp, cx, setAdjusting, snap } from './util';
 
@@ -47,6 +48,9 @@ export interface SliderTrackProps extends RangeProps {
   className?: string;
   'aria-label'?: string;
   'aria-labelledby'?: string;
+  'aria-describedby'?: string;
+  onFocus?(e: FocusEvent): void;
+  onBlur?(e: FocusEvent): void;
 }
 
 const pct = (v: number, min: number, max: number) => ((v - min) / (max - min)) * 100;
@@ -217,6 +221,8 @@ export function SliderTrack({
 
 export interface SliderRowProps extends RangeProps {
   label: string;
+  /** Note tip on the label (dotted indicator); the range line comes from min / max / step. */
+  tooltip?: RowTooltip;
   format?(value: number): string;
   parse?(text: string): number | null;
   bipolar?: boolean;
@@ -233,19 +239,27 @@ function useResetAndScrub({ value, min, max, step, onChange, onCommit, defaultVa
   return { scrub, reset };
 }
 
+/** The row's tip: its sentence plus the range generated from the control's own props. */
+function useRowTip(tooltip: RowTooltip | undefined, { min, max, step }: RangeProps, bipolar?: boolean) {
+  const t = rowTip(tooltip);
+  return useTip(t && { body: t.body, shortcut: t.shortcut, range: t.range === false ? undefined : formatRange(min, max, step, { bipolar, unit: t.unit }) }, { tap: true });
+}
+
 export function SliderRow(props: SliderRowProps) {
-  const { label, format = String, parse, bipolar, id: idProp, ...range } = props;
+  const { label, tooltip, format = String, parse, bipolar, id: idProp, ...range } = props;
   const autoId = useId();
   const id = idProp ?? autoId;
   const { scrub, reset } = useResetAndScrub(range);
+  const tip = useRowTip(tooltip, range, bipolar);
   const { defaultValue: _reset, ...field } = range;
   return (
     <div className={cx('row', range.disabled && 'off')}>
       <label htmlFor={id} onPointerDown={scrub} onDoubleClick={reset}>
-        {label}
+        {tooltip ? <TipLabel tip={tip}>{label}</TipLabel> : label}
       </label>
-      <SliderTrack id={id} {...range} bipolar={bipolar} valueText={format(range.value)} />
+      <SliderTrack id={id} {...range} bipolar={bipolar} valueText={format(range.value)} {...tip.focus} />
       <NumberField {...field} format={format} parse={parse} aria-label={`${label} value`} />
+      {tip.node}
     </div>
   );
 }
@@ -259,16 +273,17 @@ export interface HeroSliderProps extends SliderRowProps {
 }
 
 export function HeroSlider(props: HeroSliderProps) {
-  const { label, unit, majors, minorStep, format = String, parse, bipolar, id: idProp, ...range } = props;
+  const { label, tooltip, unit, majors, minorStep, format = String, parse, bipolar, id: idProp, ...range } = props;
   const autoId = useId();
   const id = idProp ?? autoId;
   const { scrub, reset } = useResetAndScrub(range);
+  const tip = useRowTip(tooltip, range, bipolar);
   const { defaultValue: _reset, ...field } = range;
   return (
     <div className="slider-hero">
       <div className="colsrow">
         <label htmlFor={id} onPointerDown={scrub} onDoubleClick={reset}>
-          {label}
+          {tooltip ? <TipLabel tip={tip}>{label}</TipLabel> : label}
         </label>
         <span className="bv">
           <NumberField {...field} big format={format} parse={parse} aria-label={`${label} value`} />
@@ -283,7 +298,9 @@ export function HeroSlider(props: HeroSliderProps) {
         majors={majors}
         minorStep={minorStep}
         valueText={`${format(range.value)}${unit ? ` ${unit}` : ''}`}
+        {...tip.focus}
       />
+      {tip.node}
       <div className="scale" aria-hidden="true">
         {majors.map((m) => (
           <span key={m} style={{ left: `${pct(m, range.min, range.max).toFixed(3)}%` }}>

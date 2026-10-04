@@ -35,12 +35,17 @@ test.describe('desktop dock', () => {
     await openEditor(page);
     const modes = section(page, 'Mode').getByRole('radiogroup', { name: 'Render mode' });
     await expect(modes.getByRole('radio', { name: 'Shape' })).toHaveAttribute('aria-checked', 'true');
-    await expect(section(page, 'Mode').locator('.hint')).toHaveText('Matches each cell’s shape, so edges read as lines.');
-    await expect(section(page, 'Grid').locator('.sh .aux')).toHaveText(/rows\s*45\s*auto · cell\s*8 × 16/);
+    await expect(section(page, 'Mode').locator('.hint')).toHaveText('Picks glyphs by each cell’s shape and brightness.');
+    await expect(section(page, 'Mode').locator('.sh .aux')).toHaveCount(0);
+    await expect(section(page, 'Grid').locator('.sh .aux')).toHaveText(/^45\s*rows$/);
     await expect(page.getByLabel('Columns value')).toHaveValue('160');
     await expect(section(page, 'Tone').getByLabel('Edge sharpness value')).toBeVisible();
     await expect(section(page, 'Tone').getByLabel('Dither value')).toHaveCount(0);
-    await expect(section(page, 'Glyphs').locator('.sh .aux')).toHaveText(/95\s*glyphs/);
+    await expect(section(page, 'Glyphs').locator('.sh .aux')).toHaveCount(0);
+    await expect(section(page, 'Edges').locator('.sh .aux')).toHaveCount(0);
+    await expect(section(page, 'Color').locator('.sh .aux')).toHaveCount(0);
+    // No shortcut chips in the dock: the keys live in the tooltips.
+    await expect(dock(page).locator('.db kbd')).toHaveCount(0);
     await expect(section(page, 'Motion')).toHaveCount(0);
     await expect(dock(page).getByRole('button', { name: /Advanced/ })).toHaveAttribute('aria-expanded', 'false');
   });
@@ -55,7 +60,7 @@ test.describe('desktop dock', () => {
     await page.mouse.up();
     // Halfway along 40–400, give or take a pixel of rounding.
     await expect(page.getByLabel('Columns value')).toHaveValue(/^2(19|20|21)$/);
-    await expect(section(page, 'Grid').locator('.sh .aux')).toHaveText(/rows\s*62\s*auto/);
+    await expect(section(page, 'Grid').locator('.sh .aux')).toHaveText(/^62\s*rows$/);
     expect(await read(page, 'history.past.length')).toBe(1);
     await page.keyboard.press('ControlOrMeta+z');
     await expect(page.getByLabel('Columns value')).toHaveValue('160');
@@ -67,14 +72,14 @@ test.describe('desktop dock', () => {
     await modes.getByRole('radio', { name: 'Ramp' }).click();
     await expect(section(page, 'Tone').getByLabel('Dither value')).toBeVisible();
     await expect(section(page, 'Tone').getByLabel('Edge sharpness value')).toHaveCount(0);
-    await expect(dock(page).getByRole('button', { name: /Advanced/ })).toContainText('Font, cell, line height');
+    await expect(dock(page).getByRole('button', { name: /Advanced/ })).toHaveText('Advanced');
 
     await modes.getByRole('radio', { name: 'Braille' }).click();
     const pattern = section(page, 'Tone').getByRole('radiogroup', { name: 'Dither' });
     await pattern.getByRole('radio', { name: 'Noise' }).click();
     expect(await read(page, 'params.ditherPattern')).toBe('noise');
-    await expect(section(page, 'Glyphs')).toContainText('Braille draws its own 2 × 4 dot patterns.');
-    await expect(section(page, 'Glyphs').getByRole('button', { name: /Character set/ })).toHaveCount(0);
+    await expect(section(page, 'Glyphs')).toContainText('Braille draws its own dot patterns. Glyph sets apply to Shape and Ramp only.');
+    await expect(section(page, 'Glyphs').getByRole('button', { name: /Glyph set/ })).toHaveCount(0);
 
     await modes.getByRole('radio', { name: 'Halftone' }).click();
     await dock(page).getByRole('button', { name: /Advanced/ }).click();
@@ -85,22 +90,21 @@ test.describe('desktop dock', () => {
     await expect(dock(page).getByRole('button', { name: /^Font:/ })).toHaveCount(0);
   });
 
-  test('custom charset: seeded from the current set, count updates while typing', async ({ page }) => {
+  test('custom glyph set: seeded from the current set, the density strip updates while typing', async ({ page }) => {
     await openEditor(page);
-    await section(page, 'Glyphs').getByRole('button', { name: 'Character set: Full ASCII' }).click();
+    await section(page, 'Glyphs').getByRole('button', { name: 'Glyph set: Full ASCII' }).click();
+    await expect(page.getByRole('option', { name: /Extended/ })).toBeVisible();
     await page.getByRole('option', { name: /Minimal/ }).click();
-    await expect(section(page, 'Glyphs').locator('.sh .aux')).toHaveText(/10\s*glyphs/);
-    await section(page, 'Glyphs').getByRole('button', { name: 'Character set: Minimal' }).click();
+    await section(page, 'Glyphs').getByRole('button', { name: 'Glyph set: Minimal' }).click();
     await page.getByRole('option', { name: /Custom/ }).click();
     const field = page.getByLabel('Custom glyphs');
     await expect(field).toBeFocused();
     await expect(field).toHaveValue('.:-=+*#%@');
     await page.keyboard.type('ABBA');
-    await expect(section(page, 'Glyphs').locator('.sh .aux')).toHaveText(/12\s*glyphs/);
     await expect(section(page, 'Glyphs').locator('.glyphs .str')).toContainText('A');
   });
 
-  test('colour mode picks the swatches; a colour pick is one undo entry', async ({ page }) => {
+  test('color mode picks the swatches; a color pick is one undo entry', async ({ page }) => {
     await openEditor(page);
     const color = section(page, 'Color');
     await expect(color.locator('.swatch')).toHaveCount(3);
@@ -110,8 +114,8 @@ test.describe('desktop dock', () => {
     await expect(color.locator('.swatch .n')).toHaveText(['Paper']);
     await color.getByRole('radio', { name: 'Duotone' }).click();
     const before = (await read(page, 'history.past.length')) as number;
-    await color.getByRole('button', { name: /^Ink colour/ }).click();
-    const popover = page.getByRole('dialog', { name: 'Ink colour' });
+    await color.getByRole('button', { name: /^Ink color/ }).click();
+    const popover = page.getByRole('dialog', { name: 'Ink color' });
     await expect(popover.getByRole('slider', { name: 'Ink saturation and brightness' })).toBeFocused();
     await popover.getByLabel('Ink hex value').fill('ff0000');
     await page.keyboard.press('Enter');
@@ -119,13 +123,13 @@ test.describe('desktop dock', () => {
     expect(await read(page, 'history.past.length')).toBe(before + 1);
   });
 
-  test('the colour popover: a drag across the plane previews live and is one undo entry; Escape returns to the swatch', async ({ page }) => {
+  test('the color popover: a drag across the plane previews live and is one undo entry; Escape returns to the swatch', async ({ page }) => {
     await openEditor(page);
     const color = section(page, 'Color');
     await color.getByRole('radio', { name: 'Mono' }).click();
-    const swatch = color.getByRole('button', { name: /^Paper colour/ });
+    const swatch = color.getByRole('button', { name: /^Paper color/ });
     await swatch.click();
-    const popover = page.getByRole('dialog', { name: 'Paper colour' });
+    const popover = page.getByRole('dialog', { name: 'Paper color' });
     const before = (await read(page, 'history.past.length')) as number;
     const plane = popover.getByRole('slider', { name: 'Paper saturation and brightness' });
     const box = (await plane.boundingBox())!;
@@ -169,11 +173,15 @@ test.describe('desktop dock', () => {
     expect(await read(page, 'params.mode')).toBe('braille');
 
     await dock(page).getByRole('button', { name: 'Presets' }).click();
-    await page.getByRole('menuitem', { name: 'Save current…' }).click();
+    await page.getByRole('menuitem', { name: 'Save as preset…' }).click();
     const dialog = page.getByRole('dialog', { name: 'Save preset' });
     const name = dialog.getByLabel('Name');
     await expect(name).toBeFocused();
-    await page.keyboard.type('Crisp lines');
+    await expect(dialog.locator('.hint')).toHaveText('Saved in this browser only.');
+    // Save sits in the footer, outside the field, next to Cancel.
+    await expect(dialog.locator('.dlg-f').getByRole('button')).toHaveText(['Cancel', 'Save']);
+    await page.keyboard.type('Teletext');
+    await expect(dialog.locator('.hint')).toHaveText('A built-in preset has this name. Choose another.');
     await expect(dialog.getByRole('button', { name: 'Save' })).toBeDisabled();
     await name.fill('Poster');
     await page.keyboard.press('Enter');
@@ -182,17 +190,18 @@ test.describe('desktop dock', () => {
 
     await dock(page).getByRole('button', { name: 'Presets' }).click();
     await expect(page.getByRole('menuitem', { name: /Poster/ })).toBeVisible();
-    await page.getByRole('menuitem', { name: 'Delete a preset…' }).click();
+    await expect(page.getByRole('menu').locator('.mh')).toHaveText(['Built-in', 'Saved']);
+    await page.getByRole('menuitem', { name: 'Delete presets…' }).click();
     await page.getByRole('button', { name: 'Delete preset Poster' }).click();
     expect(await read(page, 'userPresets.length')).toBe(0);
   });
 
-  test('Delete a preset… lists your presets with focus on a delete button, never the save form', async ({ page }) => {
+  test('Delete presets… lists the saved presets with focus on a delete button, never the save form', async ({ page }) => {
     await openEditor(page);
     await withStore(page, `s.getState().savePreset('Poster'); s.getState().savePreset('Grain')`);
     await dock(page).getByRole('button', { name: 'Presets' }).click();
-    await page.getByRole('menuitem', { name: 'Delete a preset…' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Your presets' });
+    await page.getByRole('menuitem', { name: 'Delete presets…' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Delete presets' });
     await expect(dialog.getByRole('textbox')).toHaveCount(0);
     await expect(dialog.getByRole('button', { name: 'Delete preset Poster' })).toBeFocused();
     // Enter acts on the focused delete button; focus moves to the row that takes its place.
@@ -223,7 +232,7 @@ test.describe('desktop dock', () => {
     expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(/#s=[\w-]+$/);
   });
 
-  test('Edges: Shape and Ramp only; the threshold follows the switch and the mode hint mentions it', async ({ page }) => {
+  test('Edges: Shape and Ramp only; the threshold follows the switch', async ({ page }) => {
     await openEditor(page);
     const edges = section(page, 'Edges');
     const threshold = edges.getByRole('slider', { name: 'Threshold' });
@@ -231,7 +240,7 @@ test.describe('desktop dock', () => {
     await edges.getByRole('switch', { name: /Contour lines/ }).check();
     expect(await read(page, 'params.edges')).toBe(true);
     await expect(threshold).toBeEnabled();
-    await expect(section(page, 'Mode').getByText(/strong edges also get contour strokes/)).toBeVisible();
+    await expect(section(page, 'Mode').locator('.hint')).toHaveText('Picks glyphs by each cell’s shape and brightness.');
     await threshold.focus();
     await page.keyboard.press('Shift+ArrowRight');
     expect(await read(page, 'params.edgeThreshold')).toBe(0.6);
@@ -241,19 +250,41 @@ test.describe('desktop dock', () => {
     await expect(edges).toHaveCount(0);
   });
 
-  test('the Color head names the colour mode D cycles to', async ({ page }) => {
+  test('tooltips: hover after a delay, keyboard focus at once, with a range from the control', async ({ page }) => {
     await openEditor(page);
-    await expect(section(page, 'Color').locator('.sh .aux')).toHaveText('Dduotone');
-    await withStore(page, `s.getState().setParam('colorMode', 'mono')`);
-    await expect(section(page, 'Color').locator('.sh .aux')).toHaveText('Dmono');
+    const tone = section(page, 'Tone');
+    const gamma = tone.locator('.has-tip', { hasText: 'Gamma' });
+    await gamma.hover();
+    const tip = page.locator('.tip.note');
+    await expect(tip).toBeVisible();
+    await expect(tip.locator('p')).toHaveText('Lightens midtones below\u00a01, darkens them above\u00a01.');
+    await expect(tip.locator('.tm')).toHaveText(/0\.40\s*to\s*2\.50/);
+    await expect(gamma).toHaveClass(/\bon\b/);
+    // Escape closes it.
+    await page.keyboard.press('Escape');
+    await expect(tip).toHaveCount(0);
+    // Keyboard focus shows the tip at once; the slider is described by it.
+    await page.mouse.move(0, 0);
+    const brightness = tone.getByRole('slider', { name: 'Brightness' });
+    await brightness.focus();
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Tab');
+    await expect(tip.locator('.tm')).toHaveText(/−0\.50\s*to\s*\+0\.50/);
+    await expect(brightness).toHaveAccessibleDescription('Lightens or darkens the image. −0.50 to +0.50.');
+    // Invert: a label tip on the switch, with its key, and no indicator.
+    await expect(tone.locator('.swrow .has-tip')).toHaveCount(0);
+    await tone.getByRole('switch', { name: 'Invert' }).hover();
+    await expect(page.locator('.tip:not(.note)')).toHaveText('Swaps light and darkI');
+    // Section heads carry no tips.
+    await expect(dock(page).locator('.sh .has-tip')).toHaveCount(0);
   });
 
   test('a capped grid names the limit that capped it', async ({ page }) => {
     await openEditor(page, `{ name: 'tall.jpg', kind: 'image', width: 300, height: 3000, fileSize: 1, formatLabel: 'JPEG' }`);
-    await expect(section(page, 'Grid').getByText(/^Capped at \d+ columns: a grid holds at most 400 rows\.$/)).toBeVisible();
+    await expect(section(page, 'Grid').getByText(/^Limited to \d+ columns\. A grid has at most 400 rows\.$/)).toBeVisible();
     await openEditor(page, `{ name: 'portrait.jpg', kind: 'image', width: 1000, height: 1800, fileSize: 1, formatLabel: 'JPEG' }`);
     await withStore(page, `s.getState().setParam('columns', 400)`);
-    await expect(section(page, 'Grid').getByText(/^Capped at \d+ columns: a grid holds at most 120,000 cells\.$/)).toBeVisible();
+    await expect(section(page, 'Grid').getByText(/^Limited to \d+ columns\. A grid has at most 120,000 cells\.$/)).toBeVisible();
   });
 
   test('keyboard: I toggles the Invert switch, Backspace on a track resets it', async ({ page }) => {
@@ -274,27 +305,26 @@ test.describe('video dock', () => {
     await openEditor(page, VIDEO);
     const motion = section(page, 'Motion');
     await expect(motion.getByLabel('Stability value')).toHaveValue('0.50');
-    const fps = motion.getByRole('radiogroup', { name: 'Output fps' });
-    await expect(fps.getByRole('radio', { name: 'Source rate, 24 fps' })).toHaveAttribute('aria-checked', 'true');
-    await fps.getByRole('radio', { name: '12' }).click();
-    expect(await read(page, 'exportUi.fps')).toBe(12);
+    await expect(motion.locator('.sh .aux')).toHaveCount(0);
+    // The output frame rate is set in the Export panel only.
+    await expect(motion.getByRole('radiogroup', { name: 'Output fps' })).toHaveCount(0);
 
     const glyphs = dock(page).getByRole('button', { name: /Glyphs/ });
-    await expect(glyphs).toContainText('Full ASCII · 95');
+    await expect(glyphs).toHaveText('GlyphsFull ASCII');
     await expect(glyphs).toHaveAttribute('aria-expanded', 'false');
     await glyphs.click();
-    await expect(dock(page).getByRole('button', { name: 'Character set: Full ASCII' })).toBeVisible();
+    await expect(dock(page).getByRole('button', { name: 'Glyph set: Full ASCII' })).toBeVisible();
     await expect(dock(page).getByRole('button', { name: /Color/ })).toContainText('Duotone');
   });
 });
 
 test.describe('GIF dock', () => {
-  test('a GIF keeps its own timing: no Output fps, and the section says so', async ({ page }) => {
+  test('a GIF: Stability only, no Output fps and no timing note', async ({ page }) => {
     await openEditor(page, `{ name: 'loop.gif', kind: 'animation', width: 480, height: 270, fileSize: 1, formatLabel: 'GIF', durationSec: 3, fps: 12, frameCount: 36 }`);
     const motion = section(page, 'Motion');
     await expect(motion.getByLabel('Stability value')).toHaveValue('0.50');
     await expect(motion.getByRole('radiogroup', { name: 'Output fps' })).toHaveCount(0);
-    await expect(motion.getByText('Exports keep the GIF’s own frame timing.')).toBeVisible();
+    await expect(motion.locator('.hint')).toHaveCount(0);
   });
 });
 
@@ -309,7 +339,7 @@ test.describe('light images', () => {
 
   test('line art suggests Invert, and the suggestion applies it', async ({ page }) => {
     await open(page, '/tests/fixtures/lineart_600x300.png');
-    const hint = section(page, 'Tone').getByText(/^Mostly light, so most cells get the densest glyph/);
+    const hint = section(page, 'Tone').getByText(/^This image is mostly light\. Invert to draw its dark parts\.$/);
     await expect(hint).toBeVisible();
     await hint.getByRole('button', { name: 'Invert' }).click();
     expect(await read(page, 'params.invert')).toBe(true);
@@ -320,7 +350,7 @@ test.describe('light images', () => {
     for (const url of ['/tests/fixtures/torus_450.png', '/tests/fixtures/logo_rgba_256.png']) {
       await open(page, url);
       await page.waitForTimeout(300);
-      await expect(section(page, 'Tone').getByText(/^Mostly (light|dark)/)).toHaveCount(0);
+      await expect(section(page, 'Tone').getByText(/^This image is mostly (light|dark)/)).toHaveCount(0);
     }
   });
 });
@@ -338,7 +368,7 @@ test.describe('phone sheet', () => {
 
     await tabs.getByRole('tab', { name: 'Glyphs' }).click();
     await expect(section(page, 'Grid')).toBeHidden();
-    await expect(section(page, 'Glyphs').getByRole('button', { name: 'Character set: Full ASCII' })).toBeVisible();
+    await expect(section(page, 'Glyphs').getByRole('button', { name: 'Glyph set: Full ASCII' })).toBeVisible();
 
     await page.keyboard.press('ArrowRight');
     await expect(tabs.getByRole('tab', { name: 'Color' })).toHaveAttribute('aria-selected', 'true');

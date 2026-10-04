@@ -19,10 +19,10 @@ export function resetAllWithUndo(): void {
   const before = store().params;
   store().resetParams();
   if (paramsEqual(before, store().params)) {
-    toast({ icon: 'reset', title: 'Nothing to reset', body: 'Every setting is already at its default.' });
+    toast({ icon: 'reset', title: 'Nothing to reset', body: 'All settings are already at their defaults.' });
     return;
   }
-  toast({ icon: 'reset', title: 'Settings reset', body: 'Every adjustment is back to its default.', trailing: undoTo(before) });
+  toast({ icon: 'reset', title: 'Settings reset', body: 'All settings are back to their defaults.', trailing: undoTo(before) });
 }
 
 export function applyPresetWithUndo(name: string): void {
@@ -30,13 +30,13 @@ export function applyPresetWithUndo(name: string): void {
   store().applyPreset(name);
   const after = store().params;
   if (paramsEqual(before, after)) {
-    toast({ title: `${name} is already applied`, body: 'Every setting it defines already has its value.' });
+    toast({ title: `${name} is already applied`, body: 'Nothing changed.' });
     return;
   }
   toast({
     icon: 'check',
     title: `Applied ${name}`,
-    body: `${MODE_LABELS[after.mode]} · ${COLOR_LABELS[after.colorMode]}. Your other settings are kept.`,
+    body: `${MODE_LABELS[after.mode]} · ${COLOR_LABELS[after.colorMode]}. Other settings are unchanged.`,
     trailing: undoTo(before),
   });
 }

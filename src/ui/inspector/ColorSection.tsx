@@ -1,7 +1,7 @@
 /**
- * Color: Mono / Source / Duotone (D cycles) and the swatches that mode draws with. Duotone uses
- * shadow, ink and paper; Mono ink and paper. Source takes the glyph colours from the image, so
- * only the paper remains, and Blocks in Source paints both colours per cell, so nothing does
+ * Color: Mono / Source / Duotone (D cycles; Shortcuts sheet) and the swatches that mode draws with.
+ * Duotone uses shadow, ink and paper; Mono ink and paper. Source takes the glyph colors from the
+ * image, so only the paper remains, and Blocks in Source paints both colors per cell, so nothing does
  * (ALGORITHM §7). GIF / video collapse the section to a summary row.
  */
 import type { ColorMode, RenderMode } from '../../engine/types';
@@ -9,7 +9,7 @@ import { COLOR_MODES } from '../../state/params';
 import { useStore } from '../../state/store';
 import { Disclosure, Section, Segmented, SwatchField, cx } from '../kit';
 import { commitLive, setLive, store, useRememberedOpen } from './controls';
-import { COLOR_LABELS } from './copy';
+import { COLOR_LABELS, TIPS } from './copy';
 
 type SwatchKey = 'shadowInk' | 'ink' | 'paper';
 
@@ -23,19 +23,8 @@ function swatchesFor(colorMode: ColorMode, mode: RenderMode): readonly SwatchKey
 }
 
 export function ColorSection() {
-  const colorMode = useStore((s) => s.params.colorMode);
   return (
-    <Section
-      title="Color"
-      tab="color"
-      aux={
-        <>
-          {/* The board's head: the D shortcut, then the mode it has cycled to. */}
-          <kbd aria-hidden="true">D</kbd>
-          {COLOR_LABELS[colorMode].toLowerCase()}
-        </>
-      }
-    >
+    <Section title="Color" tab="color">
       <ColorBody />
     </Section>
   );
@@ -82,8 +71,8 @@ function ColorBody() {
       {colorMode === 'source' && (
         <p className="hint">
           {mode === 'blocks'
-            ? 'Each block takes its two colours from the image.'
-            : 'Each glyph takes its cell’s colour from the image.'}
+            ? 'Each cell takes two colors from the image.'
+            : 'Glyphs take their color from the image.'}
         </p>
       )}
     </>
@@ -92,5 +81,7 @@ function ColorBody() {
 
 function ParamSwatch({ param }: { param: SwatchKey }) {
   const value = useStore((s) => s.params[param]);
-  return <SwatchField label={SWATCH_LABELS[param]} value={value} onChange={(v) => setLive(param, v)} onCommit={commitLive} />;
+  return (
+    <SwatchField label={SWATCH_LABELS[param]} tooltip={TIPS[param]} value={value} onChange={(v) => setLive(param, v)} onCommit={commitLive} />
+  );
 }

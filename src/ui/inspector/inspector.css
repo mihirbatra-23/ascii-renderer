@@ -1,0 +1,27 @@
+/* Adjust dock additions on top of kit.css / dock.css (labelled rows, swatch grid, preset dialog). */
+
+/* Segments in a labelled row get 200 px for 3–4 options: keep labels clear of the edges. */
+.segrow .seg button{padding:0 var(--s1)}
+/* In the 304 px dock a quarter is narrower than "Src 24": let the columns follow their labels. */
+@media (max-width:1280px){.segrow .seg.mono{grid-auto-columns:auto}}
+
+/* Mono colour mode has two swatches: halves instead of two thirds of a row. */
+.swatches.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+/* Custom charset field sits between the select and the density preview. */
+.field.cfield{margin-top:var(--s2)}
+
+/* Auto levels follows the cell facts inside Advanced. */
+.disc-body .swrow{margin-top:var(--s1)}
+
+/* A hint that is a section's only content starts right under the head. */
+.hint.flush{margin-top:0}
+
+/* ---------- preset dialog ---------- */
+.dialog.preset-dlg{width:min(400px,calc(100vw - 32px))}
+.pform .flabel{margin-top:0}
+.plist{margin:calc(-1 * var(--s1)) 0 0;padding:0;list-style:none}
+.plist li{display:flex;align-items:center;gap:var(--s2);height:36px;border-bottom:1px solid var(--line)}
+.plist li:last-child{border-bottom:0}
+.plist .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx-1)}
+.plist small{font:var(--fs-11)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-3)}

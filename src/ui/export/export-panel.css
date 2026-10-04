@@ -1,0 +1,33 @@
+/* Export panel parts beyond the board's static drawing: footers, custom width, fix link, errors. */
+.exp-panel{display:contents}
+.df.exp{padding-right:var(--s4)}
+.df.enc{padding:10px var(--s4) var(--s3)}
+.df.enc .acts{margin-top:4px;justify-content:flex-start}
+.df.enc .meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* custom size: a width that resolves to the nearest whole scale */
+.cwrow{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2);margin-top:var(--s2)}
+.cwrow label{font-size:var(--fs-13);color:var(--tx-2)}
+.cwrow .val{width:72px}
+.cwrow .u{font:var(--fs-12)/1 var(--mono);color:var(--tx-3)}
+.cwrow .res{margin-left:auto;font:var(--fs-12)/1 var(--mono);font-variant-numeric:tabular-nums;color:var(--tx-2)}
+.cwrow .hint{flex-basis:100%;margin:0}
+
+.outcard .check+.check{margin-top:6px}
+/* a check-style line under the card (large file warning) */
+.check.note{margin:var(--s2) 0 0}
+
+/* a switch that is on by construction (pixel-snap): readable, visibly on, not interactive */
+.swrow.off.locked{color:var(--tx-2);cursor:default}
+.swrow.locked .sw:disabled:checked{background:var(--tx-3);border-color:var(--tx-3);cursor:default}
+.swrow.locked .sw:disabled:checked::after{background:var(--g1)}
+
+.segrow+.hint{margin-top:4px}
+.swrow+.segrow,.segrow+.swrow{margin-top:4px}
+
+/* inline failure above the footer actions */
+.exp-err{flex:none;display:flex;align-items:flex-start;gap:var(--s2);padding:10px var(--s2) 10px var(--s4);border-top:1px solid var(--line);background:var(--g1)}
+.exp-err>.i{margin-top:1px;color:var(--danger)}
+.exp-err .tx{flex:1;min-width:0}
+.exp-err b{display:block;font-weight:500;color:var(--tx-1)}
+.exp-err p{margin:2px 0 0;font-size:var(--fs-12);line-height:18px;color:var(--tx-2);overflow-wrap:anywhere}

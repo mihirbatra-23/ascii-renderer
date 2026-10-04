@@ -9,7 +9,7 @@ import { BUILTIN_PRESETS, defaultParams, paramsEqual } from '../../state/params'
 import { useStore } from '../../state/store';
 import { Button, MenuButton, MODE_LABELS, type MenuEntry } from '../kit';
 import { PresetDialog, type PresetDialogMode } from './PresetDialog';
-import { applyPresetWithUndo, resetAllWithUndo } from './presetActions';
+import { applyPresetWithUndo, deletePresetWithUndo, resetAllWithUndo } from './presetActions';
 
 const DEFAULTS = defaultParams();
 
@@ -48,11 +48,17 @@ function PresetsMenu() {
   if (userPresets.length) {
     items.push('separator', { heading: 'Saved' });
     items.push(
-      ...userPresets.map((p) => ({ id: `user:${p.name}`, label: p.name, aux: MODE_LABELS[p.params.mode], onSelect: () => applyPresetWithUndo(p.name) })),
+      ...userPresets.map((p) => ({
+        id: `user:${p.name}`,
+        label: p.name,
+        aux: MODE_LABELS[p.params.mode],
+        onSelect: () => applyPresetWithUndo(p.name),
+        onDelete: () => deletePresetWithUndo(p.name),
+        deleteLabel: `Delete preset ${p.name}`,
+      })),
     );
   }
   items.push('separator', { id: 'save', label: 'Save as preset…', onSelect: () => setDialog('save') });
-  if (userPresets.length) items.push({ id: 'delete', label: 'Delete presets…', onSelect: () => setDialog('manage') });
   // A link carries the settings to another browser or person (presets stay in this one).
   items.push('separator', { id: 'link', label: 'Copy settings link', onSelect: () => void copySettingsLink() });
 

@@ -3,7 +3,8 @@
  * each says what happened in a toast whose Undo restores exactly the settings it replaced.
  *
  *   applyPresetWithUndo(name)   a built-in or saved preset
- *   resetAllWithUndo()          every parameter back to the theme's defaults
+ *   resetAllWithUndo()          every parameter back to the defaults
+ *   deletePresetWithUndo(name)  removes a saved preset
  */
 import type { RenderParams } from '../../engine/types';
 import { paramsEqual } from '../../state/params';
@@ -39,4 +40,10 @@ export function applyPresetWithUndo(name: string): void {
     body: `${MODE_LABELS[after.mode]} · ${COLOR_LABELS[after.colorMode]}. Other settings are unchanged.`,
     trailing: undoTo(before),
   });
+}
+
+export function deletePresetWithUndo(name: string): void {
+  const before = store().userPresets;
+  store().deletePreset(name);
+  toast({ icon: 'check', title: `Deleted ${name}`, trailing: { label: 'Undo', onClick: () => useStore.setState({ userPresets: before }) } });
 }

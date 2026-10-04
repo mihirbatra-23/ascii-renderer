@@ -189,25 +189,21 @@ test.describe('desktop dock', () => {
     expect(await read(page, 'userPresets.map((p) => p.name)')).toEqual(['Poster']);
 
     await dock(page).getByRole('button', { name: 'Presets' }).click();
-    await expect(page.getByRole('menuitem', { name: /Poster/ })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: 'Poster', exact: true })).toBeVisible();
     await expect(page.getByRole('menu').locator('.mh')).toHaveText(['Built-in', 'Saved']);
-    await page.getByRole('menuitem', { name: 'Delete presets…' }).click();
-    await page.getByRole('button', { name: 'Delete preset Poster' }).click();
+    await page.getByRole('menuitem', { name: 'Delete preset Poster' }).click();
     expect(await read(page, 'userPresets.length')).toBe(0);
   });
 
-  test('Delete presets… lists the saved presets with focus on a delete button, never the save form', async ({ page }) => {
+  test('a saved preset is deleted from its menu row, with an Undo', async ({ page }) => {
     await openEditor(page);
     await withStore(page, `s.getState().savePreset('Poster'); s.getState().savePreset('Grain')`);
     await dock(page).getByRole('button', { name: 'Presets' }).click();
-    await page.getByRole('menuitem', { name: 'Delete presets…' }).click();
-    const dialog = page.getByRole('dialog', { name: 'Delete presets' });
-    await expect(dialog.getByRole('textbox')).toHaveCount(0);
-    await expect(dialog.getByRole('button', { name: 'Delete preset Poster' })).toBeFocused();
-    // Enter acts on the focused delete button; focus moves to the row that takes its place.
-    await page.keyboard.press('Enter');
+    await expect(page.getByRole('menuitem', { name: 'Delete presets…' })).toHaveCount(0);
+    await page.getByRole('menuitem', { name: 'Delete preset Poster' }).click();
     expect(await read(page, 'userPresets.map((p) => p.name)')).toEqual(['Grain']);
-    await expect(dialog.getByRole('button', { name: 'Delete preset Grain' })).toBeFocused();
+    await page.locator('.toast').filter({ hasText: 'Deleted Poster' }).getByRole('button', { name: 'Undo' }).click();
+    expect(await read(page, 'userPresets.map((p) => p.name)')).toEqual(['Poster', 'Grain']);
   });
 
   test('applying a preset says so, with an Undo; Reset all is disabled at the defaults', async ({ page }) => {

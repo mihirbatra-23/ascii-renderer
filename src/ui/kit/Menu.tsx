@@ -20,6 +20,10 @@ export interface MenuItem {
   note?: string;
   /** Set for radio-like items: renders a check and role="menuitemradio". */
   checked?: boolean;
+  /** Adds a small delete button at the right of the row (e.g. a saved preset). */
+  onDelete?(): void;
+  /** Accessible name of that button (default "Delete {label}"). */
+  deleteLabel?: string;
 }
 
 export type MenuEntry = MenuItem | 'separator' | { heading: string };
@@ -138,6 +142,28 @@ export function MenuButton({ label, items, ariaLabel, icon, variant = 'secondary
                 )}
               </button>
             );
+            if (entry.onDelete) {
+              const onDelete = entry.onDelete;
+              return (
+                <div key={entry.id} className="mrow">
+                  {item}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="mdel"
+                    tabIndex={-1}
+                    aria-label={entry.deleteLabel ?? `Delete ${entry.label}`}
+                    title="Delete"
+                    onClick={() => {
+                      close(true);
+                      onDelete();
+                    }}
+                  >
+                    <Icon name="x" />
+                  </button>
+                </div>
+              );
+            }
             if (!entry.note) return item;
             return (
               <Fragment key={entry.id}>

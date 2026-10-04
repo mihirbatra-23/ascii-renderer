@@ -151,6 +151,10 @@ html[data-adjusting="drag"] *{user-select:none!important}
 .menu [aria-disabled="true"]{color:var(--tx-4);cursor:not-allowed;background:transparent}
 .menu .ck{width:16px;flex:none;color:var(--tx-1)}
 .menu hr{border:0;border-top:1px solid var(--line-2);margin:4px 0}
+.menu .mrow{display:flex;align-items:center;gap:2px}
+.menu .mrow>[role="menuitem"]:first-child{flex:1;min-width:0;width:auto}
+.menu .mrow>.mdel{flex:none;width:28px;height:28px;padding:0;justify-content:center;color:var(--tx-3)}
+.menu .mrow>.mdel:hover,.menu .mrow>.mdel:focus{color:var(--tx-1)}
 .menu .mnote{margin:-2px 0 4px;padding:0 8px 0 32px;font-size:var(--fs-11);line-height:1.35;color:var(--tx-3);white-space:normal}
 .menu .mh{padding:8px 8px 4px;font:500 var(--fs-10)/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--tx-3)}
 .listbox:focus-visible{outline:none}

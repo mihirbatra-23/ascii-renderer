@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GPU engine harness</title>
+    <link rel="icon" href="data:," />
+    <style>
+      :root { color-scheme: dark; font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+      body { margin: 0; background: #1b1b1e; color: #e8e6df; display: grid; grid-template-columns: 300px 1fr; height: 100vh; }
+      #controls { overflow: auto; padding: 12px; display: grid; gap: 6px; align-content: start; border-right: 1px solid #333; }
+      #controls label { display: grid; grid-template-columns: 96px minmax(0, 1fr) 40px; align-items: center; gap: 6px; }
+      #controls select, #controls input:not([type='checkbox']) { width: 100%; min-width: 0; box-sizing: border-box; font: inherit; }
+      #controls label.check { grid-template-columns: 96px auto; justify-content: start; }
+      #controls output { text-align: right; color: #9a988f; }
+      #controls .row { display: flex; gap: 6px; flex-wrap: wrap; }
+      #controls button { font: inherit; }
+      #main { display: grid; grid-template-rows: 1fr auto; min-width: 0; min-height: 0; }
+      #stage { position: relative; min-height: 0; overflow: hidden; background: #26262a; }
+      #stage canvas { position: absolute; inset: 0; display: block; }
+      #stats { padding: 6px 12px; border-top: 1px solid #333; color: #9a988f; }
+      #results { margin: 0; padding: 0 12px 8px; white-space: pre-wrap; max-height: 30vh; overflow: auto; }
+      #results:empty { display: none; }
+      h2 { font-size: 12px; margin: 8px 0 0; color: #9a988f; font-weight: normal; text-transform: uppercase; letter-spacing: 0.08em; }
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <h2>Source</h2>
+      <label>fixture <select id="fixture"></select><span></span></label>
+      <label>file <input id="file" type="file" accept="image/*,video/*" /><span></span></label>
+      <h2>Mode</h2>
+      <label>mode <select data-param="mode"><option>shape</option><option>ramp</option><option>braille</option><option>blocks</option><option>halftone</option></select><span></span></label>
+      <label>colour <select data-param="colorMode"><option>mono</option><option>source</option><option>duotone</option></select><span></span></label>
+      <label>font <select data-param="font"><option>jetbrains-mono</option><option>ibm-plex-mono</option><option>geist-mono</option></select><span></span></label>
+      <label>charset <select data-param="charsetPreset"><option>ascii</option><option>minimal</option><option>dense</option><option>lines</option></select><span></span></label>
+      <label>pattern <select data-param="ditherPattern"><option>ordered</option><option>noise</option><option>none</option></select><span></span></label>
+      <label>dot shape <select data-param="halftoneShape"><option>round</option><option>square</option><option>diamond</option><option>line</option></select><span></span></label>
+      <label>columns <input data-param="columns" type="range" min="20" max="400" step="1" /><output></output></label>
+      <label>line height <input data-param="lineHeight" type="range" min="1" max="1.6" step="0.05" /><output></output></label>
+      <h2>Tone</h2>
+      <label class="check">auto levels <input data-param="autoLevels" type="checkbox" /></label>
+      <label class="check">invert <input data-param="invert" type="checkbox" /></label>
+      <label>brightness <input data-param="brightness" type="range" min="-0.5" max="0.5" step="0.01" /><output></output></label>
+      <label>contrast <input data-param="contrast" type="range" min="0.5" max="2" step="0.01" /><output></output></label>
+      <label>gamma <input data-param="gamma" type="range" min="0.4" max="2.5" step="0.01" /><output></output></label>
+      <label>shape sharp. <input data-param="shapeSharpness" type="range" min="1" max="4" step="0.05" /><output></output></label>
+      <label>edge sharp. <input data-param="edgeSharpness" type="range" min="1" max="4" step="0.05" /><output></output></label>
+      <label>dither <input data-param="dither" type="range" min="0" max="0.5" step="0.01" /><output></output></label>
+      <label class="check">edges <input data-param="edges" type="checkbox" /></label>
+      <label>edge thresh. <input data-param="edgeThreshold" type="range" min="0" max="1" step="0.01" /><output></output></label>
+      <label>stability <input data-param="stability" type="range" min="0" max="1" step="0.01" /><output></output></label>
+      <label>angle <input data-param="halftoneAngle" type="range" min="0" max="90" step="1" /><output></output></label>
+      <h2>View</h2>
+      <label>zoom <select id="zoom"><option>fit</option><option>0.5</option><option>1</option><option>1.25</option><option>2</option><option>3</option><option>6</option></select><span></span></label>
+      <label>compare <input id="compare" type="range" min="-0.01" max="1" step="0.01" value="-0.01" /><output></output></label>
+      <label>compare with <select id="compareWith"><option>source</option><option>ramp</option></select><span></span></label>
+      <label class="check">show source <input id="showSource" type="checkbox" /></label>
+      <h2>Tools</h2>
+      <div class="row">
+        <button id="cmp">Compare to CPU</button>
+        <button id="prof">Profile</button>
+        <button id="png1">PNG ×1</button>
+        <button id="png2">PNG ×2</button>
+        <button id="png4">PNG ×4</button>
+      </div>
+    </div>
+    <div id="main">
+      <div id="stage"></div>
+      <div id="stats">Loading…</div>
+      <pre id="results"></pre>
+    </div>
+    <script type="module" src="./engine.ts"></script>
+  </body>
+</html>

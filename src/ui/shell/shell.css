@@ -1,0 +1,54 @@
+/*
+ * Shell additions on top of src/styles/shell.css: the layout rules the 641–1100 px range and short
+ * windows need, the Open split button, the live badge and the status-bar priorities.
+ */
+
+/* Short windows (1440 × 900 at 200% zoom is 720 × 450): the stage gives up height, the page never
+   scrolls, and the transport and status bar stay on screen. */
+.app{min-height:0}
+.stage{overflow:hidden}
+/* The stage takes focus after a file opens from the start screen; it is not a control. */
+.stage:focus{outline:none}
+
+/* ---------- top bar: the source chip shrinks first and never runs under the controls ---------- */
+.top .src{flex:0 1 auto}
+.top .src .i,.top .src .btn{flex:none}
+.top .src-name{flex:0 1 auto;min-width:48px}
+.top .src-meta{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.top .acts{flex:none}
+@media (max-width:960px){
+  .top .src-meta{display:none}
+}
+/* Under ~760 px the file name needs the room more than the repository link does. */
+@media (max-width:760px){
+  .top .gh{display:none}
+}
+
+/* Open ⌘O joined to the chevron that lists the other ways in (paste, camera). */
+.open-split{display:flex}
+.open-split>.btn:first-child{border-top-right-radius:0;border-bottom-right-radius:0}
+.open-split>.open-more{width:28px;padding:0;justify-content:center;margin-left:-1px;border-top-left-radius:0;border-bottom-left-radius:0}
+.open-split>.btn:focus-visible{position:relative;z-index:1}
+@media (max-width:800px){
+  .open-split>.btn:first-child kbd{display:none}
+}
+
+/* A live camera in the source chip: neutral (the accent belongs to Export), like the status dot. */
+.live-badge{display:inline-flex;align-items:center;gap:6px;flex:none;height:20px;padding:0 6px;border:1px solid var(--line-2);border-radius:var(--r-xs);font:var(--fs-11)/1 var(--mono);color:var(--tx-2)}
+.live-badge i{width:6px;height:6px;border-radius:1px;background:var(--tx-2)}
+
+/* ---------- status bar: the least useful readouts give way first ---------- */
+.status .it{flex:none}
+@media (max-width:1000px){
+  .status .it.p3{display:none}
+}
+@media (max-width:820px){
+  .status .it.p2{display:none}
+}
+
+/* ---------- phone sheet over a clip: a 24 px grab zone of its own, above the content rather than
+   over the timeline, so a missed grab never scrubs ---------- */
+@media (max-width:640px){
+  .app:has(.tp) .grab{height:24px}
+  .app:has(.tp) .grab::before{top:12px}
+}

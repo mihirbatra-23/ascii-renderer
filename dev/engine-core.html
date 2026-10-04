@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Engine core harness</title>
+    <style>
+      :root { color-scheme: dark; font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+      body { margin: 0; padding: 16px; background: #0b0b0c; color: #e8e6df; display: grid; gap: 12px; }
+      #out { display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 12px; }
+      figure { margin: 0; display: grid; gap: 4px; }
+      canvas { max-width: 100%; image-rendering: pixelated; }
+      pre { margin: 0; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <pre id="status">Running the CPU reference in this browser…</pre>
+    <div id="out"></div>
+    <script type="module" src="./engine-core.ts"></script>
+  </body>
+</html>

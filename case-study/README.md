@@ -1,0 +1,47 @@
+# Case study assets
+
+Screenshots and renders for the portfolio case study about ASCII Renderer. Nothing in this folder is used by the app.
+
+Everything here was captured on 5 October 2026 from the code in this repository: the current app (the same build as https://asciirenderer.vercel.app/) running locally, and the Python version in `legacy/` running under Flask. Screens are 1440 × 900 at 2× unless noted.
+
+The browser used for capture renders WebGL on the CPU (SwiftShader), so the render times in the status bar of the `new-*` screenshots are much slower than on a real GPU. Crop the status bar or recapture on your own machine if the timing shows.
+
+## v0 (Python, `legacy/`)
+
+| File | What it shows |
+| --- | --- |
+| `legacy-01-empty.png` | The Flask page before a file is dropped |
+| `legacy-02-torus-text.png` | The torus sample rendered, Text tab, with the cache hit rate under the buttons |
+| `legacy-03-torus-image.png` | The same render, Image tab |
+| `legacy-02-triangle-text.png`, `legacy-03-triangle-image.png` | The repo's own test image, both tabs |
+| `legacy-output-torus.png`, `legacy-output-triangle.png` | v0's raw PNG output (note the squashed aspect) |
+| `legacy-output-*.txt` | v0's raw text output |
+
+## v1 (the current app)
+
+| File | What it shows |
+| --- | --- |
+| `new-01-start.png` | Start screen |
+| `new-02-editor-shape.png` | Editor, torus in Shape mode |
+| `new-03-split-vs-source.png` | Split view against the original |
+| `new-04-split-vs-ramp.png` | Split view against a plain Ramp render |
+| `new-05-mode-*.png` | The torus in each of the five modes |
+| `new-06-edges-on.png` | Contour lines (edge layer) on |
+| `new-07-export-panel.png` | Export panel |
+| `new-08-planet-source-color.png` | Planet sample in Source colour |
+| `new-09-video.png`, `new-09b-video-braille.png` | Video playback in Shape and Braille, with the timeline |
+| `new-10-camera-fake-feed.png` | Camera mode, fed by Chrome's built-in fake test camera. Replace with a real webcam capture |
+| `new-11-phone-start.png`, `new-12-phone-editor.png` | Phone layout, 390 × 844 at 3× |
+| `new-output-*.png`, `new-output-*.txt` | PNG and TXT exports from the app, in mono, for comparisons |
+| `anim-interference-shape.gif`, `anim-interference-shape.webm` | Animated exports of the video sample in Shape mode, 1280 × 720 |
+
+## Composites
+
+| File | What it shows |
+| --- | --- |
+| `compare-torus-v0-vs-v1.png` | v0 and v1 output of the torus at 120 columns, side by side |
+| `compare-triangle-ramp-vs-shape.png` | Ramp and Shape zoomed in on the triangle's edge |
+| `compare-triangle-ramp-vs-shape-full.png` | The same pair, uncropped |
+| `modes-strip.png` | The torus in all five modes in one strip |
+
+The video sample was transcoded to WebM for capture, because the test browser cannot decode H.264. The app itself plays the MP4 in any browser that supports H.264, such as Chrome.

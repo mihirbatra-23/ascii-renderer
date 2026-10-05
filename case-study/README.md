@@ -32,6 +32,7 @@ The browser used for capture renders WebGL on the CPU (SwiftShader), so the rend
 | `new-09-video.png`, `new-09b-video-braille.png` | Video playback in Shape and Braille, with the timeline |
 | `new-10-camera-fake-feed.png` | Camera mode, fed by Chrome's built-in fake test camera. Replace with a real webcam capture |
 | `new-11-phone-start.png`, `new-12-phone-editor.png` | Phone layout, 390 × 844 at 3× |
+| `new-13-shortcuts.png` | The keyboard shortcuts sheet over the editor |
 | `new-output-*.png`, `new-output-*.txt` | PNG and TXT exports from the app, in mono, for comparisons |
 | `anim-interference-shape.gif`, `anim-interference-shape.webm` | Animated exports of the video sample in Shape mode, 1280 × 720 |
 
@@ -43,6 +44,7 @@ The browser used for capture renders WebGL on the CPU (SwiftShader), so the rend
 | `compare-triangle-ramp-vs-shape.png` | Ramp and Shape zoomed in on the triangle's edge |
 | `compare-triangle-ramp-vs-shape-full.png` | The same pair, uncropped |
 | `modes-strip.png` | The torus in all five modes in one strip |
+| `design-overview.png` | The full interface in one image: start screen, editor, export panel, shortcuts sheet and phone layout |
 
 ## Illustrations
 

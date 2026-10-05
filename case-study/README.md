@@ -44,4 +44,13 @@ The browser used for capture renders WebGL on the CPU (SwiftShader), so the rend
 | `compare-triangle-ramp-vs-shape-full.png` | The same pair, uncropped |
 | `modes-strip.png` | The torus in all five modes in one strip |
 
+## Illustrations
+
+Drawn from the CPU reference renderer's own data (Geist Mono, line height 1.2), in the app's colours.
+
+| File | What it shows |
+| --- | --- |
+| `figure-character-fingerprints.png` | Eight characters with the six sampling circles, each filled by the ink it covers, with the values underneath |
+| `figure-reading-and-matching.png` | The rim of the test image's white circle at 80 columns: the cells, the six readings per cell, the characters picked by shape, and the brightness-only picks |
+
 The video sample was transcoded to WebM for capture, because the test browser cannot decode H.264. The app itself plays the MP4 in any browser that supports H.264, such as Chrome.

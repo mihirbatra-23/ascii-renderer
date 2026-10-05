@@ -26,6 +26,7 @@ The browser used for capture renders WebGL on the CPU (SwiftShader), so the rend
 | `new-03-split-vs-source.png` | Split view against the original |
 | `new-04-split-vs-ramp.png` | Split view against a plain Ramp render |
 | `new-05-mode-*.png` | The torus in each of the five modes |
+| `look-*.png` | The same five renders cropped to the torus (1300 × 1010), one image per look |
 | `new-06-edges-on.png` | Contour lines (edge layer) on |
 | `new-07-export-panel.png` | Export panel |
 | `new-08-planet-source-color.png` | Planet sample in Source colour |

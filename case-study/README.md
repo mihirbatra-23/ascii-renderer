@@ -57,3 +57,10 @@ Drawn from the CPU reference renderer's own data (Geist Mono, line height 1.2), 
 | `figure-reading-and-matching.png` | The rim of the test image's white circle at 80 columns: the cells, the six readings per cell, the characters picked by shape, and the brightness-only picks |
 
 The video sample was transcoded to WebM for capture, because the test browser cannot decode H.264. The app itself plays the MP4 in any browser that supports H.264, such as Chrome.
+
+## Portfolio export
+
+`portfolio-export/` holds Draft 3 of the case study as one markdown file, `ascii-renderer.md`, for building the page on the portfolio, with the working notes and image placeholders taken out. Page details (title, year, description, role, timeline, tools, links, cover and thumbnail) are in its frontmatter. Its `assets/` folder has renamed copies of the files above, with these changes:
+
+- The editor screenshots (`thumbnail.png`, `split-view-shape-vs-ramp.png`, `video-playback.png`, `colour-source-planet.png`, `export-panel.png`) are cropped above the status bar, so the CPU-only render times don't show.
+- The cover is the Shape-mode animation export, as `cover.webm`, an H.264 `cover.mp4` for Safari, and `cover-poster.jpg`.

@@ -63,4 +63,5 @@ The video sample was transcoded to WebM for capture, because the test browser ca
 `portfolio-export/` holds Draft 3 of the case study as one markdown file, `ascii-renderer.md`, for building the page on the portfolio, with the working notes and image placeholders taken out. Page details (title, year, description, role, timeline, tools, links, cover and thumbnail) are in its frontmatter. Its `assets/` folder has renamed copies of the files above, with these changes:
 
 - The editor screenshots (`thumbnail.png`, `split-view-shape-vs-ramp.png`, `video-playback.png`, `colour-source-planet.png`, `export-panel.png`) are cropped above the status bar, so the CPU-only render times don't show.
+- `shortcuts-sheet.png` is `new-13-shortcuts.png` cropped the same way. Draft 4 of the case study uses it; `ascii-renderer.md` doesn't yet.
 - The cover is the Shape-mode animation export, as `cover.webm`, an H.264 `cover.mp4` for Safari, and `cover-poster.jpg`.

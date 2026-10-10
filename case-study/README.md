@@ -67,6 +67,7 @@ The video sample was transcoded to WebM for capture, because the test browser ca
   - `shortcuts-sheet.png`: the keyboard shortcuts sheet, recaptured with nothing focused and cropped above the status bar.
   - `cell-probe.png`: hovering over a cell on the torus's top edge (column 98, row 6, `_`, brightness 0.38).
   - `split-view-source.png`: `new-03-split-vs-source.png` cropped above the status bar.
+  - `mode-shape-torus.png`, `mode-ramp-torus.png`, `mode-braille-torus.png`, `mode-halftone-torus.png`, `mode-blocks-torus.png`: the same gradient torus in each mode at 110 columns, in Mono, as 2× PNG exports. The Shape one is the same file as `colour-mono-torus.png`.
   - `colour-mono-torus.png`, `colour-source-torus.png`, `colour-duotone-torus.png`: the app's own 2× PNG exports of a gradient torus in Shape mode at 110 columns, in Mono, Source and Duotone (violet shadow ink, yellow ink). The source, `gradient-torus-source.png`, is a 3D render made for this case study.
   - `colour-themes-halftone.png`: the planet sample in Halftone, in Mono, in Mono with dark ink on light paper (inverted), and in Duotone with blue shadows and orange highlights. The bundled samples are greyscale, so Source colour isn't shown.
 - The cover is the Shape-mode animation export, as `cover.webm`, an H.264 `cover.mp4` for Safari, and `cover-poster.jpg`.

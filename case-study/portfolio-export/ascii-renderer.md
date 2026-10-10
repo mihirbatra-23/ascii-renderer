@@ -1,9 +1,9 @@
 ---
-title: "How I ended up building an ASCII renderer"
+title: "How I built an ASCII renderer over a weekend"
 slug: ascii-renderer
 section: Playground
 year: 2026
-description: "Images, GIFs, video and a live webcam, turned into ASCII art in the browser, with characters picked by their shape, not just their brightness."
+description: "Images, GIFs, video and a live webcam, turned into ASCII art in the browser"
 role: "Design, Engineering"
 timeline: "One weekend"
 tools:
@@ -14,197 +14,214 @@ links:
     href: "https://asciirenderer.vercel.app/"
   - label: "Source on GitHub"
     href: "https://github.com/mihirbatra-23/ascii-renderer"
-cover:
-  type: video
-  webm: assets/cover.webm
-  mp4: assets/cover.mp4
-  poster: assets/cover-poster.jpg
-  alt: "An interference pattern drawn in moving ASCII characters, rendered by the app"
-thumbnail: assets/thumbnail.png
+# Cover: Mihir's looping ASCII animation exported from the app (supplied separately, not in assets/).
+cover: null
+thumbnail: assets/editor.png
 ---
 
 ## Background
 
-Earlier this year I started rebuilding my portfolio, and I wanted a few small elements on it that would reflect my engineering background and my enterprise AI experience.
+In March 2026, I was rebuilding my portfolio and decided to add a few design elements to it that would reflect my engineering background and my enterprise AI experience.
 
-One idea had been on my mind for a while. I had seen a cool animation drawn entirely in ASCII characters on [Cognition](https://cognition.ai)'s then-homepage. This was maybe the first time I had seen ASCII art move this smoothly. I had decided right then that I would make something like it for my portfolio when I rebuilt it, and now was the time to act on it.
+I had recently seen a cool animation drawn entirely in ASCII characters on [Cognition](https://cognition.ai)'s then-homepage, and that stayed with me. It was maybe the first time I had seen ASCII art move this smoothly, which made me curious about how Cognition had done it and how ASCII art is made in general.
 
-I first searched online for a tool that could do it for me, but I couldn't find anything that was reliable or would let me achieve the results I had in mind. So I started digging into how Cognition had done it, and into how ASCII art is made in general.
+<!-- Image to add: Cognition's old homepage animation -->
 
-That led me to Alex Harri's [ASCII characters are not pixels](https://alexharri.com/blog/ascii-rendering). It references the same Cognition animation, though through a different lens than mine, and highlights how the animation isn't the best implementation of ASCII rendering. He mentions that the characters follow the edges of Cognition's cube logo poorly, so they look blurry and jagged. That's because each character is treated like a pixel, picked only for how dense or sparse it looks, and its shape is ignored. His approach is to pick characters by their shape, so that edges come out as lines.
+That curiosity led me to Alex Harri's [ASCII characters are not pixels](https://alexharri.com/blog/ascii-rendering). It references the same Cognition animation, though through a different lens than mine, and highlights how the animation isn't even the best implementation of ASCII rendering. He explains that most ASCII art is made by splitting an image into a grid and picking an ASCII character for each cell of the grid by its brightness. The brighter the cell, the denser the character.
 
-That piqued my interest, and it is what made me go the extra mile on this project.\
-I recommend reading Alex Harri's piece for a better understanding of how ASCII rendering usually works and how it can be improved.
+He also points out that with this method, the characters in Cognition's animation follow the edges of its cube logo poorly, so they look blurry and jagged. That's because each character is treated like a pixel, picked only for how dense or sparse it looks, and its shape is ignored. His approach is to pick characters by their shape.
 
-## The first build
+I recommend reading Alex Harri's piece for a better understanding of how ASCII rendering usually works and how it can be improved. Reading it piqued my interest, and I thought that if I could recreate something like it, that would be the cool element I was looking for on my portfolio.
 
-My first version, v0, was a hacky, vibe-coded web app I made with Claude, and a good part of it was AI slop. It was a small Python app with a drop zone, a few sliders and a Render button. It followed the article's approach closely, and the results were good enough to get me excited.
+I searched online for any existing renderers, but couldn't find anything solid that would let me achieve what I had in mind. So I decided to go the extra mile and make one for myself.
 
-![The v0 web app after rendering a torus: a drop zone, three sliders, a Render button and a text preview](assets/v0-web-app.png)
+## The initial build
 
-*v0, running again from the repo for this page.*
+I quickly vibe-coded a hacky web app with Claude Code, and as a result, a good part of it was AI slop.
 
-The exports were where it fell apart. The PNG and SVG files never came out right, so every time I wanted to use a render in a design, I copied the ASCII text, pasted it into Figma in the right font, and turned it into an SVG or an image from there.
+![The initial build after rendering a torus: a drop zone, three sliders, a Render button and a text preview](assets/initial-build.png)
 
-I left it there. Neither Claude nor I knew enough yet to fix the exports, and the video support I had planned never happened. I did design a variant of my portfolio's hero section in Figma using the tool's output, but it never made the cut.
+It was a small Python app with a drop zone to upload an image, a few parameters to configure and a Render button that converts the image to the ASCII render. It followed the article's approach closely, and the results were good enough to get me excited.
 
-The portfolio got built without it, and this went into my backlog.
+But it had its shortcomings. The PNG and SVG exports never came out right, so if I wanted to use a render in a design, I had to copy the ASCII text, paste it into Figma and process it there before I could use it. I also tried adding GIF support, but it didn't work, so I never followed through with it.
+
+I did come up with a design using this technique, but I wasn't satisfied with it, so I left the idea and the app there.
+
+<!-- Image to add: Figma hero section variant with the ASCII art design -->
+
+The portfolio got built without it, and I moved on.
 
 ## Going all the way
 
-Cut to October 2026. The portfolio had been built, and I had a long weekend with nothing better to do. I decided to come back to this project and go all the way. By then, I had a lot more [design engineering](https://mihirbatra.in/work/artemis) behind me. This time I could tell the AI slop apart from the parts worth keeping and steer around it, and I ended up building v1, a solid app that fixed v0's limitations and went well past them.
+Cut to October 2026. I had a long weekend ahead of me, and I decided to come back to this project, treat it like a hackathon and go all the way. By then, I had a lot more [design engineering](https://mihirbatra.in/work/artemis) behind me, and I could identify the AI slop and steer around it.
 
-I went in with a hypothesis: I would treat this rebuild like a hackathon, skip Figma entirely, and use Claude Design instead for exploration and design.
-
-The first job was fixing v0:
-
-- **Squashed exports.** v0's PNG export sized each character by how big the letter M looked, not by the font's real character width and line height, so a 16:9 image came out noticeably wider. I fixed this in v1 by measuring the font once and building every export from one shared grid, so all seven formats keep the original aspect ratio.
-- **Everything else.** v0 couldn't open video, renders were slow, and GIFs flickered a lot from frame to frame (when it worked). v1 plays and exports video, redraws the frame while you drag, and holds characters steady during playback.
-
-![The same torus at 120 columns in v0 and v1. v0's output is squashed and full of vertical bars; v1 keeps the source's proportions](assets/v0-vs-v1-torus.png)
-
-*The same torus at 120 columns. Left: v0. Right: v1.*
+I went in with a hypothesis that I could skip Figma entirely and use Claude Design instead for exploration and design.
 
 ## Designing without Figma
 
-The whole interface was designed in Claude Design, through conversation and on its canvas, without opening Figma once.
-
-I wanted it to have the look and feel of some of the dev tools I enjoy using: Vercel, Cursor, Linear and Agno, which I had tried just once and which, to my surprise, left a mark with its design.
+I wanted the new app to have the look and feel of some of the dev tools I enjoy using, like Vercel, Cursor and Linear.
 
 It had to be simple enough that anyone could drop a file in and get the output they wanted, and deep enough for someone who wants to play around and tweak every setting.
 
-I designed it like a precision instrument. It relies on hairline rules and graphite chrome rather than gradients, glows or glass, with a single bright orange accent. No Render button. Every preview is real-time engine output. Keyboard shortcuts cover moving through the app, and a status bar shows nerd stats like render time and frame rate.
+I went for a clean, technical look without any gradients, glows or glass effects. Dark graphite theme with thin lines and a bright orange accent. Keyboard shortcuts cover the whole app, and a status bar shows stats for nerds.
 
-![The full interface: the start screen, the editor, the export panel, the keyboard shortcuts sheet and the phone layout](assets/interface-overview.png)
+<!-- Image to add: Claude Design canvas showing the design system and component map -->
 
-*The full interface: start screen, editor, export panel, keyboard shortcuts and the phone layout.*
+All of it was designed in Claude Design, through conversation and on its canvas, without opening Figma once.
 
-## How it works
+## The ASCII renderer
 
-Shape, the app's main mode, works in five steps. Everything that runs per frame happens on the GPU, which is why the preview updates in real time.
+After two days of burning tokens and exhausting the full weekly limit of my Max 20x plan, I built a solid app that fixed the initial build's limitations and went well past them.
 
-**1. Cut the image into cells.** The app lays a grid over the image, one cell per character. The cell size comes from the font, so the output keeps the image's proportions.
+![The Claude usage page on the Max (20x) plan, showing the weekly limit hit at 100% used](assets/max-plan-limit.png)
 
-**2. Read each cell with six circles.** Instead of measuring a cell's overall brightness, the app reads six small circles inside it, in the staggered two-by-three layout from Harri's article. Together, the six readings capture the shape of what's in the cell: whether it's heavier at the top or the bottom, on the left or the right.
+### Fixing the initial build
 
-**3. Read every character the same way.** Each character in the font gets the same treatment once, which gives it a six-number fingerprint. `T` is heavy at the top, `_` only at the bottom, `/` runs from one corner to the other, and `|` is nearly even across all six.
+Upon investigation, I found that the initial build sized each character by how big the letter M looked, instead of the font's real character width and line height. That made every exported image noticeably wider than the original. I fixed this by measuring the font once and building every export from one shared grid, so the aspect ratio is preserved in exports.
 
-![Eight characters with the six sampling circles over each, every circle filled in proportion to the ink it covers: T, L, ^, _, -, /, | and $](assets/character-fingerprints.png)
+![The same torus at 120 columns in the initial build and the new app. The initial build's output is squashed and full of vertical bars, while the new app keeps the source's proportions](assets/initial-vs-new-torus.png)
 
-*Eight characters as the app sees them. Each circle's fill shows how much of it the character's ink covers, scaled so the inkiest character in each circle reads 1.00.*
+Other than this, the initial build couldn't render GIFs or video, and the renders were painfully slow, since everything ran in Python on the CPU. I moved the whole pipeline to the GPU. Now the preview updates in real time as you modify the parameters, and GIFs and videos play and export at their original speed.
 
-**4. Pick the closest fingerprint.** For each cell, the app picks the character whose fingerprint is closest to the cell's six readings. Where an edge runs through a cell, the readings take on its shape, and the character that matches follows the edge.
+The characters also didn't quite match the image. The initial build drew each character centred in its cell instead of on the font's baseline, so `.`, `-` and `_` lost the position that tells them apart. It also measured characters and images in slightly different ways. Now every character sits on its real baseline and is measured exactly like the image.
 
-![Four panels: the rim of a white circle cut into cells, the six readings per cell, the characters picked by shape, and the characters picked by brightness alone](assets/reading-and-matching.png)
+### A new start screen
 
-*The rim of a white circle at 80 columns, from the engine's own data. The highlighted cell is lit only in its bottom two circles, so Shape picks `_`. Brightness alone only knows the cell is partly lit, and picks `+`.*
+The new app opens with a redesigned homepage. You can now render ASCII art from an image, GIF or video file on your device, in the clipboard or at a link, and even use your device's live camera feed. You can also simply drag the file you want to convert and drop it in the drop zone.
 
-**5. Sharpen, and keep it steady.** Before matching, the readings are exaggerated a little so boundaries come out crisper, partly by looking into the neighbouring cells. The Shape contrast and Edge sharpness sliders control how much. On video, a Stability control smooths each cell over time, so characters don't flicker between two close matches.
+If you want to get started quickly, there are a few samples to select from just below the drop zone. Click on one and that's it. The sample opens in the editor with its settings already applied.
 
-Harri points out the parallel to word embeddings, the lists of numbers AI models use to place similar words close together. A fingerprint like this is, in effect, an embedding of a character, and picking the closest one is a nearest-neighbour search, the same operation that retrieval in AI products is built on.
+The footer notes that everything is processed in the browser, and the files you open stay on your device.
 
-![The editor in Split view, with a brightness-only render on the left and the shape render on the right](assets/split-view-shape-vs-ramp.png)
+![The start screen: a drop zone with Choose file, Paste, Camera and a link field, and three sample tiles below it](assets/start-screen.png)
 
-*The Split view compares Shape with a brightness-only render of the same image.*
+### Live preview and precise controls
 
-## What I changed from Harri's approach
+The editor keeps the focus on the live preview. The controls sit in a panel on the right, grouped into sections for the mode, grid, tone, colour and more. To keep the panel easy to scan, each control shows only its label and value, and hovering over a label shows a tooltip explaining what it does. On a phone, the modes sit along the top and the controls move into a sheet under the preview.
 
-The idea is Harri's, and v0 copied his article almost line for line. v1 keeps the idea and changes some of the machinery around it. A few of those changes look like steps backwards on paper.
+![The editor rendering a torus in Shape mode, with the controls on the right](assets/editor.png)
 
-### Less clever, always right
+Rulers along the top and left of the preview count columns and rows. Hovering over a cell shows its column and row, the character in it and its brightness. The status bar at the bottom shows the grid size, how long each frame takes to render and the frame rate, so these details are always visible.
 
-Harri spends two appendices on speed. Comparing every cell with every character was too slow on a CPU, so he added a k-d tree to search faster and a cache that rounds each reading to a few levels, and he moved the sampling and contrast work onto the GPU. v0 copied the k-d tree and the cache, and the cache was behind its strangest bugs. Rounding sends many different cells to the same answer, and in v0 it picked the wrong character for 5 to 32% of cells. v1 does the matching on the GPU as well, where comparing every cell with every character is cheap. It is less clever, and it is always right.
+![The cell probe: an orange outline around one cell on the torus's top edge, with a tag beside it reading C098 R06, the character _ and L 0.38](assets/cell-probe.png)
 
-### Flat areas keep their tone
+The Split view compares the render with the source image, or with a plain brightness-only render of the same image. Every change can be undone and redone.
 
-v0 had one more problem, and it came from the matching itself. A flat grey cell has no shape, so only the few characters with evenly spread ink could win it, and smooth areas filled up with walls of `|` and `!`. v1 tells the matcher to care less about shape when a cell has little shape of its own. Edges match exactly as before, and smooth areas keep their tone. On one of my test images, `!` dropped from 61% of the inked cells to 35%.
+![The editor in Split view: the source torus on the left and the Shape render on the right, with a handle on the divider](assets/split-view.png)
 
-### Keeping the ramp
-
-The article starts from the classic brightness ramp, `.:-=+*#%@`, and spends the rest of its length moving past it. I kept it anyway, as Ramp mode. For soft photographs it is sometimes the look you want, and next to Shape in the Split view, it shows exactly what shape matching adds.
-
-### Adding what a tool needs
-
-Some things only matter once the renderer is a tool rather than a demo. An optional edge layer, borrowed from [Acerola's ASCII shader](https://github.com/GarrettGunnell/AcerolaFX), draws strokes along strong edges. Exposure is measured once per clip, so it holds still from frame to frame. And colour is an option, even though Harri leaves it out on purpose because he doesn't like the look.
-
-## What it does now
-
-Two days and the full weekly limit of my Max 20x plan later, here's what the app does.
-
-### Any source
-
-Images, GIFs, video files and a live webcam, all converted in the browser. Files never leave the device. Clips play on a timeline, where you can scrub through them and trim them before exporting.
+GIFs and videos also get a timeline for scrubbing through the clip, stepping through it frame by frame, trimming it with In and Out points, looping it and changing its speed.
 
 ![The editor playing a looping video in Shape mode, with the playback timeline at the bottom](assets/video-playback.png)
 
-*A video clip in Shape mode, with trimming and playback controls along the bottom.*
+### Five modes and colour
 
-### Five looks
+The app has five modes to switch between.
 
-The app has five modes, and all of them run on the same pipeline, so the tone and colour controls and every export format work in each. Below is the same torus at 160 columns in each look, in monochrome.
+<!-- Interactive component: the five mode tiles from the app, with their icons. Selecting a tile shows that mode's render and description. The five renders and descriptions below are its content. -->
 
-**Shape.** Picks each character by the shape of what's in its cell, so characters follow the edges. It's the look the whole project was built around.
+**Shape.** Picks each character by both brightness and shape, so characters follow the edges.
 
-![The torus in Shape mode, with characters following the ring's curves and edges](assets/look-shape.png)
+![The gradient torus in Shape mode, with characters following the ring's curves and edges](assets/mode-shape.png)
 
-**Ramp.** Picks characters by brightness alone, from the classic ramp I kept from the article. One of the built-in presets, Soft photo, builds on it.
+**Ramp.** Picks characters by brightness alone, from the classic ramp of characters sorted from sparse to dense.
 
-![The torus in Ramp mode, stepped by brightness through the classic ramp](assets/look-ramp.png)
+![The gradient torus in Ramp mode, stepped by brightness through the classic ramp](assets/mode-ramp.png)
 
-**Braille.** Splits each cell into a 2 × 4 grid of braille dots, so every character carries eight dots of detail. A dither pattern decides which midtone dots are on, and the dots are drawn rather than typed, so they stay sharp at any size.
+**Braille.** Splits each cell into a 2 × 4 grid of braille dots, and every character carries eight dots of detail.
 
-![The torus in Braille mode, drawn in fine dots, eight to a character](assets/look-braille.png)
+![The gradient torus in Braille mode, drawn in fine dots, eight to a character](assets/mode-braille.png)
 
-**Halftone.** Not text at all. It draws a grid of dots, rotated 45° the way print halftones are, with each dot sized by the brightness under it. The dots can also be squares, diamonds or lines.
+**Halftone.** Draws a grid of dots, rotated 45° the way print halftones are, with each dot sized by the brightness under it. The dots can also be squares, diamonds or lines.
 
-![The torus in Halftone mode, a rotated grid of round dots sized by brightness](assets/look-halftone.png)
+![The gradient torus in Halftone mode, a rotated grid of round dots sized by brightness](assets/mode-halftone.png)
 
-**Blocks.** Splits each cell into 2 × 2 quarter blocks. In the source's own colours, every cell picks the two that fit it best, which gives the render a teletext look. The built-in Teletext preset sets that up at 80 columns.
+**Blocks.** Splits each cell into 2 × 2 quarter blocks.
 
-![The torus in Blocks mode, built from quarter blocks](assets/look-blocks.png)
+![The gradient torus in Blocks mode, built from quarter blocks](assets/mode-blocks.png)
 
-### Colour
+The app comes with built-in presets for Line art, Soft photo, Braille dots, Halftone print and Teletext. You can also save your own.
 
-There are three colour settings. Mono uses one ink, Source takes each cell's colour from the image, and Duotone blends two inks by brightness.
+Every mode also works in three colour themes. Mono uses one ink for the whole render, Source takes each cell's colour from the image, and Duotone blends two inks based on brightness.
 
-![The planet sample rendered in Source colour](assets/colour-source-planet.png)
+![A PNG export of a gradient torus in Shape mode and Mono colour, light characters on black](assets/colour-mono.png)
 
-*A planet, one of the app's sample images, in Source colour.*
+![The same torus in Source colour, the characters shifting from orange through pink and violet to teal around the ring](assets/colour-source.png)
 
-### Exports that match the preview
+![The same torus in Duotone, blending violet shadows into yellow highlights](assets/colour-duotone.png)
 
-PNG, SVG, TXT, HTML, GIF, MP4 and WebM, all built from the same grid as the preview. Video exports keep their frame timing and their audio.
+### Exports and sharing
+
+You can export your ASCII render as PNG, SVG, TXT, HTML, GIF, MP4 or WebM. GIF and video exports keep the clip's frame timing, MP4 and WebM formats keep its audio too, and the webcam can be recorded straight to video.
 
 ![The export panel, with a 2× PNG preview and a check that it matches the source](assets/export-panel.png)
 
-*The export panel previews the file at its final size and checks it against the source.*
+The PNG, the SVG and the text can also be copied straight to the clipboard, ready to paste wherever you need them.
 
-### Room to experiment
+### Accessibility
 
-The Split view compares the render with the original or with a brightness-only version. There's also undo and redo, five built-in presets plus your own, and settings links that recreate a look.
+Keyboard shortcuts cover the whole app, and pressing the "?" key shows all of them in one modal. When you move through the app with the keyboard, the focused control has an orange outline.
 
-**[Try it live](https://asciirenderer.vercel.app/)**. Drop in an image and drag the sliders.
+![The keyboard shortcuts sheet open over the editor, grouped into File, Edit, View, General, Render and Playback](assets/shortcuts-sheet.png)
+
+All text meets the WCAG contrast minimum of 4.5:1 against the dark theme, including the dimmest labels, and every button and slider has a hit area of at least 32 pixels. All buttons have labels for screen readers and tooltips that show their shortcut. States are not shown by colour alone. Selected items also have a bar and a border, and disabled options include clear reasoning.
+
+For screen readers, the preview has a text label with the file name and grid size, for example "ASCII render of torus.png, 160 by 45 cells", and actions like switching modes or Undo are announced. For the systems set to reduce motion, the app removes its sliding animations and the looping loading indicator.
+
+## How it works
+
+### Architecture
+
+The app runs entirely in the browser. There's no server.
+
+It has four main parts.
+
+- **The media layer**, which reads files and the webcam, including every frame of a GIF or video.
+- **The renderer**, which turns each frame into characters on the GPU, using WebGL2.
+- **The exporters**, which turn the result into files.
+- **The interface**, which sits on top.
+
+The preview and every export come from the same grid. This is what fixed the aspect ratio bug from the initial build. The preview is drawn by the same code that draws the exports, so what you see is what you download. And since there's no Render button, every change redraws the preview on the next frame.
+
+Long exports like GIF and video are encoded in the background, so the app stays responsive and you can cancel them at any point. For browsers without WebGL2, a slower copy of the renderer runs on the CPU.
+
+### Algorithm
+
+The app cuts the image into a grid of cells. Instead of measuring each cell's overall brightness, it reads six small circles inside the cell. Together, the six readings capture the cell's brightness and shape, which the app uses to pick the right ASCII character.
+
+![Four panels: the rim of a white circle cut into cells, the six readings per cell, the characters picked by shape, and the characters picked by brightness alone](assets/reading-and-matching.png)
+
+This works a lot like word embeddings, the vectors language models use to place words with similar meanings close together. The six readings form a six-dimensional vector for each cell, and every character in the font gets one too. Picking a character is then a nearest-neighbour search using a weighted Euclidean distance, the same kind of vector search that retrieval in RAG systems is built on.
+
+Read more about the [architecture](https://github.com/mihirbatra-23/ascii-renderer/blob/main/docs/ARCHITECTURE.md) and the [algorithm](https://github.com/mihirbatra-23/ascii-renderer/blob/main/docs/ALGORITHM.md) in the project's notes on GitHub.
+
+### What I changed from Harri's approach
+
+In the initial build, I followed Harri's approach almost line for line. The new app keeps the idea but changes three things around it.
+
+**Matching every cell exactly.** Comparing every cell with every character was too slow on a CPU, so Harri sped it up with a faster search and a cache that rounds each reading. That cache caused bugs in the initial build, where it picked the wrong character for 5 to 32% of cells. The new app compares every cell with every character on the GPU, where it's fast enough, so it always picks the closest character.
+
+**Keeping tone in flat areas.** A flat grey cell has no shape, so only characters with evenly spread ink could match it, and smooth areas filled up with `|` and `!`. The new app gives shape less weight when a cell has little shape of its own, so edges are matched as before and smooth areas keep their tone.
+
+**Keeping the ramp.** Harri's article moves past the classic brightness ramp, `.:-=+*#%@`. I kept it as Ramp mode, because it suits some soft photos, and next to Shape in the Split view, it shows the difference shape matching makes.
 
 ## Reflection
 
-Some of my other projects feel like apps I designed and happened to build. This one feels like an app I built and happened to design.
+Most of my other design engineering projects feel like apps that I designed and happened to build. This one feels like an app that I built and happened to design.
 
 ### Know enough to steer
 
-The idea and the approach are Alex Harri's, and I built both versions with Claude. The difference between them was how much I understood. With v0, I took the article's tricks and Claude's code as they came. With v1, I knew enough to question both, and the changes I'm surest of made the renderer less clever. Claude could write the code both times. Knowing which parts to keep was on me.
+I built both versions with the same exact tool, following the same idea and approach. The difference between them was the level of understanding and control I had. With the initial build, I followed Harri's approach directly and took Claude's output as it came. With the new app, I knew enough to question both.
 
 ### Testing the hypothesis
 
-I never opened Figma, and the hackathon scope held for about a day. After that I kept adding to it and refining the interface to the last pixel.
-
-Designing only in Claude Design felt weird at first, because I didn't have the manual control and tooling that I had in Figma. But it also freed me from the manual work. I could rely on Claude for that, as long as I gave it the right ideas and feedback.
+My hypothesis held. I skipped Figma entirely and used Claude Design for both exploration and design. Working only in Claude Design felt weird at first, because I didn't have the manual control and tooling I was used to in Figma. But it also freed me from the manual work, which I could now rely on Claude for, as long as I gave it the right ideas and feedback.
 
 > **Fun fact**
 >
-> The animation at the top of this page was rendered by the app itself. An ASCII animation for my portfolio is what I set out to make in the first place.
+> The ASCII animation at the top of this page was rendered in the app itself. In a way, it's the kind of element I set out to add to my portfolio in the first place.
 
 ## Further reading
 
-- [ASCII characters are not pixels](https://alexharri.com/blog/ascii-rendering) by Alex Harri. The article this project stands on, with interactive demos for every step.
-- [AcerolaFX](https://github.com/GarrettGunnell/AcerolaFX), whose ASCII shader the edge layer is modelled on.
-- [The renderer's spec](https://github.com/mihirbatra-23/ascii-renderer/blob/main/docs/ALGORITHM.md), with every constant and the measurements behind each change.
+- [ASCII characters are not pixels](https://alexharri.com/blog/ascii-rendering) by Alex Harri. The article this project is based on. He explains the subject really well using examples and interactive demos.
+- [Architecture notes](https://github.com/mihirbatra-23/ascii-renderer/blob/main/docs/ARCHITECTURE.md) on how the app is put together, from reading a file to exporting it.
+- [Algorithm notes](https://github.com/mihirbatra-23/ascii-renderer/blob/main/docs/ALGORITHM.md) on how the renderer picks each character, with every constant and the measurements behind each change.

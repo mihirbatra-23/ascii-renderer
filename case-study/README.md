@@ -60,14 +60,26 @@ The video sample was transcoded to WebM for capture, because the test browser ca
 
 ## Portfolio export
 
-`portfolio-export/` holds Draft 3 of the case study as one markdown file, `ascii-renderer.md`, for building the page on the portfolio, with the working notes and image placeholders taken out. Page details (title, year, description, role, timeline, tools, links, cover and thumbnail) are in its frontmatter. Its `assets/` folder has renamed copies of the files above, with these changes:
+`portfolio-export/` holds the final draft of the case study (Draft 4 in the doc) as one markdown file, `ascii-renderer.md`, for building the page on the portfolio. Page details (title, year, description, role, timeline, tools, links, thumbnail) are in its frontmatter. The cover is Mihir's own looping animation and isn't included.
 
-- The editor screenshots (`thumbnail.png`, `split-view-shape-vs-ramp.png`, `video-playback.png`, `colour-source-planet.png`, `export-panel.png`) are cropped above the status bar, so the CPU-only render times don't show.
-- Draft 4 of the case study uses more images that `ascii-renderer.md` doesn't yet:
-  - `shortcuts-sheet.png`: the keyboard shortcuts sheet, recaptured with nothing focused and cropped above the status bar.
-  - `cell-probe.png`: hovering over a cell on the torus's top edge (column 98, row 6, `_`, brightness 0.38).
-  - `split-view-source.png`: `new-03-split-vs-source.png` cropped above the status bar.
-  - `mode-shape-torus.png`, `mode-ramp-torus.png`, `mode-braille-torus.png`, `mode-halftone-torus.png`, `mode-blocks-torus.png`: the same gradient torus in each mode at 110 columns, in Mono, as 2× PNG exports. The Shape one is the same file as `colour-mono-torus.png`.
-  - `colour-mono-torus.png`, `colour-source-torus.png`, `colour-duotone-torus.png`: the app's own 2× PNG exports of a gradient torus in Shape mode at 110 columns, in Mono, Source and Duotone (violet shadow ink, yellow ink). The source, `gradient-torus-source.png`, is a 3D render made for this case study.
-  - `colour-themes-halftone.png`: the planet sample in Halftone, in Mono, in Mono with dark ink on light paper (inverted), and in Duotone with blue shadows and orange highlights. The bundled samples are greyscale, so Source colour isn't shown.
-- The cover is the Shape-mode animation export, as `cover.webm`, an H.264 `cover.mp4` for Safari, and `cover-poster.jpg`.
+Things the page still needs are left as HTML comments in the markdown: three images to add (Cognition's old homepage animation, the Figma hero section variant, the Claude Design canvas) and the interactive mode switcher in "Five modes and colour".
+
+`assets/` holds every image the page uses, exactly as it appears in the doc:
+
+| File | What it shows |
+| --- | --- |
+| `initial-build.png` | The initial build (the Python app in `legacy/`) after rendering a torus |
+| `max-plan-limit.png` | The Claude usage page with the weekly limit hit (Mihir's screenshot) |
+| `initial-vs-new-torus.png` | The torus at 120 columns in the initial build and the new app |
+| `start-screen.png` | The new start screen |
+| `editor.png` | The editor with the torus in Shape mode (also the thumbnail) |
+| `cell-probe.png` | Hovering over a cell on the torus's top edge |
+| `split-view.png` | Split view against the source |
+| `video-playback.png` | A looping video with the timeline and filmstrip |
+| `mode-*.png` | A gradient torus in each of the five modes at 110 columns, in Mono (2× PNG exports from the app) |
+| `colour-mono.png`, `colour-source.png`, `colour-duotone.png` | The same torus in each colour theme (Duotone with violet shadow ink and yellow ink). `colour-mono.png` is the same image as `mode-shape.png` |
+| `export-panel.png` | The export panel |
+| `shortcuts-sheet.png` | The keyboard shortcuts sheet, with nothing focused |
+| `reading-and-matching.png` | The illustration of reading cells and matching characters |
+
+The gradient torus is a 3D render made for the case study, kept in `assets/gradient-torus.png`. Screenshots of the editor show slow render times in the status bar because the capture browser drew WebGL on the CPU.

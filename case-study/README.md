@@ -67,6 +67,6 @@ The video sample was transcoded to WebM for capture, because the test browser ca
   - `shortcuts-sheet.png`: the keyboard shortcuts sheet, recaptured with nothing focused and cropped above the status bar.
   - `cell-probe.png`: hovering over a cell on the torus's top edge (column 98, row 6, `_`, brightness 0.38).
   - `split-view-source.png`: `new-03-split-vs-source.png` cropped above the status bar.
-  - `colour-mono-cat.png`, `colour-source-cat.png`, `colour-duotone-cat.png`: the full editor with a cat photo in Shape mode, in Mono, Source and Duotone (blue shadow ink, orange ink). The photo is "Chelsea" from scikit-image's sample data, CC0 by Stefan van der Walt.
+  - `colour-mono-cat.png`, `colour-source-cat.png`, `colour-duotone-cat.png`: the full editor with a cat photo in Shape mode at 110 columns, in Mono, Source and Duotone (blue shadow ink, orange ink). The photo is "Chelsea" from scikit-image's sample data, CC0 by Stefan van der Walt.
   - `colour-themes-halftone.png`: the planet sample in Halftone, in Mono, in Mono with dark ink on light paper (inverted), and in Duotone with blue shadows and orange highlights. The bundled samples are greyscale, so Source colour isn't shown.
 - The cover is the Shape-mode animation export, as `cover.webm`, an H.264 `cover.mp4` for Safari, and `cover-poster.jpg`.
